@@ -13,6 +13,8 @@ dependencies:
   dotted_line: ^3.2.3
   http: ^1.2.2
   shared_preferences: ^2.3.4
+  bloc: ^8.1.4
+  flutter_bloc: ^8.1.6
 
 dev_dependencies:
   flutter_test:

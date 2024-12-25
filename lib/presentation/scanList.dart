@@ -20,8 +20,6 @@ class _ScanListPageState extends State<ScanListPage> {
 
   @override
   void initState() {
-    // onScannListener();
-
     super.initState();
   }
 

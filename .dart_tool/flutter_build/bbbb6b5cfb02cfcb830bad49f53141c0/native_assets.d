@@ -1,0 +1,1 @@
+ D:\\Freelance\\POS-Pnot\\.dart_tool\\flutter_build\\bbbb6b5cfb02cfcb830bad49f53141c0\\native_assets.yaml: 

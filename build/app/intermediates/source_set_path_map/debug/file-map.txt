@@ -32,11 +32,11 @@ com.example.pos.app-jetified-annotation-experimental-1.4.0-30 C:\Users\Legion Go
 com.example.pos.app-fragment-1.7.1-31 C:\Users\Legion God\.gradle\caches\transforms-3\ca4d40f38b71d4c621d36eba6fe2f4a4\transformed\fragment-1.7.1\res
 com.example.pos.app-jetified-tracing-1.2.0-32 C:\Users\Legion God\.gradle\caches\transforms-3\e896b9ac412a8814559a776dc7b5a420\transformed\jetified-tracing-1.2.0\res
 com.example.pos.app-jetified-savedstate-ktx-1.2.1-33 C:\Users\Legion God\.gradle\caches\transforms-3\eb30b97cf0c123a3aa78bfba9082ceea\transformed\jetified-savedstate-ktx-1.2.1\res
-com.example.pos.app-debug-34 D:\Freelance\pos\android\app\src\debug\res
-com.example.pos.app-main-35 D:\Freelance\pos\android\app\src\main\res
-com.example.pos.app-pngs-36 D:\Freelance\pos\build\app\generated\res\pngs\debug
-com.example.pos.app-resValues-37 D:\Freelance\pos\build\app\generated\res\resValues\debug
-com.example.pos.app-packageDebugResources-38 D:\Freelance\pos\build\app\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.example.pos.app-packageDebugResources-39 D:\Freelance\pos\build\app\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.example.pos.app-merged_res-40 D:\Freelance\pos\build\app\intermediates\merged_res\debug
-com.example.pos.app-packaged_res-41 D:\Freelance\pos\build\shared_preferences_android\intermediates\packaged_res\debug
+com.example.pos.app-debug-34 D:\Freelance\POS-Pnot\android\app\src\debug\res
+com.example.pos.app-main-35 D:\Freelance\POS-Pnot\android\app\src\main\res
+com.example.pos.app-pngs-36 D:\Freelance\POS-Pnot\build\app\generated\res\pngs\debug
+com.example.pos.app-resValues-37 D:\Freelance\POS-Pnot\build\app\generated\res\resValues\debug
+com.example.pos.app-packageDebugResources-38 D:\Freelance\POS-Pnot\build\app\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.example.pos.app-packageDebugResources-39 D:\Freelance\POS-Pnot\build\app\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.example.pos.app-merged_res-40 D:\Freelance\POS-Pnot\build\app\intermediates\merged_res\debug
+com.example.pos.app-packaged_res-41 D:\Freelance\POS-Pnot\build\shared_preferences_android\intermediates\packaged_res\debug

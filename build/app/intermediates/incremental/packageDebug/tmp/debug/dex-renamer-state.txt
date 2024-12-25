@@ -1,14 +1,14 @@
-#Wed Dec 25 01:30:13 ICT 2024
-base.0=D\:\\Freelance\\pos\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
-base.1=D\:\\Freelance\\pos\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
-base.2=D\:\\Freelance\\pos\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\1\\classes.dex
-base.3=D\:\\Freelance\\pos\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\8\\classes.dex
-base.4=D\:\\Freelance\\pos\\build\\app\\intermediates\\dex\\debug\\mergeLibDexDebug\\0\\classes.dex
+#Wed Dec 25 19:27:17 ICT 2024
+base.0=D\:\\Freelance\\POS-Pnot\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
+base.1=D\:\\Freelance\\POS-Pnot\\build\\app\\intermediates\\dex\\debug\\mergeLibDexDebug\\0\\classes.dex
+base.2=D\:\\Freelance\\POS-Pnot\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
+base.3=D\:\\Freelance\\POS-Pnot\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\1\\classes.dex
+base.4=D\:\\Freelance\\POS-Pnot\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\8\\classes.dex
 path.0=classes.dex
 path.1=0/classes.dex
-path.2=1/classes.dex
-path.3=8/classes.dex
-path.4=0/classes.dex
+path.2=0/classes.dex
+path.3=1/classes.dex
+path.4=8/classes.dex
 renamed.0=classes.dex
 renamed.1=classes2.dex
 renamed.2=classes3.dex

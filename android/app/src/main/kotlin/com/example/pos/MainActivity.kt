@@ -17,7 +17,7 @@ class MainActivity: FlutterActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (event != null) {
-            // sendToFlutter("scan")
+            sendToFlutter("scan")
             
             val scanCode = event.scanCode;
             val unicodeChar = event.unicodeChar;

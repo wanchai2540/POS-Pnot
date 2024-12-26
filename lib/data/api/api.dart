@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:pos/data/models/detailItemScan_model.dart';
@@ -138,6 +139,139 @@ class DataService {
     } catch (e) {
       Exception('Exception occurred: $e');
       return {"status": "error", "text": "Exception occurred: $e", "data": null};
+    }
+  }
+
+  Future<Map<String, dynamic>> getPendingReleaseListener(String date, String hawb) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String accessToken = prefs.getString("accessToken") ?? "";
+
+    final String path = '/v1/ip/m/scan/pending_release';
+    Map<String, String> body = {"date": date, "hawb": hawb};
+    final Uri url = Uri.https(_baseUrl, path);
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Authorization': "Bearer $accessToken", 'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+      Map<String, dynamic> bodyResponse = jsonDecode(response.body);
+      return {
+        "status": "success",
+        "text": "success",
+        "code": response.statusCode,
+        "body": bodyResponse["data"],
+      };
+    } catch (e) {
+      Exception('Exception occurred: $e');
+      return {"status": "error", "text": "Exception occurred: $e", "data": null};
+    }
+  }
+
+  Future<Map<String, dynamic>> getReleaseListener(String date, String hawb) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String accessToken = prefs.getString("accessToken") ?? "";
+
+    final String path = '/v1/ip/m/scan/release';
+    Map<String, String> body = {"date": date, "hawb": hawb};
+    final Uri url = Uri.https(_baseUrl, path);
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Authorization': "Bearer $accessToken", 'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+      Map<String, dynamic> bodyResponse = jsonDecode(response.body);
+      return {
+        "status": "success",
+        "text": "success",
+        "code": response.statusCode,
+        "body": bodyResponse["data"],
+      };
+    } catch (e) {
+      Exception('Exception occurred: $e');
+      return {"status": "error", "text": "Exception occurred: $e", "data": null};
+    }
+  }
+
+  Future<Map<String, dynamic>> getProblemList() async {
+    final String path = '/public/master/problem_pickup';
+    final Uri url = Uri.https(_baseUrl, path);
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Map<String, dynamic> body = jsonDecode(response.body);
+        List<Map<String, dynamic>> result = [];
+
+        for (var data in body["data"]) {
+          result.add({
+            "text": data["text"],
+            "value": data["value"],
+          });
+        }
+
+        return {"status": "success", "data": result};
+      } else {
+        throw "error";
+      }
+    } catch (e) {
+      return {"status": "error", "text": "Exception occurred: $e", "data": null};
+    }
+  }
+
+  Future<String> sendReport(String uuid, String date, String problemCode, File image, [String? remark]) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String accessToken = prefs.getString("accessToken") ?? "";
+
+    final String path = '/v1/ip/m/report';
+    final Uri url = Uri.https(_baseUrl, path);
+
+    try {
+      final request = http.MultipartRequest("POST", url);
+      request.headers.addAll({'Authorization': accessToken});
+      request.fields['uuid'] = uuid;
+      request.fields['date'] = date;
+      request.fields['problemCode'] = problemCode;
+      if (remark != null || remark!.isEmpty) {
+        request.fields['remark'] = remark;
+      }
+      request.files.add(await http.MultipartFile.fromPath('image', image.path));
+
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        return Future.value("success");
+      } else {
+        return Future.value("faild");
+      }
+    } catch (e) {
+      Exception('Exception occurred: $e');
+      return Future.value("error");
+    }
+  }
+
+  Future<String> sendRepack(String uuid, String date, File image) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String accessToken = prefs.getString("accessToken") ?? "";
+
+    final String path = '/v1/ip/m/repack';
+    final Uri url = Uri.https(_baseUrl, path);
+    try {
+      final request = http.MultipartRequest("POST", url);
+      request.headers.addAll({'Authorization': accessToken});
+      request.fields['uuid'] = uuid;
+      request.fields['date'] = date;
+      request.files.add(await http.MultipartFile.fromPath('image', image.path));
+
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        return Future.value("success");
+      } else {
+        return Future.value("faild");
+      }
+    } catch (e) {
+      return Future.value("error");
     }
   }
 

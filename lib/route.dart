@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pos/presentation/detail_items_scan/detailItemScan.dart';
-import 'package:pos/presentation/releaseItems.dart';
 import 'package:pos/presentation/home/home.dart';
 import 'package:pos/presentation/login.dart';
-import 'package:pos/presentation/scanAndRelease.dart';
+import 'package:pos/presentation/release_items/releaseItems.dart';
+import 'package:pos/presentation/scan_and_release/scanAndRelease.dart';
 import 'package:pos/presentation/scan_find_items/scanFindItems.dart';
 import 'package:pos/presentation/splash.dart';
 
@@ -48,14 +48,14 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
       return PageRouteBuilder(
         settings: settings,
         pageBuilder: (context, animation, secondaryAnimation) {
-          return ScanAndRelasePage();
+          return ScanAndReleasePage();
         },
       );
     case '/releaseItems':
       return PageRouteBuilder(
         settings: settings,
         pageBuilder: (context, animation, secondaryAnimation) {
-          return releaseItemsPage();
+          return ReleaseItemsPage();
         },
       );
   }

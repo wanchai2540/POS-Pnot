@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pos/data/models/home_model.dart';
 import 'package:pos/presentation/home/bloc/home_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -59,24 +60,35 @@ class _HomePageState extends State<HomePage> {
                               alignment: Alignment.center,
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      _selectDate(context);
-                                    },
-                                    child: Text(
-                                      'Select date',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
+                                  Row(
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          _selectDate(context);
+                                        },
+                                        child: Text(
+                                          'Select date',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.greenAccent),
                                       ),
-                                    ),
-                                    style: ElevatedButton.styleFrom(backgroundColor: Colors.greenAccent),
+                                      SizedBox(width: 20),
+                                      Text(
+                                        "${selectedDate.toLocal()}".split(' ')[0],
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(width: 20),
-                                  Text(
-                                    "${selectedDate.toLocal()}".split(' ')[0],
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  IconButton(
+                                    icon: Icon(Icons.account_circle),
+                                    onPressed: () async {
+                                      confirmLogout(context);
+                                    },
                                   ),
                                 ],
                               ),
@@ -138,6 +150,48 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<dynamic> confirmLogout(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Container(
+            height: MediaQuery.of(context).size.height * 0.20,
+            alignment: Alignment.center,
+            child: Text(
+              'คุณแน่ใจใช่หรือไม่',
+            ),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('ยกเลิก'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('ยืนยัน'),
+              onPressed: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.remove("username");
+                prefs.remove("password");
+                prefs.remove("accessToken");
+                Navigator.of(context).pop();
+                Navigator.pushReplacementNamed(context, "/login");
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -302,7 +356,7 @@ class _HomePageState extends State<HomePage> {
         onPressed: () {
           Navigator.pushNamed(context, "/scanFindItems",
               arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"});
-              // arguments: {"datePick": "2024-12-05"});
+          // arguments: {"datePick": "2024-12-05"});
         },
         child: Text("สแกนหาของ"),
         style: ButtonStyle(

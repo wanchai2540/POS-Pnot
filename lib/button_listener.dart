@@ -8,7 +8,6 @@ class CustomButtonListener {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'onBarcodeScanned') {
         final scannedData = call.arguments as String?;
-        print("james: ${scannedData}");
         onButtonPressed?.call(scannedData.toString());
       }
     });

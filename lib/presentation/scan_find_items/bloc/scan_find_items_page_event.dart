@@ -10,3 +10,9 @@ class ScanPageGetDataEvent extends ScanPageBlocEvent {
   String? barcode;
   ScanPageGetDataEvent({this.type = "all", required this.date, this.barcode});
 }
+
+class ScanPageScanEvent extends ScanPageBlocEvent {
+  String date;
+  String hawb;
+  ScanPageScanEvent({required this.date, required this.hawb});
+}

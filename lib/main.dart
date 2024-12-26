@@ -3,8 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pos/button_listener.dart';
 import 'package:pos/presentation/detail_items_scan/bloc/detail_item_scan_bloc.dart';
 import 'package:pos/presentation/home/bloc/home_bloc.dart';
-import 'package:pos/presentation/scan_find_items/scan_file_items_bloc/scan_find_items_page_bloc.dart';
-import 'package:pos/presentation/scan_find_items/scan_listener_bloc/scan_listener_bloc.dart';
+import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 import 'package:pos/route.dart';
 
 void main() {
@@ -23,7 +22,6 @@ class MyApp extends StatelessWidget {
         BlocProvider<HomeBloc>(create: (BuildContext context) => HomeBloc()),
         BlocProvider<ScanFindItemsPageBloc>(create: (BuildContext context) => ScanFindItemsPageBloc()),
         BlocProvider<DetailItemScanBloc>(create: (BuildContext context) => DetailItemScanBloc()),
-        BlocProvider<ScanListenerBloc>(create: (BuildContext context) => ScanListenerBloc()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

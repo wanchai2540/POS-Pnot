@@ -8,7 +8,20 @@ final class ScanPageGetLoadingState extends ScanPageBlocState {}
 
 final class ScanPageGetLoadedState extends ScanPageBlocState {
   List<ScanfinditemsModel> model;
+
   ScanPageGetLoadedState({required this.model});
+}
+
+final class ScanPageScanSuccessState extends ScanPageBlocState {
+  ScanListenerModel model;
+
+  ScanPageScanSuccessState({required this.model});
+}
+
+final class ScanPageScanErrorState extends ScanPageBlocState {
+  ScanListenerModel model;
+
+  ScanPageScanErrorState({required this.model});
 }
 
 final class ScanPageGetErrorState extends ScanPageBlocState {}

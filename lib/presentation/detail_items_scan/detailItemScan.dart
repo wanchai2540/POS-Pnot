@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pos/data/models/detailItemScan_model.dart';
@@ -14,9 +16,15 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
   Map<String, dynamic> detailData = {};
 
   @override
-  void didChangeDependencies() {
-    _startEventDetailTable();
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startEventDetailTable();
+    });
+    super.initState();
+  }
 
+  @override
+  void didChangeDependencies() {
     super.didChangeDependencies();
   }
 
@@ -123,14 +131,14 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (data.statusCode == "08")
-                      IconButton(
-                        onPressed: () {
-                          _showCustomDialog(context, detailData["hawb"], data.status, data.remark);
-                        },
-                        icon: Icon(Icons.zoom_in),
-                      ),
-                    SizedBox(height: 48)
+                    // if (data.statusCode == "08")
+                    IconButton(
+                      onPressed: () {
+                        _showCustomDialog(context, detailData["hawb"], data.status, data.remark);
+                      },
+                      icon: Icon(Icons.zoom_in),
+                    ),
+                    // SizedBox(height: 48)
                   ],
                 ),
               ],
@@ -140,7 +148,7 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
     );
   }
 
-  void _showCustomDialog(BuildContext context, String hwb, String status, String remark, [String? image]) {
+  void _showCustomDialog(BuildContext context, String hwb, String status, String remark, [File? image]) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -162,32 +170,36 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
               SizedBox(height: 16),
               Text('รูปภาพ:'),
               SizedBox(height: 8),
-              GestureDetector(
-                onTap: () {
-                  // เพิ่มการเปิดภาพหรือการกระทำที่ต้องการ
-                },
-                child: Container(
-                  height: 100,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[200],
-                  ),
-                  child: Center(
-                    child: Text(
-                      'รูปภาพ (ถ้ามี)',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
+              Container(
+                height: 100,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.grey[200],
                 ),
+                child: image == null
+                    ? Center(
+                        child: Text(
+                          'รูปภาพ (ถ้ามี)',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      )
+                    : Center(
+                        child: Image.file(
+                          image,
+                          height: 200,
+                          width: 200,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
               ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // ปิด Dialog
+                Navigator.of(context).pop();
               },
               child: Text('ปิด'),
             ),

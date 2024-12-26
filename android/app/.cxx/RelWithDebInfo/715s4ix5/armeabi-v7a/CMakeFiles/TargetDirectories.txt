@@ -1,0 +1,2 @@
+/Users/wanchainagtang/Desktop/WORK/POC/POS-Pnot/android/app/.cxx/RelWithDebInfo/715s4ix5/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/wanchainagtang/Desktop/WORK/POC/POS-Pnot/android/app/.cxx/RelWithDebInfo/715s4ix5/armeabi-v7a/CMakeFiles/rebuild_cache.dir

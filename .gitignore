@@ -23,6 +23,8 @@
 # /dev/docs/lib/
 # /dev/docs/pubspec.yaml
 
+.flutter-plugins-dependecies
+
 # Miscellaneous
 *.class
 *.lock

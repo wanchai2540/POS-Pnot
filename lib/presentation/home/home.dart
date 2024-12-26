@@ -301,8 +301,8 @@ class _HomePageState extends State<HomePage> {
       child: ElevatedButton(
         onPressed: () {
           Navigator.pushNamed(context, "/scanFindItems",
-              // arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"});
-              arguments: {"datePick": "2024-12-05"});
+              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"});
+              // arguments: {"datePick": "2024-12-05"});
         },
         child: Text("สแกนหาของ"),
         style: ButtonStyle(

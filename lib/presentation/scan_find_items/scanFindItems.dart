@@ -8,7 +8,9 @@ import 'package:pos/data/api/api.dart';
 import 'package:pos/button_listener.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pos/data/models/scanFindItems_model.dart';
-import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
+import 'package:pos/data/models/scan_listener_model.dart';
+import 'package:pos/presentation/scan_find_items/scan_file_items_bloc/scan_find_items_page_bloc.dart';
+import 'package:pos/presentation/scan_find_items/scan_listener_bloc/scan_listener_bloc.dart';
 
 typedef MenuEntry = DropdownMenuEntry<String>;
 
@@ -48,58 +50,88 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
         child: SingleChildScrollView(
           child: Container(
             color: Colors.blue[100],
-            child: Column(
-              children: [
-                Center(
-                  child: Text(
-                    "Scan HAWB (${datePicked})",
-                    style: TextStyle(fontSize: 25),
-                  ),
-                ),
-                SizedBox(height: 20),
-                DropdownMenu<String>(
-                  initialSelection: list.first,
-                  onSelected: (String? value) {
-                    setState(() {
-                      switch (value) {
-                        case "ทั้งหมด":
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                        case "เจอของ":
-                          dropdownValue = "03";
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "03"));
-                        case "ของพร้อมปล่อย":
-                          dropdownValue = "04";
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "04"));
-                        case "ปล่อยของ":
-                          dropdownValue = "05";
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "05"));
-                        case "พบปัญหา":
-                          dropdownValue = "08";
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "08"));
-                        case "อื่นๆ":
-                          dropdownValue = "99";
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "99"));
-                          break;
-                        default:
-                      }
-                      dropdownLabel = value!;
-                    });
-                  },
-                  dropdownMenuEntries: menuEntries,
-                ),
-                SizedBox(height: 20),
-                BlocBuilder<ScanFindItemsPageBloc, ScanPageBlocState>(
-                  builder: (context, state) {
-                    if (state is ScanPageGetLoadingState) {
-                      return CircularProgressIndicator();
-                    } else if (state is ScanPageGetLoadedState) {
-                      return _tableListData(state.model);
-                    } else {
-                      return Center(child: Text("ไม่มีข้อมูล"));
-                    }
-                  },
-                )
-              ],
+            child: BlocBuilder<ScanListenerBloc, ScanListenerState>(
+              builder: (context, state) {
+                if (state is ScanListenerDialog01State) {
+                  // Dialog 1
+                  showScanNoHawbDialog();
+                } else if (state is ScanListenerDialog02State) {
+                  // Dialog 2
+                  showScanDialog(state.model);
+                } else if (state is ScanListenerDialog03State) {
+                  // Dialog 3
+                  showScanDialog(state.model);
+                } else if (state is ScanListenerDialog04State) {
+                  // Dialog 4
+                  showScanDialog(state.model);
+                } else if (state is ScanListenerDialog04State) {
+                  // Dialog 5
+                  showScanDialog(state.model);
+                }
+                return Column(
+                  children: [
+                    Center(
+                      child: Text(
+                        "Scan HAWB (${datePicked})",
+                        style: TextStyle(fontSize: 25),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    DropdownMenu<String>(
+                      initialSelection: list.first,
+                      onSelected: (String? value) {
+                        setState(() {
+                          switch (value) {
+                            case "ทั้งหมด":
+                              context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                            case "เจอของ":
+                              dropdownValue = "03";
+                              context
+                                  .read<ScanFindItemsPageBloc>()
+                                  .add(ScanPageGetDataEvent(date: datePicked, type: "03"));
+                            case "ของพร้อมปล่อย":
+                              dropdownValue = "04";
+                              context
+                                  .read<ScanFindItemsPageBloc>()
+                                  .add(ScanPageGetDataEvent(date: datePicked, type: "04"));
+                            case "ปล่อยของ":
+                              dropdownValue = "05";
+                              context
+                                  .read<ScanFindItemsPageBloc>()
+                                  .add(ScanPageGetDataEvent(date: datePicked, type: "05"));
+                            case "พบปัญหา":
+                              dropdownValue = "08";
+                              context
+                                  .read<ScanFindItemsPageBloc>()
+                                  .add(ScanPageGetDataEvent(date: datePicked, type: "08"));
+                            case "อื่นๆ":
+                              dropdownValue = "99";
+                              context
+                                  .read<ScanFindItemsPageBloc>()
+                                  .add(ScanPageGetDataEvent(date: datePicked, type: "99"));
+                              break;
+                            default:
+                          }
+                          dropdownLabel = value!;
+                        });
+                      },
+                      dropdownMenuEntries: menuEntries,
+                    ),
+                    SizedBox(height: 20),
+                    BlocBuilder<ScanFindItemsPageBloc, ScanPageBlocState>(
+                      builder: (context, state) {
+                        if (state is ScanPageGetLoadingState) {
+                          return CircularProgressIndicator();
+                        } else if (state is ScanPageGetLoadedState) {
+                          return _tableListData(state.model);
+                        } else {
+                          return Center(child: Text("ไม่มีข้อมูล"));
+                        }
+                      },
+                    )
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -192,6 +224,80 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     );
   }
 
+  showScanNoHawbDialog() {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Basic dialog title'),
+          content: const Text(
+            'A dialog is a type of modal window that\n'
+            'appears in front of app content to\n'
+            'provide critical information, or prompt\n'
+            'for a decision to be made.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Disable'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Enable'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  showScanDialog(ScanListenerModel model) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Basic dialog title'),
+          content: const Text(
+            'A dialog is a type of modal window that\n'
+            'appears in front of app content to\n'
+            'provide critical information, or prompt\n'
+            'for a decision to be made.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Disable'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Enable'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _startEventTable() {
     Map<String, dynamic> date = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     datePicked = date["datePick"];
@@ -209,7 +315,12 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     CustomButtonListener.onButtonPressed = (event) {
       setState(() {
         if (event != null) {
-          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, barcode: event));
+          // context.read<ScanListenerBloc>().add(ScanListenerLoadingEvent(date: datePicked, hawb: event));
+          context
+              .read<ScanListenerBloc>()
+              .add(ScanListenerLoadingEvent(date: "2024-12-05", hawb: "1ZA21R176795174995"));
+          _controller.text = event;
+
           // .add(ScanPageGetDataEvent(date: datePicked, type: dropdownValue, barcode: event));
           // _controller.text = event;
           // // _controller.text = "4294969872";

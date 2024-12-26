@@ -114,6 +114,33 @@ class DataService {
     }
   }
 
+  Future<Map<String, dynamic>> getScanListener(String date, String hawb) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String accessToken = prefs.getString("accessToken") ?? "";
+
+    final String path = '/v1/ip/m/scan/pickup';
+    Map<String, String> body = {"date": date, "hawb": hawb};
+    final Uri url = Uri.https(_baseUrl, path);
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Authorization': "Bearer $accessToken", 'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+      Map<String, dynamic> bodyResponse = jsonDecode(response.body);
+      return {
+        "status": "success",
+        "text": "success",
+        "code": response.statusCode,
+        "body": bodyResponse["data"],
+      };
+    } catch (e) {
+      Exception('Exception occurred: $e');
+      return {"status": "error", "text": "Exception occurred: $e", "data": null};
+    }
+  }
+
   Future<Map<String, dynamic>> getDetailItem(String uuid) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";

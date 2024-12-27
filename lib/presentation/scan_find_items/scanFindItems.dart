@@ -464,6 +464,19 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                           setState(() {
                             _imageRepack.value = null;
                           });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('แจ้งการ Repack สำเร็จ'),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('แจ้งการ Repack ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
                         }
                       });
                       Navigator.of(context).pop();
@@ -603,6 +616,19 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                             setState(() {
                               _imageReport.value = null;
                             });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('แจ้งปัญหาสำเร็จ'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
                           }
                         });
                         Navigator.of(context).pop();

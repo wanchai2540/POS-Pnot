@@ -10,8 +10,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc() : super(HomeInitialState()) {
     on<HomeLoadingEvent>((event, emit) async {
       emit(HomeLoadingState());
-      // var data = await DataService().getDataHome(event.date);
-      var data = await DataService().getDataHome("2024-12-05");
+      var data = await DataService().getDataHome(event.date);
       try {
         if (data["status"] == "success") {
           HomeModel result = HomeModel.fromJson(data["data"]);

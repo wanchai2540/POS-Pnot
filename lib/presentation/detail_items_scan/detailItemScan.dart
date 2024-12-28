@@ -131,14 +131,14 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // if (data.statusCode == "08")
-                    IconButton(
-                      onPressed: () {
-                        _showCustomDialog(context, detailData["hawb"], data.status, data.remark);
-                      },
-                      icon: Icon(Icons.zoom_in),
-                    ),
-                    // SizedBox(height: 48)
+                    if (data.imageUrl != "" || data.remark != "")
+                      IconButton(
+                        onPressed: () {
+                          _showCustomDialog(context, detailData["hawb"], data.status, data.remark, data.imageUrl);
+                        },
+                        icon: Icon(Icons.zoom_in),
+                      ),
+                    SizedBox(height: 48)
                   ],
                 ),
               ],
@@ -148,7 +148,7 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
     );
   }
 
-  void _showCustomDialog(BuildContext context, String hwb, String status, String remark, [File? image]) {
+  void _showCustomDialog(BuildContext context, String hwb, String status, String remark, [String? image]) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -165,35 +165,44 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('$hwb : พบปัญหา (DMC)'),
-              SizedBox(height: 8),
+              SizedBox(height: 16),
               Text('หมายเหตุ: ${!remark.isEmpty ? remark : "ไม่มี"}'),
               SizedBox(height: 16),
-              Text('รูปภาพ:'),
-              SizedBox(height: 8),
-              Container(
-                height: 100,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.grey[200],
-                ),
-                child: image == null
-                    ? Center(
-                        child: Text(
-                          'รูปภาพ (ถ้ามี)',
-                          style: TextStyle(color: Colors.grey),
+              image != null
+                  ? Column(
+                      children: [
+                        Align(alignment: Alignment.centerLeft, child: Text('รูปภาพ:')),
+                        SizedBox(height: 16),
+                        Center(
+                          child: Image.network(
+                            image,
+                            height: 200,
+                            width: 200,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      )
-                    : Center(
-                        child: Image.file(
-                          image,
-                          height: 200,
-                          width: 200,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-              ),
+                      ],
+                    )
+                  : SizedBox(),
+              // Container(
+              //   height: 100,
+              //   width: double.infinity,
+              //   decoration: BoxDecoration(
+              //     border: Border.all(color: Colors.grey),
+              //     borderRadius: BorderRadius.circular(8),
+              //     color: Colors.grey[200],
+              //   ),
+              //   child: image == null
+              //       ? SizedBox()
+              //       : Center(
+              //           child: Image.network(
+              //             image,
+              //             height: 200,
+              //             width: 200,
+              //             fit: BoxFit.cover,
+              //           ),
+              //         ),
+              // ),
             ],
           ),
           actions: [

@@ -29,10 +29,14 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   List<MenuEntry> menuEntries = [];
   final FocusNode _focusNode = FocusNode();
   final TextEditingController _controller = TextEditingController();
+  final TextEditingController _dropDowncontroller = TextEditingController();
+
   List<String> list = ["ทั้งหมด", "เจอของ", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
   final ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
   final ValueNotifier<File?> _imageRepack = ValueNotifier<File?>(null);
   final _formKey = GlobalKey<FormState>();
+  final _reportFormKey = GlobalKey<FormState>();
+  final _repackFormKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -65,7 +69,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
               children: [
                 Center(
                   child: Text(
-                    "Scan HAWB (${datePicked})",
+                    "งานของวันที่ ${datePicked}",
                     style: TextStyle(fontSize: 25),
                   ),
                 ),
@@ -90,8 +94,8 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                           dropdownValue = "08";
                           context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "08"));
                         case "อื่นๆ":
-                          dropdownValue = "99";
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "99"));
+                          dropdownValue = "00";
+                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "00"));
                           break;
                         default:
                       }
@@ -179,8 +183,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     children: [
                       Text(
                         "${data.lastStatus}",
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.green[200],
+                          color: _colorStatus(data.lastStatus),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -204,6 +209,17 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
         ),
       ),
     );
+  }
+
+  Color? _colorStatus(String lastStatus) {
+    if (lastStatus == "ปล่อยของ") {
+      return Colors.green[200];
+    } else if (lastStatus == "เจอของ") {
+      return Colors.blue[200];
+    } else if (lastStatus == "พบปัญหา [DMC (กล่องบุบ)]") {
+      return Colors.red[200];
+    }
+    return Colors.black;
   }
 
   Widget floadting() {
@@ -271,6 +287,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   showScanNoHawbDialog() {
     return showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           content: Container(
@@ -278,6 +295,11 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
             alignment: Alignment.center,
             child: Text(
               'ไม่พบ HAWB ในระบบ',
+              style: TextStyle(
+                color: Colors.red[200],
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
             ),
           ),
           actions: [
@@ -285,18 +307,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('ออก'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
               child: const Text('สแกนต่อ'),
               onPressed: () {
-                // floadting().call();
+                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                 Navigator.of(context).pop();
               },
             ),
@@ -310,6 +323,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
       {int? statusCode, bool isDialog3 = false, String? nameReportBtn, String? remarkSuccess, String? remarkFailed}) {
     return showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Align(
@@ -341,7 +355,15 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                 SizedBox(height: 30),
                 remarkFailed != null
                     ? Container(
-                        child: Text("$remarkFailed"),
+                        child: Text(
+                          "$remarkFailed",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.red[200],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                       )
                     : SizedBox(),
                 SizedBox(height: 10),
@@ -353,17 +375,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('ออก'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
               child: const Text('สแกนต่อ'),
               onPressed: () {
+                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                 Navigator.of(context).pop();
               },
             ),
@@ -378,6 +392,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
 
     return showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: RichText(
@@ -450,6 +465,10 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     ),
                     child: const Text('ออก'),
                     onPressed: () {
+                      setState(() {
+                        _imageReport.value = null;
+                      });
+                      context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                       Navigator.of(context).pop();
                     },
                   ),
@@ -459,27 +478,37 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     ),
                     child: const Text('ยืนยัน'),
                     onPressed: () async {
-                      await DataService().sendRepack(uuid, datePicked, _imageRepack.value!).then((res) {
-                        if (res == "success") {
-                          setState(() {
-                            _imageRepack.value = null;
-                          });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('แจ้งการ Repack สำเร็จ'),
-                              duration: Duration(seconds: 3),
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('แจ้งการ Repack ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
-                              duration: Duration(seconds: 3),
-                            ),
-                          );
-                        }
-                      });
-                      Navigator.of(context).pop();
+                      if (_imageRepack.value != null) {
+                        await DataService().sendRepack(uuid, datePicked, _imageRepack.value!).then((res) {
+                          if (res == "success") {
+                            setState(() {
+                              _imageRepack.value = null;
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('แจ้งการ Repack สำเร็จ'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('แจ้งการ Repack ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          }
+                        });
+                        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                        Navigator.of(context).pop();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('กรุณาถ่ายรูปเพื่อเปลี่ยนสถานะเป็น Repack'),
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
+                      }
                     },
                   ),
                 ])
@@ -494,7 +523,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   Future<void> showConfirmFindItemDialog(String uuid) async {
     _imageReport.value = null;
     TextEditingController _controllerRemark = TextEditingController();
-    String reasonValue = "";
+    String? reasonValue;
 
     Map<String, dynamic> result = await DataService().getProblemList();
     List<DropdownMenuEntry<String>> reasonList = (result['data'] as List)
@@ -520,50 +549,66 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
             ),
           ),
           content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                DropdownMenu<String>(
-                  initialSelection: reasonList.first.label,
-                  onSelected: (String? value) {
-                    setState(() {
-                      reasonValue = value!;
-                    });
-                  },
-                  dropdownMenuEntries: reasonList,
-                ),
-                SizedBox(height: 10),
-                Text("หมายเหตุ"),
-                TextFormField(
-                  controller: _controllerRemark,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'ระบุหมายเหตุ...',
+            child: Form(
+              key: _reportFormKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: reasonValue,
+                    decoration: InputDecoration(
+                      labelText: 'เลือกสาเหตุ',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: [
+                      for (var dropValue in reasonList)
+                        DropdownMenuItem(value: '${dropValue.value}', child: Text('${dropValue.label}')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        reasonValue = value!;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'กรุณาเลือกสาเหตุในการแจ้งปัญหา';
+                      }
+                      return null;
+                    },
                   ),
-                ),
-                SizedBox(height: 30),
-                ValueListenableBuilder<File?>(
-                  valueListenable: _imageReport,
-                  builder: (context, capturedImage, child) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        capturedImage == null
-                            ? SizedBox()
-                            : Center(
-                                child: Image.file(
-                                  capturedImage,
-                                  height: 200,
-                                  width: 200,
-                                  fit: BoxFit.cover,
+                  SizedBox(height: 10),
+                  Text("หมายเหตุ"),
+                  TextFormField(
+                    controller: _controllerRemark,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'ระบุหมายเหตุ...',
+                    ),
+                  ),
+                  SizedBox(height: 30),
+                  ValueListenableBuilder<File?>(
+                    valueListenable: _imageReport,
+                    builder: (context, capturedImage, child) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          capturedImage == null
+                              ? SizedBox()
+                              : Center(
+                                  child: Image.file(
+                                    capturedImage,
+                                    height: 200,
+                                    width: 200,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                              ),
-                      ],
-                    );
-                  },
-                ),
-              ],
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
@@ -595,6 +640,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                       setState(() {
                         _imageReport.value = null;
                       });
+                      context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                       Navigator.of(context).pop();
                     },
                   ),
@@ -604,33 +650,35 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     ),
                     child: const Text('ยืนยัน'),
                     onPressed: () async {
-                      if (_imageReport.value == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('กรุณาถ่ายรูปเพื่อรายงาน')),
-                        );
-                      } else {
-                        await DataService()
-                            .sendReport(uuid, datePicked, reasonValue, _imageReport.value!, _controllerRemark.text)
-                            .then((res) {
-                          if (res == "success") {
-                            setState(() {
-                              _imageReport.value = null;
-                            });
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('แจ้งปัญหาสำเร็จ'),
-                                duration: Duration(seconds: 3),
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
-                                duration: Duration(seconds: 3),
-                              ),
-                            );
-                          }
-                        });
+                      if (_reportFormKey.currentState!.validate()) {
+                        var res;
+                        if (_imageReport.value != null) {
+                          res = await DataService().sendReport(uuid, datePicked, reasonValue!,
+                              image: _imageReport.value!, remark: _controllerRemark.text);
+                        } else {
+                          res = await DataService()
+                              .sendReport(uuid, datePicked, reasonValue!, remark: _controllerRemark.text);
+                        }
+
+                        if (res == "success") {
+                          setState(() {
+                            _imageReport.value = null;
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('แจ้งปัญหาสำเร็จ'),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                         Navigator.of(context).pop();
                       }
                     },
@@ -675,7 +723,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
           showScanNoHawbDialog();
         } else if (data["appCode"] == "02" && (data["statusCode"] == "04" || data["statusCode"] == "05")) {
           // Dialog 2
-          showScanDialog(result, remarkFailed: "สถานะไม่ถูกต้อง");
+          showScanDialog(result, statusCode: 400, remarkFailed: "สถานะไม่ถูกต้อง");
         } else if (data["appCode"] == "02" && (data["statusCode"] == "08" || data["subStatusCode"] == "03")) {
           // Dialog 3
           showScanDialog(result,
@@ -686,7 +734,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
         } else if (data["appCode"] == "02" &&
             (data["statusCode"] == "03" || data["statusCode"] == "06" || data["statusCode"] == "08")) {
           // Dialog 4
-          showScanDialog(result, nameReportBtn: "แจ้งปัญหา", remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว");
+          showScanDialog(result, statusCode: 400, remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว");
         }
       }
     } catch (e) {

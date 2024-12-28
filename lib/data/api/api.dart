@@ -221,7 +221,7 @@ class DataService {
     }
   }
 
-  Future<String> sendReport(String uuid, String date, String problemCode, File image, [String? remark]) async {
+  Future<String> sendReport(String uuid, String date, String problemCode, {File? image, String? remark}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
@@ -230,14 +230,19 @@ class DataService {
 
     try {
       final request = http.MultipartRequest("POST", url);
-      request.headers.addAll({'Authorization': accessToken});
+      request.headers.addAll({
+        'Authorization': "Bearer $accessToken",
+        'Content-Type': 'multipart/form-data',
+      });
       request.fields['uuid'] = uuid;
       request.fields['date'] = date;
       request.fields['problemCode'] = problemCode;
       if (remark != null || remark!.isEmpty) {
         request.fields['remark'] = remark;
       }
-      request.files.add(await http.MultipartFile.fromPath('image', image.path));
+      if (image != null) {
+        request.files.add(await http.MultipartFile.fromPath('image', image.path));
+      }
 
       var response = await request.send();
       if (response.statusCode == 200) {
@@ -259,7 +264,10 @@ class DataService {
     final Uri url = Uri.https(_baseUrl, path);
     try {
       final request = http.MultipartRequest("POST", url);
-      request.headers.addAll({'Authorization': accessToken});
+      request.headers.addAll({
+        'Authorization': "Bearer $accessToken",
+        'Content-Type': 'multipart/form-data',
+      });
       request.fields['uuid'] = uuid;
       request.fields['date'] = date;
       request.files.add(await http.MultipartFile.fromPath('image', image.path));

@@ -64,7 +64,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
               children: [
                 Center(
                   child: Text(
-                    "Scan HAWB (${datePicked})",
+                    "งานของวันที่ ${datePicked}",
                     style: TextStyle(fontSize: 25),
                   ),
                 ),
@@ -89,8 +89,8 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                           dropdownValue = "08";
                           context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "08"));
                         case "อื่นๆ":
-                          dropdownValue = "99";
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "99"));
+                          dropdownValue = "00";
+                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "00"));
                           break;
                         default:
                       }
@@ -170,17 +170,20 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("${data.hawb}", style: TextStyle(fontSize: 16)),
+                      Center(child: Text("${data.hawb}", style: TextStyle(fontSize: 16))),
                     ],
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "${data.lastStatus}",
-                        style: TextStyle(
-                          color: Colors.green[200],
-                          fontWeight: FontWeight.bold,
+                      Center(
+                        child: Text(
+                          "${data.lastStatus}",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: _colorStatus(data.lastStatus),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
@@ -203,6 +206,17 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
         ),
       ),
     );
+  }
+
+  Color? _colorStatus(String lastStatus) {
+    if (lastStatus == "ปล่อยของ") {
+      return Colors.green[200];
+    } else if (lastStatus == "เจอของ") {
+      return Colors.blue[200];
+    } else if (lastStatus == "พบปัญหา") {
+      return Colors.red[200];
+    }
+    return Colors.black;
   }
 
   Widget floadting() {
@@ -247,7 +261,6 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      // _controller.text = "1ZA21R176795174995";
                       if (_formKey.currentState!.validate()) {
                         _onScan(date: datePicked, hawb: _controller.text);
                         Navigator.pop(context);
@@ -270,6 +283,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   showScanNoHawbDialog() {
     return showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           content: Container(
@@ -277,6 +291,11 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
             alignment: Alignment.center,
             child: Text(
               'ไม่พบ HAWB ในระบบ',
+              style: TextStyle(
+                color: Colors.red[200],
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
             ),
           ),
           actions: [
@@ -284,18 +303,9 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('ออก'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
               child: const Text('สแกนต่อ'),
               onPressed: () {
-                // floadting().call();
+                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                 Navigator.of(context).pop();
               },
             ),
@@ -306,9 +316,15 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   }
 
   showScanDialog(ReleaseModel model,
-      {int? statusCode, bool isDialog3 = false, String? nameReportBtn, String? remarkSuccess, String? remarkFailed}) {
+      {int? statusCode,
+      bool isDialog3 = false,
+      String? nameReportBtn,
+      String? remarkSuccess,
+      String? remarkFailed,
+      bool isGreen = false}) {
     return showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           content: SingleChildScrollView(
@@ -321,7 +337,14 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                 SizedBox(height: 30),
                 remarkFailed != null
                     ? Container(
-                        child: Text("$remarkFailed"),
+                        child: Text(
+                          "$remarkFailed",
+                          style: TextStyle(
+                            color: isGreen ? Colors.green[200] : Colors.red[200],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                       )
                     : SizedBox(),
                 SizedBox(height: 10),
@@ -333,17 +356,9 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('ออก'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
               child: const Text('สแกนต่อ'),
               onPressed: () {
+                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                 Navigator.of(context).pop();
               },
             ),
@@ -376,7 +391,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
       if (dataGetScan["code"] == 200) {
         if (data["appCode"] == "01" && data["statusCode"] == "05") {
           // Dialog 1
-          showScanDialog(result, remarkFailed: "สแกนปล่อยของสำเร็จ");
+          showScanDialog(result, remarkFailed: "สแกนปล่อยของสำเร็จ", isGreen: true);
         }
       } else if (dataGetScan["code"] == 400) {
         if (data["appCode"] == "03") {

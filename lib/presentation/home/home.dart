@@ -16,17 +16,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   DateTime selectedDate = DateTime.now();
-  int _total = 0;
-  int _green = 0;
-  int _red = 0;
-  int _other = 0;
-  int _ups = 0;
-  int _skl = 0;
-  int _l = 0;
-
-  int _foundItems = 0;
-  int _readyLeave = 0;
-  int _leave = 0;
 
   @override
   void didChangeDependencies() {
@@ -45,6 +34,44 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.1,
+                    alignment: Alignment.center,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                _selectDate(context);
+                              },
+                              child: Text(
+                                'Select date',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.greenAccent),
+                            ),
+                            SizedBox(width: 20),
+                            Text(
+                              "${selectedDate.toLocal()}".split(' ')[0],
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.account_circle),
+                          onPressed: () async {
+                            confirmLogout(context);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                   BlocBuilder<HomeBloc, HomeState>(
                     builder: (context, state) {
                       if (state is HomeLoadingState) {
@@ -55,44 +82,6 @@ class _HomePageState extends State<HomePage> {
                         HomeModel model = state.model;
                         return Column(
                           children: [
-                            Container(
-                              height: MediaQuery.of(context).size.height * 0.1,
-                              alignment: Alignment.center,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          _selectDate(context);
-                                        },
-                                        child: Text(
-                                          'Select date',
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.greenAccent),
-                                      ),
-                                      SizedBox(width: 20),
-                                      Text(
-                                        "${selectedDate.toLocal()}".split(' ')[0],
-                                        style: TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.account_circle),
-                                    onPressed: () async {
-                                      confirmLogout(context);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
                             Container(
                               height: MediaQuery.of(context).size.height * 0.06,
                               alignment: Alignment.center,
@@ -121,11 +110,11 @@ class _HomePageState extends State<HomePage> {
                                 dashLength: 3,
                               ),
                             ),
-                            _countStatusText("เจอของ", model.scannedPickup, 6),
-                            _countStatusText("ของพร้อมปล่อย", model.pendingReleasePickup, 6),
-                            _countStatusText("ปล่อยของ", model.releasePickup, 6),
-                            _countStatusText("พบปัญหา", model.problemPickup, 6),
-                            _countStatusText("อื้นๆ", model.otherPickup, 6),
+                            _countStatusText("เจอของ", model.scannedPickup),
+                            _countStatusText("ของพร้อมปล่อย", model.pendingReleasePickup),
+                            _countStatusText("ปล่อยของ", model.releasePickup),
+                            _countStatusText("พบปัญหา", model.problemPickup),
+                            _countStatusText("อื้นๆ", model.otherPickup),
                           ],
                         );
                       }
@@ -202,13 +191,15 @@ class _HomePageState extends State<HomePage> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2025),
     );
-    if (picked != null && picked != selectedDate)
+    if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
       });
+      context.read<HomeBloc>().add(HomeLoadingEvent(date: "${picked.year}-${picked.month}-${picked.day}"));
+    }
   }
 
-  Widget _countStatusText(String title, int count, int maxCount) {
+  Widget _countStatusText(String title, int count) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -226,7 +217,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         Text(
-          "/ $maxCount)",
+          ")",
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),

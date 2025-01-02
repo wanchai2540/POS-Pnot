@@ -650,37 +650,103 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     ),
                     child: const Text('ยืนยัน'),
                     onPressed: () async {
+                      var res;
                       if (_reportFormKey.currentState!.validate()) {
-                        var res;
-                        if (_imageReport.value != null) {
-                          res = await DataService().sendReport(uuid, datePicked, reasonValue!,
-                              image: _imageReport.value!, remark: _controllerRemark.text);
-                        } else {
-                          res = await DataService()
-                              .sendReport(uuid, datePicked, reasonValue!, remark: _controllerRemark.text);
-                        }
+                        if (reasonValue == "03") {
+                          if (_imageReport.value != null) {
+                            res = await DataService().sendReport(uuid, datePicked, reasonValue!,
+                                image: _imageReport.value!, remark: _controllerRemark.text);
 
-                        if (res == "success") {
-                          setState(() {
-                            _imageReport.value = null;
-                          });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('แจ้งปัญหาสำเร็จ'),
-                              duration: Duration(seconds: 3),
-                            ),
-                          );
+                            if (res == "success") {
+                              setState(() {
+                                _imageReport.value = null;
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('แจ้งปัญหาสำเร็จ'),
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
+                            }
+                            context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                            Navigator.of(context).pop();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          }
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
-                              duration: Duration(seconds: 3),
-                            ),
-                          );
+                          if (_imageReport.value != null) {
+                            res = await DataService().sendReport(uuid, datePicked, reasonValue!,
+                                image: _imageReport.value!, remark: _controllerRemark.text);
+                          } else {
+                            res = await DataService()
+                                .sendReport(uuid, datePicked, reasonValue!, remark: _controllerRemark.text);
+                          }
+                          if (res == "success") {
+                            setState(() {
+                              _imageReport.value = null;
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('แจ้งปัญหาสำเร็จ'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          }
+                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                          Navigator.of(context).pop();
                         }
-                        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                        Navigator.of(context).pop();
                       }
+
+                      // if (_reportFormKey.currentState!.validate()) {
+                      //   var res;
+                      //   if (_imageReport.value != null) {
+                      //     res = await DataService().sendReport(uuid, datePicked, reasonValue!,
+                      //         image: _imageReport.value!, remark: _controllerRemark.text);
+                      //   } else {
+                      //     res = await DataService()
+                      //         .sendReport(uuid, datePicked, reasonValue!, remark: _controllerRemark.text);
+                      //   }
+
+                      //   if (res == "success") {
+                      //     setState(() {
+                      //       _imageReport.value = null;
+                      //     });
+                      //     ScaffoldMessenger.of(context).showSnackBar(
+                      //       SnackBar(
+                      //         content: Text('แจ้งปัญหาสำเร็จ'),
+                      //         duration: Duration(seconds: 3),
+                      //       ),
+                      //     );
+                      //   } else {
+                      //     ScaffoldMessenger.of(context).showSnackBar(
+                      //       SnackBar(
+                      //         content: Text('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
+                      //         duration: Duration(seconds: 3),
+                      //       ),
+                      //     );
+                      //   }
+                      //   context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                      //   Navigator.of(context).pop();
+                      // }
                     },
                   ),
                 ])

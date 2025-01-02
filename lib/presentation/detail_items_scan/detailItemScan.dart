@@ -110,11 +110,14 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
             TableRow(
               decoration: BoxDecoration(color: Colors.white),
               children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(data.status),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(data.status),
+                    ],
+                  ),
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -137,8 +140,9 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
                           _showCustomDialog(context, detailData["hawb"], data.status, data.remark, data.imageUrl);
                         },
                         icon: Icon(Icons.warning, color: Colors.orange),
-                      ),
-                    SizedBox(height: 48)
+                      )
+                    else
+                      SizedBox(height: 48)
                   ],
                 ),
               ],
@@ -168,22 +172,47 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
               SizedBox(height: 16),
               Text('หมายเหตุ: ${!remark.isEmpty ? remark : "ไม่มี"}'),
               SizedBox(height: 16),
-              image != null
-                  ? Column(
-                      children: [
-                        Align(alignment: Alignment.centerLeft, child: Text('รูปภาพ:')),
-                        SizedBox(height: 16),
-                        Center(
-                          child: Image.network(
-                            image,
-                            height: 200,
-                            width: 200,
-                            fit: BoxFit.cover,
+              // image != null
+              //     ?
+              Column(
+                children: [
+                  Align(alignment: Alignment.centerLeft, child: Text('รูปภาพ:')),
+                  SizedBox(height: 16),
+                  Center(
+                    child: Image.network(
+                      image ?? "",
+                      height: 200,
+                      width: 200,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        }
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                : null,
                           ),
-                        ),
-                      ],
-                    )
-                  : SizedBox(),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              "assets/images/no-image.png",
+                              height: 200,
+                              width: 200,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              )
+              // : SizedBox(),
               // Container(
               //   height: 100,
               //   width: double.infinity,

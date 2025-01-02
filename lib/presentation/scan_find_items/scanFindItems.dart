@@ -715,38 +715,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                           Navigator.of(context).pop();
                         }
                       }
-
-                      // if (_reportFormKey.currentState!.validate()) {
-                      //   var res;
-                      //   if (_imageReport.value != null) {
-                      //     res = await DataService().sendReport(uuid, datePicked, reasonValue!,
-                      //         image: _imageReport.value!, remark: _controllerRemark.text);
-                      //   } else {
-                      //     res = await DataService()
-                      //         .sendReport(uuid, datePicked, reasonValue!, remark: _controllerRemark.text);
-                      //   }
-
-                      //   if (res == "success") {
-                      //     setState(() {
-                      //       _imageReport.value = null;
-                      //     });
-                      //     ScaffoldMessenger.of(context).showSnackBar(
-                      //       SnackBar(
-                      //         content: Text('แจ้งปัญหาสำเร็จ'),
-                      //         duration: Duration(seconds: 3),
-                      //       ),
-                      //     );
-                      //   } else {
-                      //     ScaffoldMessenger.of(context).showSnackBar(
-                      //       SnackBar(
-                      //         content: Text('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
-                      //         duration: Duration(seconds: 3),
-                      //       ),
-                      //     );
-                      //   }
-                      //   context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                      //   Navigator.of(context).pop();
-                      // }
                     },
                   ),
                 ])
@@ -790,7 +758,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
         } else if (data["appCode"] == "02" && (data["statusCode"] == "04" || data["statusCode"] == "05")) {
           // Dialog 2
           showScanDialog(result, statusCode: 400, remarkFailed: "สถานะไม่ถูกต้อง");
-        } else if (data["appCode"] == "02" && (data["statusCode"] == "08" || data["subStatusCode"] == "03")) {
+        } else if (data["appCode"] == "02" && (data["statusCode"] == "08" && data["subStatusCode"] == "03")) {
           // Dialog 3
           showScanDialog(result,
               statusCode: 400,

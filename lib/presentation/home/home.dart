@@ -187,9 +187,9 @@ class _HomePageState extends State<HomePage> {
   _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate, // Refer step 1
+      initialDate: selectedDate,
       firstDate: DateTime(2000),
-      lastDate: DateTime(2025),
+      lastDate: DateTime.now().add(Duration(days: 365)),
     );
     if (picked != null && picked != selectedDate) {
       setState(() {
@@ -346,8 +346,11 @@ class _HomePageState extends State<HomePage> {
       child: ElevatedButton(
         onPressed: () {
           Navigator.pushNamed(context, "/scanFindItems",
-              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"});
-          // arguments: {"datePick": "2024-12-05"});
+              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"}).then((value) {
+            context
+                .read<HomeBloc>()
+                .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+          });
         },
         child: Text("สแกนหาของ"),
         style: ButtonStyle(
@@ -377,7 +380,11 @@ class _HomePageState extends State<HomePage> {
       child: ElevatedButton(
         onPressed: () {
           Navigator.pushNamed(context, "/scanAndRelease",
-              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"});
+              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"}).then((value) {
+            context
+                .read<HomeBloc>()
+                .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+          });
         },
         child: Text("สแกนพร้อมปล่อยของ"),
         style: ButtonStyle(
@@ -407,7 +414,11 @@ class _HomePageState extends State<HomePage> {
       child: ElevatedButton(
         onPressed: () {
           Navigator.pushNamed(context, "/releaseItems",
-              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"});
+              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"}).then((value) {
+            context
+                .read<HomeBloc>()
+                .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+          });
         },
         child: Text("ปล่อยของ"),
         style: ButtonStyle(

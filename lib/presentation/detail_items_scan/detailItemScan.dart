@@ -136,7 +136,7 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
                         onPressed: () {
                           _showCustomDialog(context, detailData["hawb"], data.status, data.remark, data.imageUrl);
                         },
-                        icon: Icon(Icons.zoom_in),
+                        icon: Icon(Icons.warning, color: Colors.orange),
                       ),
                     SizedBox(height: 48)
                   ],

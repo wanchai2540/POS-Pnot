@@ -11,7 +11,7 @@ class SplashPage extends StatefulWidget {
 class _SplashPageState extends State<SplashPage> {
   @override
   void didChangeDependencies() {
-    Future.delayed(Duration(seconds: 2, milliseconds: 500), () async{
+    Future.delayed(Duration(seconds: 2, milliseconds: 500), () async {
       await checkLogin() == false
           ? Navigator.pushReplacementNamed(context, "/login")
           : Navigator.pushReplacementNamed(context, "/home");
@@ -33,6 +33,13 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.blueGrey,
+      child: Center(
+        child: Image.asset(
+          "assets/icon/logo-splash.png",
+          width: 250,
+          height: 250,
+        ),
+      ),
     );
   }
 }

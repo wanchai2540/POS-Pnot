@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_unnecessary_containers
+// ignore_for_file: avoid_unnecessary_containers, use_build_context_synchronously
 
 import 'dart:collection';
 import 'dart:io';
@@ -14,6 +14,8 @@ import 'package:pos/data/models/scan_listener_model.dart';
 import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 
 typedef MenuEntry = DropdownMenuEntry<String>;
+
+enum TypeDialogScanItems { dialog1, dialog2, dialog3, dialog4, dialog5 }
 
 class ScanFindItemsPage extends StatefulWidget {
   ScanFindItemsPage({super.key});
@@ -320,7 +322,21 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   }
 
   showScanDialog(ScanListenerModel model,
-      {int? statusCode, bool isDialog3 = false, String? nameReportBtn, String? remarkSuccess, String? remarkFailed}) {
+      {int? statusCode,
+      TypeDialogScanItems? typeDialogScan,
+      String? nameReportBtn,
+      String? remarkSuccess,
+      String? remarkFailed}) {
+    Color? colorTypeBadge = Colors.yellow[200];
+    Color? isOtherTypeBadge = Colors.black;
+
+    if (model.productType == "G") {
+      colorTypeBadge = Colors.green;
+      isOtherTypeBadge = Colors.white;
+    } else if (model.productType == "R") {
+      colorTypeBadge = Colors.red;
+      isOtherTypeBadge = Colors.white;
+    }
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -332,10 +348,11 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
               child: nameReportBtn != null
                   ? ElevatedButton(
                       onPressed: () async {
-                        if (statusCode == 200) {
+                        if (typeDialogScan == TypeDialogScanItems.dialog5 ||
+                            typeDialogScan == TypeDialogScanItems.dialog4) {
                           Navigator.pop(context);
                           await showConfirmFindItemDialog(model.uuid);
-                        } else if (statusCode == 400 && isDialog3) {
+                        } else if (statusCode == 400 && typeDialogScan == TypeDialogScanItems.dialog3) {
                           Navigator.pop(context);
                           showConfirmRepackDialog(model.uuid);
                         }
@@ -349,7 +366,10 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
             child: Column(
               children: [
                 Text("HAWB: ${model.hawb}"),
-                Text("Type: ${model.productType}"),
+                if (model.productType == "G" || model.productType == "R")
+                  customBadgeSpecial(model.productType)
+                else
+                  customTypeBadge(model.productType),
                 Text("Pick Up: ${model.pickupBy}"),
                 Text("สถานะล่าสุด: ${model.lastStatus}"),
                 SizedBox(height: 30),
@@ -384,6 +404,57 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
           ],
         );
       },
+    );
+  }
+
+  Widget customBadgeSpecial(String productType) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Type:  "),
+        Container(
+          width: 25,
+          height: 25,
+          decoration: BoxDecoration(
+            color: productType == "G" ? Colors.green : Colors.red,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              productType,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget customTypeBadge(String productType) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Type:  "),
+        Container(
+          width: 20,
+          height: 25,
+          decoration: BoxDecoration(color: Colors.yellow),
+          child: Center(
+            child: Text(
+              productType,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 
@@ -532,6 +603,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
 
     return await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: RichText(
@@ -635,7 +707,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     style: TextButton.styleFrom(
                       textStyle: Theme.of(context).textTheme.labelLarge,
                     ),
-                    child: const Text('ออก'),
+                    child: const Text('ยกเลิก'),
                     onPressed: () {
                       setState(() {
                         _imageReport.value = null;
@@ -661,29 +733,14 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                               setState(() {
                                 _imageReport.value = null;
                               });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('แจ้งปัญหาสำเร็จ'),
-                                  duration: Duration(seconds: 3),
-                                ),
-                              );
+                              snackBarUtil('แจ้งปัญหาสำเร็จ');
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
-                                  duration: Duration(seconds: 3),
-                                ),
-                              );
+                              snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                             }
                             context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                             Navigator.of(context).pop();
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา'),
-                                duration: Duration(seconds: 3),
-                              ),
-                            );
+                            snackBarUtil('กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา');
                           }
                         } else {
                           if (_imageReport.value != null) {
@@ -697,19 +754,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                             setState(() {
                               _imageReport.value = null;
                             });
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('แจ้งปัญหาสำเร็จ'),
-                                duration: Duration(seconds: 3),
-                              ),
-                            );
+                            snackBarUtil('แจ้งปัญหาสำเร็จ');
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
-                                duration: Duration(seconds: 3),
-                              ),
-                            );
+                            snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                           }
                           context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                           Navigator.of(context).pop();
@@ -723,6 +770,15 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
           ],
         );
       },
+    );
+  }
+
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBarUtil(String title) {
+    return ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(title),
+        duration: Duration(seconds: 3),
+      ),
     );
   }
 
@@ -749,7 +805,12 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
       if (dataGetScan["code"] == 200) {
         if (data["appCode"] == "01" && data["statusCode"] == "03") {
           // Dialog 5
-          showScanDialog(result, statusCode: 200, nameReportBtn: "แจ้งปัญหา");
+          showScanDialog(
+            result,
+            statusCode: 200,
+            nameReportBtn: "แจ้งปัญหา",
+            typeDialogScan: TypeDialogScanItems.dialog5,
+          );
         }
       } else if (dataGetScan["code"] == 400) {
         if (data["appCode"] == "03") {
@@ -762,13 +823,18 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
           // Dialog 3
           showScanDialog(result,
               statusCode: 400,
-              isDialog3: true,
+              typeDialogScan: TypeDialogScanItems.dialog3,
               nameReportBtn: "ยืนยัน\nRepack",
               remarkFailed: "เป็นงาน DMC คุณต้องการยืนยันการ\nRepack(หากยืนยันบังคับถ่ายรูป)");
         } else if (data["appCode"] == "02" &&
             (data["statusCode"] == "03" || data["statusCode"] == "06" || data["statusCode"] == "08")) {
           // Dialog 4
-          showScanDialog(result, statusCode: 400, remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว");
+          showScanDialog(
+            result,
+            statusCode: 400,
+            remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว",
+            typeDialogScan: TypeDialogScanItems.dialog4,
+          );
         }
       }
     } catch (e) {

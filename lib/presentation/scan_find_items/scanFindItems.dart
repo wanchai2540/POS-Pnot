@@ -684,7 +684,12 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                   child: const Text('ถ่ายรูป'),
                   onPressed: () async {
                     final ImagePicker picker = ImagePicker();
-                    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+                    final XFile? image = await picker.pickImage(
+                      source: ImageSource.camera,
+                      maxWidth: 800,
+                      maxHeight: 800,
+                      imageQuality: 100,
+                    );
                     if (image != null) {
                       setState(() {
                         _imageReport.value = File(image.path);

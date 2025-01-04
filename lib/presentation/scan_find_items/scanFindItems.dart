@@ -511,7 +511,12 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                   child: const Text('ถ่ายรูป'),
                   onPressed: () async {
                     final ImagePicker picker = ImagePicker();
-                    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+                    final XFile? image = await picker.pickImage(
+                      source: ImageSource.camera,
+                      maxWidth: 1080,
+                      maxHeight: 1080,
+                      imageQuality: 100,
+                    );
                     if (image != null) {
                       setState(() {
                         _imageRepack.value = File(image.path);
@@ -524,7 +529,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     style: TextButton.styleFrom(
                       textStyle: Theme.of(context).textTheme.labelLarge,
                     ),
-                    child: const Text('ออก'),
+                    child: const Text('ยกเลิก'),
                     onPressed: () {
                       setState(() {
                         _imageReport.value = null;

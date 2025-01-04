@@ -686,8 +686,8 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     final ImagePicker picker = ImagePicker();
                     final XFile? image = await picker.pickImage(
                       source: ImageSource.camera,
-                      maxWidth: 800,
-                      maxHeight: 800,
+                      maxWidth: 1080,
+                      maxHeight: 1080,
                       imageQuality: 100,
                     );
                     if (image != null) {

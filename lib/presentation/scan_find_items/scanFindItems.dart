@@ -327,16 +327,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
       String? nameReportBtn,
       String? remarkSuccess,
       String? remarkFailed}) {
-    Color? colorTypeBadge = Colors.yellow[200];
-    Color? isOtherTypeBadge = Colors.black;
-
-    if (model.productType == "G") {
-      colorTypeBadge = Colors.green;
-      isOtherTypeBadge = Colors.white;
-    } else if (model.productType == "R") {
-      colorTypeBadge = Colors.red;
-      isOtherTypeBadge = Colors.white;
-    }
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -833,6 +823,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
             result,
             statusCode: 400,
             remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว",
+            nameReportBtn: "แจ้งปัญหา",
             typeDialogScan: TypeDialogScanItems.dialog4,
           );
         }

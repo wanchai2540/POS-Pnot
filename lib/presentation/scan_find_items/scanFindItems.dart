@@ -114,19 +114,26 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                   },
                   dropdownMenuEntries: menuEntries,
                 ),
-                Visibility(
-                  visible: true,
-                  child: TextField(
-                    controller: _textEditing,
-                    onChanged: (value) {
-                      _onScan(date: datePicked, hawb: value);
-                    },
-                    keyboardType: TextInputType.none,
-                    focusNode: _focusBarcodeField,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("HAWB ล่าสุด : "),
+                    Container(
+                      width: MediaQuery.of(context).size.height * 0.3,
+                      child: TextField(
+                        controller: _textEditing,
+                        onChanged: (value) {
+                          _onScan(date: datePicked, hawb: value);
+                        },
+                        keyboardType: TextInputType.none,
+                        focusNode: _focusBarcodeField,
+                        // decoration: InputDecoration(
+                        //   border: OutlineInputBorder(),
+                        // ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
                 SizedBox(height: 20),
                 BlocBuilder<ScanFindItemsPageBloc, ScanPageBlocState>(

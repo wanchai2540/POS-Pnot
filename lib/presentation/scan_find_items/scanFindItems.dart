@@ -67,6 +67,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue[100],
         title: Text("สแกนหาของ"),
       ),
       backgroundColor: Colors.blue[100],
@@ -114,20 +115,17 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                   dropdownMenuEntries: menuEntries,
                 ),
                 Visibility(
-                  visible: false,
+                  visible: true,
                   child: TextField(
                     controller: _textEditing,
-                    focusNode: _focusBarcodeField,
+                    onChanged: (value) {
+                      _onScan(date: datePicked, hawb: value);
+                    },
                     keyboardType: TextInputType.none,
+                    focusNode: _focusBarcodeField,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                     ),
-                    onChanged: (value) {
-                      if (value != "") {
-                        _onScan(date: datePicked, hawb: value);
-                        _textEditing.text = "";
-                      }
-                    },
                   ),
                 ),
                 SizedBox(height: 20),
@@ -342,7 +340,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                 _isShowDialog = false;
                 Navigator.of(context).pop();
-                FocusScope.of(context).requestFocus(_focusBarcodeField);
               },
             ),
           ],
@@ -425,7 +422,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                 _isShowDialog = false;
                 Navigator.of(context).pop();
-                FocusScope.of(context).requestFocus(_focusBarcodeField);
               },
             ),
           ],
@@ -573,7 +569,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                       });
                       context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                       Navigator.of(context).pop();
-                      FocusScope.of(context).requestFocus(_focusBarcodeField);
                     },
                   ),
                   TextButton(
@@ -605,7 +600,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                         });
                         context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                         Navigator.of(context).pop();
-                        FocusScope.of(context).requestFocus(_focusBarcodeField);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -753,7 +747,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                       });
                       context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                       Navigator.of(context).pop();
-                      FocusScope.of(context).requestFocus(_focusBarcodeField);
                     },
                   ),
                   TextButton(
@@ -779,7 +772,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                             }
                             context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                             Navigator.of(context).pop();
-                            FocusScope.of(context).requestFocus(_focusBarcodeField);
                           } else {
                             snackBarUtil('กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา');
                           }
@@ -801,7 +793,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                           }
                           context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                           Navigator.of(context).pop();
-                          FocusScope.of(context).requestFocus(_focusBarcodeField);
                         }
                       }
                     },
@@ -845,7 +836,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     try {
       ScanListenerModel result = ScanListenerModel.fromJson(data);
       if (dataGetScan["code"] == 200) {
-        _focusBarcodeField.unfocus();
         if (data["appCode"] == "01" && data["statusCode"] == "03") {
           // Dialog 5
           showScanDialog(
@@ -856,7 +846,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
           );
         }
       } else if (dataGetScan["code"] == 400) {
-        _focusBarcodeField.unfocus();
         if (data["appCode"] == "03") {
           // Dialog 1
           showScanNoHawbDialog();
@@ -892,7 +881,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
       setState(() {
         if (event != null) {
           FocusScope.of(context).requestFocus(_focusBarcodeField);
-          _onScan(date: datePicked, hawb: event);
         }
       });
     };

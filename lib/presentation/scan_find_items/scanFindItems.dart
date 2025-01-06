@@ -119,7 +119,8 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text("HAWB ล่าสุด : "),
-                    Container(
+                    SizedBox(width: 10),
+                    SizedBox(
                       width: MediaQuery.of(context).size.height * 0.3,
                       child: TextField(
                         controller: _textEditing,
@@ -128,9 +129,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                         },
                         keyboardType: TextInputType.none,
                         focusNode: _focusBarcodeField,
-                        // decoration: InputDecoration(
-                        //   border: OutlineInputBorder(),
-                        // ),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],

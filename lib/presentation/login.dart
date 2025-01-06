@@ -19,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFFFFAEC),
       body: SizedBox(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 50),
@@ -28,7 +29,11 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 2,
               children: [
-                Text("Login", style: TextStyle(fontSize: 30)),
+                Image.asset(
+                  "assets/icon/logo-splash.png",
+                  width: 150,
+                  height: 150,
+                ),
                 SizedBox(height: 30),
                 TextFormField(
                   controller: _username,
@@ -62,6 +67,11 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 SizedBox(height: 10),
                 ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll(
+                      Color(0xFFF5ECD5),
+                    ),
+                  ),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       FocusScope.of(context).unfocus();

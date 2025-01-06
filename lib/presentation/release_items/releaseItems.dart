@@ -52,14 +52,12 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue[100],
+        backgroundColor: Color(0xFFF5ECD5),
         title: Text("ปล่อยของ"),
       ),
-      backgroundColor: Colors.blue[100],
       body: SafeArea(
         child: SingleChildScrollView(
           child: Container(
-            color: Colors.blue[100],
             child: Column(
               children: [
                 Center(

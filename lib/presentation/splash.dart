@@ -32,7 +32,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.blueGrey,
+      color: Color(0xFFFFFAEC),
       child: Center(
         child: Image.asset(
           "assets/icon/logo-splash.png",

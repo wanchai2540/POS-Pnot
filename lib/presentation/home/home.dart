@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFFFFAEC),
       body: SafeArea(
         child: SizedBox(
           child: Center(
@@ -52,6 +53,7 @@ class _HomePageState extends State<HomePage> {
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 18,
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(backgroundColor: Colors.greenAccent),
@@ -59,7 +61,10 @@ class _HomePageState extends State<HomePage> {
                             SizedBox(width: 20),
                             Text(
                               "${selectedDate.toLocal()}".split(' ')[0],
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
                             ),
                           ],
                         ),
@@ -85,7 +90,7 @@ class _HomePageState extends State<HomePage> {
                             Container(
                               height: MediaQuery.of(context).size.height * 0.06,
                               alignment: Alignment.center,
-                              child: Text("Total: ${model.totalPickup.toString()}"),
+                              child: Text("Total: ${model.totalPickup.toString()}", style: TextStyle(fontSize: 20)),
                             ),
                             _colorItems(model.countGreen, model.countRed, model.countOther),
                             Container(
@@ -99,7 +104,7 @@ class _HomePageState extends State<HomePage> {
                             Container(
                               height: MediaQuery.of(context).size.height * 0.06,
                               alignment: Alignment.center,
-                              child: Text("Pick Up"),
+                              child: Text("Pick Up", style: TextStyle(fontSize: 20)),
                             ),
                             _releaseItemss(model.countPickupByUps, model.countPickupBySkl, model.countPickupByL),
                             Container(
@@ -205,22 +210,15 @@ class _HomePageState extends State<HomePage> {
       children: [
         Text(
           "$title (",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         Text(
           "$count",
-          style: TextStyle(
-            color: Colors.red,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20),
         ),
         Text(
           ")",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
       ],
     );
@@ -237,12 +235,14 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(
                 color: Colors.green,
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
             Text(
               ": $green",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
           ],
@@ -254,12 +254,14 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(
                 color: Colors.red,
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
             Text(
               ": $red",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
           ],
@@ -270,12 +272,14 @@ class _HomePageState extends State<HomePage> {
               "Other",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
             Text(
               ": $other",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
           ],
@@ -294,12 +298,14 @@ class _HomePageState extends State<HomePage> {
               "UPS",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
             Text(
               ": $ups",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
           ],
@@ -310,12 +316,14 @@ class _HomePageState extends State<HomePage> {
               "SKL",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
             Text(
               ": $skl",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
           ],
@@ -326,12 +334,14 @@ class _HomePageState extends State<HomePage> {
               "L",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
             Text(
               ": $l",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
           ],
@@ -352,7 +362,7 @@ class _HomePageState extends State<HomePage> {
                 .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
           });
         },
-        child: Text("สแกนหาของ"),
+        child: Text("สแกนหาของ", style: TextStyle(color: Colors.black, fontSize: 18)),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.lightGreenAccent),
           textStyle: WidgetStateProperty.all(
@@ -386,7 +396,7 @@ class _HomePageState extends State<HomePage> {
                 .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
           });
         },
-        child: Text("สแกนพร้อมปล่อยของ"),
+        child: Text("สแกนพร้อมปล่อยของ", style: TextStyle(color: Colors.black, fontSize: 18)),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.lightGreenAccent),
           textStyle: WidgetStateProperty.all(
@@ -420,7 +430,7 @@ class _HomePageState extends State<HomePage> {
                 .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
           });
         },
-        child: Text("ปล่อยของ"),
+        child: Text("ปล่อยของ", style: TextStyle(color: Colors.black, fontSize: 18)),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.lightGreenAccent),
           textStyle: WidgetStateProperty.all(

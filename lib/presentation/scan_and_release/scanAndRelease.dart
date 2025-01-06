@@ -51,14 +51,12 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue[100],
+        backgroundColor: Color(0xFFF5ECD5),
         title: Text("สแกนพร้อมปล่อยของ"),
       ),
-      backgroundColor: Colors.blue[100],
       body: SafeArea(
         child: SingleChildScrollView(
           child: Container(
-            color: Colors.blue[100],
             child: Column(
               children: [
                 Center(

@@ -41,6 +41,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   bool _isShowDialog = false;
   FocusNode _focusBarcodeField = FocusNode();
   TextEditingController _textEditing = TextEditingController();
+  bool _isCanScan = true;
 
   @override
   void initState() {
@@ -67,14 +68,13 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue[100],
+        backgroundColor: Color(0xFFF5ECD5),
         title: Text("สแกนหาของ"),
       ),
-      backgroundColor: Colors.blue[100],
+      backgroundColor: Color(0xFFFFFAEC),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Container(
-            color: Colors.blue[100],
             child: Column(
               children: [
                 Center(
@@ -125,6 +125,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                       child: TextField(
                         controller: _textEditing,
                         onChanged: (value) {
+                          _focusBarcodeField.unfocus();
                           _onScan(date: datePicked, hawb: value);
                         },
                         keyboardType: TextInputType.none,
@@ -132,6 +133,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
+                        // decoration: InputDecoration(
+                        //   hintText: "ยังไม่มีการสแกน",
+                        // ),
                       ),
                     ),
                   ],
@@ -256,6 +260,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
 
   Widget floadting() {
     return FloatingActionButton(
+      backgroundColor: Color(0xFFF5ECD5),
       onPressed: () {
         showModalBottomSheet(
           context: context,
@@ -295,6 +300,11 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(
+                        Color(0xFFF5ECD5),
+                      ),
+                    ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _onScan(date: datePicked, hawb: _controller.text);
@@ -302,7 +312,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                       }
                       _controller.text = "";
                     },
-                    child: Text('Submit'),
+                    child: Text('Submit', style: TextStyle(color: Colors.black)),
                   ),
                   SizedBox(height: 20),
                 ],
@@ -347,6 +357,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
               onPressed: () {
                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                 _isShowDialog = false;
+                setState(() {
+                  _isCanScan = true;
+                });
                 Navigator.of(context).pop();
               },
             ),
@@ -429,6 +442,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
               onPressed: () {
                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                 _isShowDialog = false;
+                setState(() {
+                  _isCanScan = true;
+                });
                 Navigator.of(context).pop();
               },
             ),
@@ -574,6 +590,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     onPressed: () {
                       setState(() {
                         _imageReport.value = null;
+                        _isCanScan = true;
                       });
                       context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                       Navigator.of(context).pop();
@@ -607,6 +624,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                           }
                         });
                         context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                        setState(() {
+                          _isCanScan = true;
+                        });
                         Navigator.of(context).pop();
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -754,6 +774,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                         _imageReport.value = null;
                       });
                       context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                      setState(() {
+                        _isCanScan = true;
+                      });
                       Navigator.of(context).pop();
                     },
                   ),
@@ -779,6 +802,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                               snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                             }
                             context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                            setState(() {
+                              _isCanScan = true;
+                            });
                             Navigator.of(context).pop();
                           } else {
                             snackBarUtil('กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา');
@@ -800,6 +826,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                             snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                           }
                           context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                          setState(() {
+                            _isCanScan = true;
+                          });
                           Navigator.of(context).pop();
                         }
                       }
@@ -846,6 +875,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
       if (dataGetScan["code"] == 200) {
         if (data["appCode"] == "01" && data["statusCode"] == "03") {
           // Dialog 5
+          _isCanScan = false;
           showScanDialog(
             result,
             statusCode: 200,
@@ -856,12 +886,15 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
       } else if (dataGetScan["code"] == 400) {
         if (data["appCode"] == "03") {
           // Dialog 1
+          _isCanScan = false;
           showScanNoHawbDialog();
         } else if (data["appCode"] == "02" && (data["statusCode"] == "04" || data["statusCode"] == "05")) {
           // Dialog 2
+          _isCanScan = false;
           showScanDialog(result, statusCode: 400, remarkFailed: "สถานะไม่ถูกต้อง");
         } else if (data["appCode"] == "02" && (data["statusCode"] == "08" && data["subStatusCode"] == "03")) {
           // Dialog 3
+          _isCanScan = false;
           showScanDialog(result,
               statusCode: 400,
               typeDialogScan: TypeDialogScanItems.dialog3,
@@ -870,6 +903,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
         } else if (data["appCode"] == "02" &&
             (data["statusCode"] == "03" || data["statusCode"] == "06" || data["statusCode"] == "08")) {
           // Dialog 4
+          _isCanScan = false;
           showScanDialog(
             result,
             statusCode: 400,
@@ -887,8 +921,11 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   void _onScannListener() {
     CustomButtonListener.onButtonPressed = (event) {
       setState(() {
-        if (event != null) {
-          FocusScope.of(context).requestFocus(_focusBarcodeField);
+        if (_isCanScan) {
+          if (event != null) {
+            _textEditing.text = "";
+            FocusScope.of(context).requestFocus(_focusBarcodeField);
+          }
         }
       });
     };

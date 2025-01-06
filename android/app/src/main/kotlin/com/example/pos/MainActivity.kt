@@ -17,19 +17,17 @@ class MainActivity: FlutterActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (event != null) {
-            sendToFlutter("scan")
-            
-            val scanCode = event.scanCode;
-            val unicodeChar = event.unicodeChar;
-
-            if(keyCode == KeyEvent.KEYCODE_ENTER){
-                val scannedData = scanBuffer.toString()
-                scanBuffer.clear();
-                sendToFlutter(scannedData);
-            }else if(unicodeChar > 0){
-                scanBuffer.append(unicodeChar.toChar())
-            }
-
+            val scannedData = scanBuffer.toString()
+            scanBuffer.clear();
+            sendToFlutter(scannedData);
+            // val unicodeChar = event.unicodeChar;
+            // if(keyCode == KeyEvent.KEYCODE_ENTER){
+            //     val scannedData = scanBuffer.toString()
+            //     scanBuffer.clear();
+            //     sendToFlutter(scannedData);
+            // }else if(unicodeChar > 0){
+            //     scanBuffer.append(unicodeChar.toChar())
+            // }
         }
         return super.onKeyDown(keyCode, event)
     }

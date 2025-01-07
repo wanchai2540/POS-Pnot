@@ -355,11 +355,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
               ),
               child: const Text('สแกนต่อ'),
               onPressed: () {
-                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                 _isShowDialog = false;
-                setState(() {
-                  _isCanScan = true;
-                });
+                _isCanScan = true;
+                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                 Navigator.of(context).pop();
               },
             ),
@@ -393,9 +391,11 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                       onPressed: () async {
                         if (typeDialogScan == TypeDialogScanItems.dialog5 ||
                             typeDialogScan == TypeDialogScanItems.dialog4) {
+                          _isShowDialog = false;
                           Navigator.pop(context);
                           await showConfirmFindItemDialog(model.uuid);
                         } else if (statusCode == 400 && typeDialogScan == TypeDialogScanItems.dialog3) {
+                          _isShowDialog = false;
                           Navigator.pop(context);
                           showConfirmRepackDialog(model.uuid);
                         }
@@ -440,11 +440,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
               ),
               child: const Text('สแกนต่อ'),
               onPressed: () {
-                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                 _isShowDialog = false;
-                setState(() {
-                  _isCanScan = true;
-                });
+                _isCanScan = true;
+                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                 Navigator.of(context).pop();
               },
             ),
@@ -505,9 +503,14 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     );
   }
 
-  showConfirmRepackDialog(String uuid) async {
+  Future<void> showConfirmRepackDialog(String uuid) async {
     _imageRepack.value = null;
 
+    if (_isShowDialog) {
+      Navigator.of(context).pop();
+      _isShowDialog = false;
+    }
+    _isShowDialog = true;
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -590,8 +593,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     onPressed: () {
                       setState(() {
                         _imageReport.value = null;
-                        _isCanScan = true;
                       });
+                      _isCanScan = true;
+                      _isShowDialog = false;
                       context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                       Navigator.of(context).pop();
                     },
@@ -623,10 +627,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                             );
                           }
                         });
+                        _isCanScan = true;
+                        _isShowDialog = false;
                         context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                        setState(() {
-                          _isCanScan = true;
-                        });
                         Navigator.of(context).pop();
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -657,6 +660,11 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
         .map((item) => DropdownMenuEntry<String>(label: item['text'], value: item['value']))
         .toList();
 
+    if (_isShowDialog) {
+      Navigator.of(context).pop();
+      _isShowDialog = false;
+    }
+    _isShowDialog = true;
     return await showDialog(
       context: context,
       barrierDismissible: false,
@@ -770,13 +778,13 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     ),
                     child: const Text('ยกเลิก'),
                     onPressed: () {
-                      setState(() {
-                        _imageReport.value = null;
-                      });
+                      if (_imageReport.value != null) {
+                        setState(() {
+                          _imageReport.value = null;
+                        });
+                      }
+                      _isCanScan = true;
                       context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                      setState(() {
-                        _isCanScan = true;
-                      });
                       Navigator.of(context).pop();
                     },
                   ),
@@ -801,10 +809,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                             } else {
                               snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                             }
+                            _isShowDialog = false;
+                            _isCanScan = true;
                             context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                            setState(() {
-                              _isCanScan = true;
-                            });
                             Navigator.of(context).pop();
                           } else {
                             snackBarUtil('กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา');
@@ -825,10 +832,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                           } else {
                             snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                           }
+                          _isShowDialog = false;
+                          _isCanScan = true;
                           context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                          setState(() {
-                            _isCanScan = true;
-                          });
                           Navigator.of(context).pop();
                         }
                       }

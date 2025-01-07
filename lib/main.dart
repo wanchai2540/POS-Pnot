@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pos/button_listener.dart';
 import 'package:pos/presentation/detail_items_scan/bloc/detail_item_scan_bloc.dart';
@@ -8,7 +9,10 @@ import 'package:pos/route.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  CustomButtonListener.initialize();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(const MyApp());
 }
 

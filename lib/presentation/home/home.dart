@@ -7,6 +7,8 @@ import 'package:pos/data/models/home_model.dart';
 import 'package:pos/presentation/home/bloc/home_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../chum.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -56,7 +58,8 @@ class _HomePageState extends State<HomePage> {
                                   fontSize: 18,
                                 ),
                               ),
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.greenAccent),
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.greenAccent),
                             ),
                             SizedBox(width: 20),
                             Text(
@@ -90,9 +93,12 @@ class _HomePageState extends State<HomePage> {
                             Container(
                               height: MediaQuery.of(context).size.height * 0.06,
                               alignment: Alignment.center,
-                              child: Text("Total: ${model.totalPickup.toString()}", style: TextStyle(fontSize: 20)),
+                              child: Text(
+                                  "Total: ${model.totalPickup.toString()}",
+                                  style: TextStyle(fontSize: 20)),
                             ),
-                            _colorItems(model.countGreen, model.countRed, model.countOther),
+                            _colorItems(model.countGreen, model.countRed,
+                                model.countOther),
                             Container(
                               height: MediaQuery.of(context).size.height * 0.06,
                               alignment: Alignment.center,
@@ -104,9 +110,11 @@ class _HomePageState extends State<HomePage> {
                             Container(
                               height: MediaQuery.of(context).size.height * 0.06,
                               alignment: Alignment.center,
-                              child: Text("Pick Up", style: TextStyle(fontSize: 20)),
+                              child: Text("Pick Up",
+                                  style: TextStyle(fontSize: 20)),
                             ),
-                            _releaseItemss(model.countPickupByUps, model.countPickupBySkl, model.countPickupByL),
+                            _releaseItemss(model.countPickupByUps,
+                                model.countPickupBySkl, model.countPickupByL),
                             Container(
                               height: MediaQuery.of(context).size.height * 0.06,
                               alignment: Alignment.center,
@@ -116,7 +124,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             _countStatusText("เจอของ", model.scannedPickup),
-                            _countStatusText("ของพร้อมปล่อย", model.pendingReleasePickup),
+                            _countStatusText(
+                                "ของพร้อมปล่อย", model.pendingReleasePickup),
                             _countStatusText("ปล่อยของ", model.releasePickup),
                             _countStatusText("พบปัญหา", model.problemPickup),
                             _countStatusText("อื้นๆ", model.otherPickup),
@@ -200,7 +209,8 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         selectedDate = picked;
       });
-      context.read<HomeBloc>().add(HomeLoadingEvent(date: "${picked.year}-${picked.month}-${picked.day}"));
+      context.read<HomeBloc>().add(HomeLoadingEvent(
+          date: "${picked.year}-${picked.month}-${picked.day}"));
     }
   }
 
@@ -214,7 +224,8 @@ class _HomePageState extends State<HomePage> {
         ),
         Text(
           "$count",
-          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20),
+          style: TextStyle(
+              color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20),
         ),
         Text(
           ")",
@@ -355,14 +366,17 @@ class _HomePageState extends State<HomePage> {
       width: MediaQuery.of(context).size.width,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/scanFindItems",
-              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"}).then((value) {
-            context
-                .read<HomeBloc>()
-                .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+          Navigator.pushNamed(context, "/scanFindItems", arguments: {
+            "datePick":
+                "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"
+          }).then((value) {
+            context.read<HomeBloc>().add(HomeLoadingEvent(
+                date:
+                    "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
           });
         },
-        child: Text("สแกนหาของ", style: TextStyle(color: Colors.black, fontSize: 18)),
+        child: Text("สแกนหาของ",
+            style: TextStyle(color: Colors.black, fontSize: 18)),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.lightGreenAccent),
           textStyle: WidgetStateProperty.all(
@@ -389,14 +403,17 @@ class _HomePageState extends State<HomePage> {
       width: MediaQuery.of(context).size.width,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/scanAndRelease",
-              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"}).then((value) {
-            context
-                .read<HomeBloc>()
-                .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+          Navigator.pushNamed(context, "/scanAndRelease", arguments: {
+            "datePick":
+                "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"
+          }).then((value) {
+            context.read<HomeBloc>().add(HomeLoadingEvent(
+                date:
+                    "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
           });
         },
-        child: Text("สแกนพร้อมปล่อยของ", style: TextStyle(color: Colors.black, fontSize: 18)),
+        child: Text("สแกนพร้อมปล่อยของ",
+            style: TextStyle(color: Colors.black, fontSize: 18)),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.lightGreenAccent),
           textStyle: WidgetStateProperty.all(
@@ -423,14 +440,17 @@ class _HomePageState extends State<HomePage> {
       width: MediaQuery.of(context).size.width,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/releaseItems",
-              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"}).then((value) {
-            context
-                .read<HomeBloc>()
-                .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+          Navigator.pushNamed(context, "/releaseItems", arguments: {
+            "datePick":
+                "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"
+          }).then((value) {
+            context.read<HomeBloc>().add(HomeLoadingEvent(
+                date:
+                    "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
           });
         },
-        child: Text("ปล่อยของ", style: TextStyle(color: Colors.black, fontSize: 18)),
+        child: Text("ปล่อยของ",
+            style: TextStyle(color: Colors.black, fontSize: 18)),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.lightGreenAccent),
           textStyle: WidgetStateProperty.all(
@@ -453,7 +473,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _startEventHome() {
-    String date = "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}";
+    String date =
+        "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}";
     context.read<HomeBloc>().add(HomeLoadingEvent(date: date));
   }
 }

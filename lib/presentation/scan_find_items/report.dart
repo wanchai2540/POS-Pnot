@@ -174,6 +174,7 @@ class _ReportPageState extends State<ReportPage> {
                         setState(() {
                           _imageReport.value = null;
                         });
+                        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                         Navigator.of(context).pop();
                       },
                     ),

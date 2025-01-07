@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pos/data/api/api.dart';
+import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 
 class RepackPage extends StatefulWidget {
   const RepackPage({super.key});
@@ -141,6 +142,7 @@ class _RepackPageState extends State<RepackPage> {
                       setState(() {
                         _imageRepack.value = null;
                       });
+                      context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                       Navigator.of(context).pop();
                     },
                   ),
@@ -158,6 +160,7 @@ class _RepackPageState extends State<RepackPage> {
                             snackBarUtil('แจ้งการ Repack ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                           }
                         });
+                        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                         Navigator.of(context).pop();
                       } else {
                         snackBarUtil('กรุณาถ่ายรูปเพื่อเปลี่ยนสถานะเป็น Repack');

@@ -105,32 +105,35 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     dropdownMenuEntries: menuEntries,
                   ),
                   SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("HAWB ล่าสุด : "),
-                      SizedBox(width: 10),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.height * 0.3,
-                        child: TextField(
-                          focusNode: _focusBarcodeField,
-                          controller: _textEditing,
-                          // onChanged: (value) {
-                          //   _onScan(context,
-                          //       date: datePicked, hawb: value.trim());
-                          // },
-                          onSubmitted: (String value) {
-                            _textEditing.text = value;
-                            _onScan(context, date: datePicked, hawb: value.trim());
-                          },
-                          
-                          // keyboardType: TextInputType.none,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("HAWB ที่สแกน : ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        SizedBox(width: 10),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.height * 0.27,
+                          child: TextField(
+                            focusNode: _focusBarcodeField,
+                            controller: _textEditing,
+                            // onChanged: (value) {
+                            //   _onScan(context,
+                            //       date: datePicked, hawb: value.trim());
+                            // },
+                            onSubmitted: (String value) {
+                              _textEditing.text = value;
+                              _onScan(context, date: datePicked, hawb: value.trim());
+                            },
+
+                            // keyboardType: TextInputType.none,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   SizedBox(height: 20),
                   BlocBuilder<ScanFindItemsPageBloc, ScanPageBlocState>(
@@ -143,7 +146,8 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                         return Center(child: Text("ไม่มีข้อมูล"));
                       }
                     },
-                  )
+                  ),
+                  SizedBox(height: 80),
                 ],
               ),
             ),
@@ -269,7 +273,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                           Navigator.pushNamed(context, "/detailItemScan",
                               arguments: {"uuid": data.uuid, "hawb": data.hawb});
                         },
-                        icon: Icon(Icons.zoom_in),
+                        icon: Image.asset("assets/images/file.png", width: 25, height: 25),
                       ),
                     ],
                   ),
@@ -294,7 +298,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
 
   Widget floadting(BuildContext ctx) {
     return FloatingActionButton(
-      backgroundColor: Color(0xFFF5ECD5),
       onPressed: () {
         showModalBottomSheet(
           context: context,
@@ -426,20 +429,14 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                             typeDialogScan == TypeDialogScanItems.dialog4) {
                           _isShowDialog = false;
                           Navigator.of(context).pop();
-                          Navigator.of(parentContext).pushNamed("/report",
-                              arguments: {
-                                "uuid": model.uuid,
-                                "datePicked": datePicked
-                              });
+                          Navigator.of(parentContext)
+                              .pushNamed("/report", arguments: {"uuid": model.uuid, "datePicked": datePicked});
                           // await showConfirmFindItemDialog(model.uuid);
                         } else if (statusCode == 400 && typeDialogScan == TypeDialogScanItems.dialog3) {
                           _isShowDialog = false;
                           Navigator.of(context).pop();
-                          Navigator.of(parentContext).pushNamed("/repack",
-                              arguments: {
-                                "uuid": model.uuid,
-                                "datePicked": datePicked
-                              });
+                          Navigator.of(parentContext)
+                              .pushNamed("/repack", arguments: {"uuid": model.uuid, "datePicked": datePicked});
                           // await showConfirmRepackDialog(model.uuid);
                         }
                       },
@@ -527,7 +524,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
       children: [
         Text("Type:  "),
         Container(
-          width: 20,
+          width: 30,
           height: 25,
           decoration: BoxDecoration(color: Colors.yellow),
           child: Center(

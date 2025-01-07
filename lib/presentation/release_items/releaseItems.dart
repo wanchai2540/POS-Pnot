@@ -34,9 +34,17 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   List<String> list = ["ทั้งหมด", "เจอของ", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
   final _formKey = GlobalKey<FormState>();
 
+  bool _isShowDialog = false;
+  final FocusNode _focusBarcodeField = FocusNode();
+  final TextEditingController _textEditing = TextEditingController();
+  final FocusNode _keyboardListenerFocusNode = FocusNode();
+
   @override
   void initState() {
+    CustomButtonListener.initialize();
+
     _initialValueListDropdown();
+    _onScannListener();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startEventTable();
     });
@@ -44,8 +52,11 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void dispose() {
+    CustomButtonListener.dispose();
+    _focusBarcodeField.dispose();
+    _keyboardListenerFocusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -56,66 +67,128 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
         title: Text("ปล่อยของ"),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            child: Column(
-              children: [
-                Center(
-                  child: Text(
-                    "งานของวันที่ ${datePicked}",
-                    style: TextStyle(fontSize: 25),
+        child: KeyboardListener(
+          focusNode: _keyboardListenerFocusNode,
+          autofocus: true,
+          onKeyEvent: (event) {
+            if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
+              // print('Enter key pressed!');
+            }
+          },
+          child: SingleChildScrollView(
+            child: Container(
+              child: Column(
+                children: [
+                  Center(
+                    child: Text(
+                      "งานของวันที่ ${datePicked}",
+                      style: TextStyle(fontSize: 25),
+                    ),
                   ),
-                ),
-                SizedBox(height: 20),
-                DropdownMenu<String>(
-                  initialSelection: list.first,
-                  onSelected: (String? value) {
-                    setState(() {
-                      switch (value) {
-                        case "ทั้งหมด":
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                        case "เจอของ":
-                          dropdownValue = "03";
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "03"));
-                        case "ของพร้อมปล่อย":
-                          dropdownValue = "04";
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "04"));
-                        case "ปล่อยของ":
-                          dropdownValue = "05";
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "05"));
-                        case "พบปัญหา":
-                          dropdownValue = "08";
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "08"));
-                        case "อื่นๆ":
-                          dropdownValue = "00";
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "00"));
-                          break;
-                        default:
+                  SizedBox(height: 20),
+                  DropdownMenu<String>(
+                    initialSelection: list.first,
+                    onSelected: (String? value) {
+                      setState(() {
+                        dropdownLabel = value!;
+                        _handleDropdownSelection(value);
+                      });
+                    },
+                    dropdownMenuEntries: menuEntries,
+                  ),
+                  SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("HAWB ที่สแกน : ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        SizedBox(width: 10),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.height * 0.27,
+                          child: TextField(
+                            focusNode: _focusBarcodeField,
+                            controller: _textEditing,
+                            // onChanged: (value) {
+                            //   _onScan(context,
+                            //       date: datePicked, hawb: value.trim());
+                            // },
+                            onSubmitted: (String value) {
+                              _textEditing.text = value;
+                              _onScan(date: datePicked, hawb: value.trim());
+                            },
+
+                            // keyboardType: TextInputType.none,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  BlocBuilder<ScanFindItemsPageBloc, ScanPageBlocState>(
+                    builder: (context, state) {
+                      if (state is ScanPageGetLoadingState) {
+                        return CircularProgressIndicator();
+                      } else if (state is ScanPageGetLoadedState) {
+                        return _tableListData(state.model);
+                      } else {
+                        return Center(child: Text("ไม่มีข้อมูล"));
                       }
-                      dropdownLabel = value!;
-                    });
-                  },
-                  dropdownMenuEntries: menuEntries,
-                ),
-                SizedBox(height: 20),
-                BlocBuilder<ScanFindItemsPageBloc, ScanPageBlocState>(
-                  builder: (context, state) {
-                    if (state is ScanPageGetLoadingState) {
-                      return CircularProgressIndicator();
-                    } else if (state is ScanPageGetLoadedState) {
-                      return _tableListData(state.model);
-                    } else {
-                      return Center(child: Text("ไม่มีข้อมูล"));
-                    }
-                  },
-                )
-              ],
+                    },
+                  ),
+                  SizedBox(height: 80),
+                ],
+              ),
             ),
           ),
         ),
       ),
       floatingActionButton: floadting(),
     );
+  }
+
+  void _handleDropdownSelection(String value) {
+    switch (value) {
+      case "ทั้งหมด":
+        context.read<ScanFindItemsPageBloc>().add(
+              ScanPageGetDataEvent(date: datePicked),
+            );
+        break;
+      case "เจอของ":
+        dropdownValue = "03";
+        context.read<ScanFindItemsPageBloc>().add(
+              ScanPageGetDataEvent(date: datePicked, type: "03"),
+            );
+        break;
+      case "ของพร้อมปล่อย":
+        dropdownValue = "04";
+        context.read<ScanFindItemsPageBloc>().add(
+              ScanPageGetDataEvent(date: datePicked, type: "04"),
+            );
+        break;
+      case "ปล่อยของ":
+        dropdownValue = "05";
+        context.read<ScanFindItemsPageBloc>().add(
+              ScanPageGetDataEvent(date: datePicked, type: "05"),
+            );
+        break;
+      case "พบปัญหา":
+        dropdownValue = "08";
+        context.read<ScanFindItemsPageBloc>().add(
+              ScanPageGetDataEvent(date: datePicked, type: "08"),
+            );
+        break;
+      case "อื่นๆ":
+        dropdownValue = "00";
+        context.read<ScanFindItemsPageBloc>().add(
+              ScanPageGetDataEvent(date: datePicked, type: "00"),
+            );
+        break;
+      default:
+    }
   }
 
   Widget _tableListData(List<ScanfinditemsModel> model) {
@@ -194,7 +267,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                           Navigator.pushNamed(context, "/detailItemScan",
                               arguments: {"uuid": data.uuid, "hawb": data.hawb});
                         },
-                        icon: Icon(Icons.zoom_in),
+                        icon: Image.asset("assets/images/file.png", width: 25, height: 25),
                       ),
                     ],
                   ),
@@ -279,6 +352,11 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   }
 
   showScanNoHawbDialog() {
+    if (_isShowDialog) {
+      Navigator.of(context).pop();
+      _isShowDialog = false;
+    }
+    _isShowDialog = true;
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -304,6 +382,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
               child: const Text('สแกนต่อ'),
               onPressed: () {
                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                _isShowDialog = false;
                 Navigator.of(context).pop();
               },
             ),
@@ -320,6 +399,11 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
       String? remarkSuccess,
       String? remarkFailed,
       bool isGreen = false}) {
+    if (_isShowDialog) {
+      Navigator.of(context).pop();
+      _isShowDialog = false;
+    }
+    _isShowDialog = true;
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -329,7 +413,10 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
             child: Column(
               children: [
                 Text("HAWB: ${model.hawb}"),
-                Text("Type: ${model.productType}"),
+                if (model.productType == "G" || model.productType == "R")
+                  customBadgeSpecial(model.productType)
+                else
+                  customTypeBadge(model.productType),
                 Text("Pick Up: ${model.pickupBy}"),
                 Text("สถานะล่าสุด: ${model.lastStatus}"),
                 SizedBox(height: 30),
@@ -357,12 +444,73 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
               child: const Text('สแกนต่อ'),
               onPressed: () {
                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                _isShowDialog = false;
                 Navigator.of(context).pop();
               },
             ),
           ],
         );
       },
+    );
+  }
+
+  Widget customBadgeSpecial(String productType) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Type:  "),
+        Container(
+          width: 30,
+          height: 25,
+          decoration: BoxDecoration(
+            color: productType == "G" ? Colors.green : Colors.red,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              productType,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget customTypeBadge(String productType) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Type:  "),
+        Container(
+          width: 25,
+          height: 25,
+          decoration: BoxDecoration(color: Colors.yellow),
+          child: Center(
+            child: Text(
+              productType,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBarUtil(String title) {
+    return ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(title),
+        duration: Duration(seconds: 3),
+      ),
     );
   }
 
@@ -411,5 +559,17 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
     } catch (e) {
       Exception(e);
     }
+  }
+
+  void _onScannListener() {
+    CustomButtonListener.onButtonPressed = (event) {
+      setState(() {
+        if (event != null) {
+          _textEditing.text = "";
+          _focusBarcodeField.requestFocus();
+          // FocusScope.of(context).requestFocus(_focusBarcodeField);
+        }
+      });
+    };
   }
 }

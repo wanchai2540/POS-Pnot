@@ -17,12 +17,6 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   @override
-  void didChangeDependencies() {
-    _username.text = "deft001";
-    _password.text = "test1234";
-    super.didChangeDependencies();
-  }
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFFFFAEC),

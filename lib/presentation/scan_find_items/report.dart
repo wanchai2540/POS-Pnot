@@ -150,11 +150,9 @@ class _ReportPageState extends State<ReportPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      textStyle: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    child: const Text('ถ่ายรูป', style: TextStyle(fontSize: 20)),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                    child: const Text('ถ่ายรูป', style: TextStyle(fontSize: 18)),
                     onPressed: () async {
                       final ImagePicker picker = ImagePicker();
                       final XFile? image = await picker.pickImage(
@@ -171,11 +169,9 @@ class _ReportPageState extends State<ReportPage> {
                     },
                   ),
                   Row(children: [
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        textStyle: Theme.of(context).textTheme.labelLarge,
-                      ),
-                      child: const Text('ยกเลิก', style: TextStyle(fontSize: 20)),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                      child: const Text('ยกเลิก', style: TextStyle(fontSize: 18)),
                       onPressed: () {
                         setState(() {
                           _imageReport.value = null;
@@ -183,11 +179,10 @@ class _ReportPageState extends State<ReportPage> {
                         Navigator.of(context).pop();
                       },
                     ),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        textStyle: Theme.of(context).textTheme.labelLarge,
-                      ),
-                      child: const Text('ยืนยัน', style: TextStyle(fontSize: 20)),
+                    SizedBox(width: 10),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                      child: const Text('ยืนยัน', style: TextStyle(fontSize: 18)),
                       onPressed: () async {
                         var res;
                         if (_reportFormKey.currentState!.validate()) {

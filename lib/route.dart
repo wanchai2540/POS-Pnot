@@ -4,6 +4,8 @@ import 'package:pos/presentation/home/home.dart';
 import 'package:pos/presentation/login.dart';
 import 'package:pos/presentation/release_items/releaseItems.dart';
 import 'package:pos/presentation/scan_and_release/scanAndRelease.dart';
+import 'package:pos/presentation/scan_find_items/repack.dart';
+import 'package:pos/presentation/scan_find_items/report.dart';
 import 'package:pos/presentation/scan_find_items/scanFindItems.dart';
 import 'package:pos/presentation/splash.dart';
 
@@ -56,6 +58,20 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
         settings: settings,
         pageBuilder: (context, animation, secondaryAnimation) {
           return ReleaseItemsPage();
+        },
+      );
+    case '/report':
+      return PageRouteBuilder(
+        settings: settings,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return ReportPage();
+        },
+      );
+    case '/repack':
+      return PageRouteBuilder(
+        settings: settings,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return RepackPage();
         },
       );
   }

@@ -37,9 +37,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   final _formKey = GlobalKey<FormState>();
   final _reportFormKey = GlobalKey<FormState>();
   bool _isShowDialog = false;
-  FocusNode _focusBarcodeField = FocusNode();
-  TextEditingController _textEditing = TextEditingController();
-  FocusNode _keyboardListenerFocusNode = FocusNode();
+  final FocusNode _focusBarcodeField = FocusNode();
+  final TextEditingController _textEditing = TextEditingController();
+  final FocusNode _keyboardListenerFocusNode = FocusNode();
   @override
   void initState() {
     CustomButtonListener.initialize();
@@ -51,12 +51,12 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     });
     super.initState();
   }
-
-  @override
-  void didChangeDependencies() {
-    _onScannListener();
-    super.didChangeDependencies();
-  }
+  //
+  // @override
+  // void didChangeDependencies() {
+  //   _onScannListener();
+  //   super.didChangeDependencies();
+  // }
 
   @override
   void dispose() {
@@ -89,7 +89,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                 children: [
                   Center(
                     child: Text(
-                      "งานของวันที่ ${datePicked}",
+                      "งานของวันที่ $datePicked",
                       style: TextStyle(fontSize: 25),
                     ),
                   ),
@@ -123,8 +123,8 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                             _textEditing.text = value;
                             _onScan(context, date: datePicked, hawb: value.trim());
                           },
-                          keyboardType: TextInputType.none,
-                          // focusNode: _focusBarcodeField,
+                          
+                          // keyboardType: TextInputType.none,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                           ),

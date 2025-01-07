@@ -22,6 +22,7 @@ class _ReportPageState extends State<ReportPage> {
   final ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
   String uuid = "";
   String datePicked = "";
+
   @override
   void initState() {
     super.initState();
@@ -40,13 +41,13 @@ class _ReportPageState extends State<ReportPage> {
 
   Future<void> getListResaon() async {
     Map<String, dynamic>? problemList = await DataService().getProblemList();
-    // List<DropdownMenuEntry<String>> dropReasonList = (result['data'] as List)
-    //     .map((item) => DropdownMenuEntry<String>(label: item['text'], value: item['value']))
-    //     .toList();
-    // setState(() {
-    //   result = problemList;
-    //   reasonList = dropReasonList;
-    // });
+    List<DropdownMenuEntry<String>> dropReasonList = (problemList['data'] as List)
+        .map((item) => DropdownMenuEntry<String>(label: item['text'], value: item['value']))
+        .toList();
+    setState(() {
+      result = problemList;
+      reasonList = dropReasonList;
+    });
   }
 
   @override
@@ -179,7 +180,6 @@ class _ReportPageState extends State<ReportPage> {
                         setState(() {
                           _imageReport.value = null;
                         });
-                        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                         Navigator.of(context).pop();
                       },
                     ),

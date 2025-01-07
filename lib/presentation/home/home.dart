@@ -7,8 +7,6 @@ import 'package:pos/data/models/home_model.dart';
 import 'package:pos/presentation/home/bloc/home_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../chum.dart';
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 

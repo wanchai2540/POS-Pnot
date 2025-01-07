@@ -2,7 +2,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-feature android:name="android.hardware.camera" android:required="true" />
     <application
-        android:label="pos"
+        android:label="KYM Scanner"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true"

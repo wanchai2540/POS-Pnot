@@ -126,7 +126,7 @@ class _HomePageState extends State<HomePage> {
                                 "ของพร้อมปล่อย", model.pendingReleasePickup),
                             _countStatusText("ปล่อยของ", model.releasePickup),
                             _countStatusText("พบปัญหา", model.problemPickup),
-                            _countStatusText("อื้นๆ", model.otherPickup),
+                            _countStatusText("อื่นๆ", model.otherPickup),
                           ],
                         );
                       }

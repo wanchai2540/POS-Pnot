@@ -27,6 +27,10 @@ flutter_launcher_icons:
   android: "ic_launcher"
   ios: true
   image_path: "assets/icon/playstore.png"
+  min_sdk_android: 24 # android min sdk min:16, default 21
+  adaptive_icon_background: "#ffffff" # You can use a color or image for the background
+  adaptive_icon_foreground: "assets/icon/playstore.png" # For adaptive icons on Android
+
 
 flutter:
   uses-material-design: true

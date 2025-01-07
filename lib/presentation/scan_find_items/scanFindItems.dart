@@ -43,6 +43,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   @override
   void initState() {
     _initialValueListDropdown();
+    _onScannListener();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startEventTable();
     });
@@ -57,6 +58,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
 
   @override
   void dispose() {
+    _focusBarcodeField.dispose();
     super.dispose();
   }
 
@@ -121,7 +123,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                       child: TextField(
                         controller: _textEditing,
                         onChanged: (value) {
-                          _onScan(date: datePicked, hawb: value);
+                          _onScan(context, date: datePicked, hawb: value);
                         },
                         keyboardType: TextInputType.none,
                         focusNode: _focusBarcodeField,
@@ -152,7 +154,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
           ),
         ),
       ),
-      floatingActionButton: floadting(),
+      floatingActionButton: floadting(context),
     );
   }
 
@@ -253,7 +255,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     return Colors.black;
   }
 
-  Widget floadting() {
+  Widget floadting(BuildContext ctx) {
     return FloatingActionButton(
       backgroundColor: Color(0xFFF5ECD5),
       onPressed: () {
@@ -302,7 +304,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        _onScan(date: datePicked, hawb: _controller.text);
+                        _onScan(ctx, date: datePicked, hawb: _controller.text);
                         Navigator.pop(context);
                       }
                       _controller.text = "";
@@ -361,7 +363,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     );
   }
 
-  showScanDialog(ScanListenerModel model,
+  showScanDialog(BuildContext parentContext, ScanListenerModel model,
       {int? statusCode,
       TypeDialogScanItems? typeDialogScan,
       String? nameReportBtn,
@@ -386,11 +388,13 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                         if (typeDialogScan == TypeDialogScanItems.dialog5 ||
                             typeDialogScan == TypeDialogScanItems.dialog4) {
                           _isShowDialog = false;
-                          Navigator.pop(context);
+                          Navigator.of(context).pop();
+                          // Navigator.of(parentContext)
+                          //     .pushNamed("/report", arguments: {"uuid": model.uuid, "datePicked": datePicked});
                           await showConfirmFindItemDialog(model.uuid);
                         } else if (statusCode == 400 && typeDialogScan == TypeDialogScanItems.dialog3) {
                           _isShowDialog = false;
-                          Navigator.pop(context);
+                          Navigator.of(context).pop();
                           await showConfirmRepackDialog(model.uuid);
                         }
                       },
@@ -585,7 +589,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     child: const Text('ยกเลิก'),
                     onPressed: () {
                       setState(() {
-                        _imageReport.value = null;
+                        _imageRepack.value = null;
                       });
                       context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                       _isShowDialog = false;
@@ -776,16 +780,15 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                                 image: _imageReport.value!, remark: _controllerRemark.text);
 
                             if (res == "success") {
-                              setState(() {
-                                _imageReport.value = null;
-                              });
                               snackBarUtil('แจ้งปัญหาสำเร็จ');
                             } else {
                               snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                             }
-                            context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                             _isShowDialog = false;
+                            _imageReport.value = null;
+                            context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                             Navigator.of(context).pop();
+                            FocusScope.of(context).requestFocus(_focusBarcodeField);
                           } else {
                             snackBarUtil('กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา');
                           }
@@ -798,16 +801,15 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                                 .sendReport(uuid, datePicked, reasonValue!, remark: _controllerRemark.text);
                           }
                           if (res == "success") {
-                            setState(() {
-                              _imageReport.value = null;
-                            });
                             snackBarUtil('แจ้งปัญหาสำเร็จ');
                           } else {
                             snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                           }
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                           _isShowDialog = false;
+                          _imageReport.value = null;
+                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                           Navigator.of(context).pop();
+                          FocusScope.of(context).requestFocus(_focusBarcodeField);
                         }
                       }
                     },
@@ -845,7 +847,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     );
   }
 
-  Future<void> _onScan({required String date, required String hawb}) async {
+  Future<void> _onScan(BuildContext parentContext, {required String date, required String hawb}) async {
     var dataGetScan = await DataService().getScanListener(date, hawb);
     var data = dataGetScan["body"];
     try {
@@ -854,6 +856,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
         if (data["appCode"] == "01" && data["statusCode"] == "03") {
           // Dialog 5
           showScanDialog(
+            parentContext,
             result,
             statusCode: 200,
             nameReportBtn: "แจ้งปัญหา",
@@ -866,10 +869,10 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
           showScanNoHawbDialog();
         } else if (data["appCode"] == "02" && (data["statusCode"] == "04" || data["statusCode"] == "05")) {
           // Dialog 2
-          showScanDialog(result, statusCode: 400, remarkFailed: "สถานะไม่ถูกต้อง");
+          showScanDialog(parentContext, result, statusCode: 400, remarkFailed: "สถานะไม่ถูกต้อง");
         } else if (data["appCode"] == "02" && (data["statusCode"] == "08" && data["subStatusCode"] == "03")) {
           // Dialog 3
-          showScanDialog(result,
+          showScanDialog(parentContext, result,
               statusCode: 400,
               typeDialogScan: TypeDialogScanItems.dialog3,
               nameReportBtn: "ยืนยัน\nRepack",
@@ -878,6 +881,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
             (data["statusCode"] == "03" || data["statusCode"] == "06" || data["statusCode"] == "08")) {
           // Dialog 4
           showScanDialog(
+            parentContext,
             result,
             statusCode: 400,
             remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว",
@@ -896,7 +900,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
       setState(() {
         if (event != null) {
           _textEditing.text = "";
+          snackBarUtil("pre-test");
           FocusScope.of(context).requestFocus(_focusBarcodeField);
+          _textEditing.text = "a101";
         }
       });
     };

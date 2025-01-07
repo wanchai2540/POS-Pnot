@@ -118,10 +118,7 @@ class _RepackPageState extends State<RepackPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  style: TextButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  child: const Text('ถ่ายรูป'),
+                  child: const Text('ถ่ายรูป', style: TextStyle(fontSize: 18)),
                   onPressed: () async {
                     final ImagePicker picker = ImagePicker();
                     final XFile? image = await picker.pickImage(
@@ -139,10 +136,7 @@ class _RepackPageState extends State<RepackPage> {
                 ),
                 Row(children: [
                   TextButton(
-                    style: TextButton.styleFrom(
-                      textStyle: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    child: const Text('ยกเลิก'),
+                    child: const Text('ยกเลิก', style: TextStyle(fontSize: 18)),
                     onPressed: () {
                       setState(() {
                         _imageRepack.value = null;
@@ -151,10 +145,7 @@ class _RepackPageState extends State<RepackPage> {
                     },
                   ),
                   TextButton(
-                    style: TextButton.styleFrom(
-                      textStyle: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    child: const Text('ยืนยัน'),
+                    child: const Text('ยืนยัน', style: TextStyle(fontSize: 18)),
                     onPressed: () async {
                       if (_imageRepack.value != null) {
                         await DataService().sendRepack(uuid, datePicked, _imageRepack.value!).then((res) {

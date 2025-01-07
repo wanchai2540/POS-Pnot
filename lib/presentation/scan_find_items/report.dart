@@ -150,8 +150,7 @@ class _ReportPageState extends State<ReportPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                  TextButton(
                     child: const Text('ถ่ายรูป', style: TextStyle(fontSize: 18)),
                     onPressed: () async {
                       final ImagePicker picker = ImagePicker();
@@ -169,8 +168,7 @@ class _ReportPageState extends State<ReportPage> {
                     },
                   ),
                   Row(children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                    TextButton(
                       child: const Text('ยกเลิก', style: TextStyle(fontSize: 18)),
                       onPressed: () {
                         setState(() {
@@ -180,8 +178,7 @@ class _ReportPageState extends State<ReportPage> {
                       },
                     ),
                     SizedBox(width: 10),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                    TextButton(
                       child: const Text('ยืนยัน', style: TextStyle(fontSize: 18)),
                       onPressed: () async {
                         var res;

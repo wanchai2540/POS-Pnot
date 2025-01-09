@@ -5,17 +5,16 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:pos/constant.dart';
 import 'package:pos/data/api/api.dart';
 import 'package:pos/button_listener.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pos/data/models/scanFindItems_model.dart';
 import 'package:pos/data/models/scan_listener_model.dart';
+import 'package:pos/common.dart';
 import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 
 typedef MenuEntry = DropdownMenuEntry<String>;
-
-enum TypeDialogScanItems { dialog1, dialog2, dialog3, dialog4, dialog5 }
 
 class ScanFindItemsPage extends StatefulWidget {
   ScanFindItemsPage({super.key});
@@ -31,7 +30,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   List<MenuEntry> menuEntries = [];
   final TextEditingController _controller = TextEditingController();
 
-  List<String> list = ["ทั้งหมด", "เจอของ", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
+  List<String> list = ["ทั้งหมด", "สแกนแล้ว", "ยังไม่ได้สแกน", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
   final ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
   final ValueNotifier<File?> _imageRepack = ValueNotifier<File?>(null);
   final _formKey = GlobalKey<FormState>();
@@ -51,12 +50,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     });
     super.initState();
   }
-  //
-  // @override
-  // void didChangeDependencies() {
-  //   _onScannListener();
-  //   super.didChangeDependencies();
-  // }
 
   @override
   void dispose() {
@@ -165,10 +158,16 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
               ScanPageGetDataEvent(date: datePicked),
             );
         break;
-      case "เจอของ":
+      case "สแกนแล้ว":
         dropdownValue = "03";
         context.read<ScanFindItemsPageBloc>().add(
               ScanPageGetDataEvent(date: datePicked, type: "03"),
+            );
+        break;
+      case "ยังไม่ได้สแกน":
+        dropdownValue = "01";
+        context.read<ScanFindItemsPageBloc>().add(
+              ScanPageGetDataEvent(date: datePicked, type: "01"),
             );
         break;
       case "ของพร้อมปล่อย":
@@ -249,14 +248,14 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("${data.hawb}", style: TextStyle(fontSize: 16)),
+                      Text(data.hawb, style: TextStyle(fontSize: 16)),
                     ],
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "${data.lastStatus}",
+                        data.lastStatus,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: _colorStatus(data.lastStatus),
@@ -362,509 +361,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     );
   }
 
-  showScanNoHawbDialog() {
-    if (_isShowDialog) {
-      Navigator.of(context).pop();
-      _isShowDialog = false;
-    }
-    _isShowDialog = true;
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Container(
-            height: MediaQuery.of(context).size.height * 0.20,
-            alignment: Alignment.center,
-            child: Text(
-              'ไม่พบ HAWB ในระบบ',
-              style: TextStyle(
-                color: Colors.red[200],
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('สแกนต่อ'),
-              onPressed: () {
-                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                _isShowDialog = false;
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  showScanDialog(BuildContext parentContext, ScanListenerModel model,
-      {int? statusCode,
-      TypeDialogScanItems? typeDialogScan,
-      String? nameReportBtn,
-      String? remarkSuccess,
-      String? remarkFailed}) {
-    if (_isShowDialog) {
-      Navigator.of(context).pop();
-      _isShowDialog = false;
-    }
-    _isShowDialog = true;
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Align(
-            alignment: Alignment.centerRight,
-            child: SizedBox(
-              child: nameReportBtn != null
-                  ? ElevatedButton(
-                      onPressed: () async {
-                        if (typeDialogScan == TypeDialogScanItems.dialog5 ||
-                            typeDialogScan == TypeDialogScanItems.dialog4) {
-                          _isShowDialog = false;
-                          Navigator.of(context).pop();
-                          Navigator.of(parentContext)
-                              .pushNamed("/report", arguments: {"uuid": model.uuid, "datePicked": datePicked});
-                          // await showConfirmFindItemDialog(model.uuid);
-                        } else if (statusCode == 400 && typeDialogScan == TypeDialogScanItems.dialog3) {
-                          _isShowDialog = false;
-                          Navigator.of(context).pop();
-                          Navigator.of(parentContext)
-                              .pushNamed("/repack", arguments: {"uuid": model.uuid, "datePicked": datePicked});
-                          // await showConfirmRepackDialog(model.uuid);
-                        }
-                      },
-                      child: Text("$nameReportBtn"),
-                    )
-                  : SizedBox(),
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                Text("HAWB: ${model.hawb}"),
-                if (model.productType == "G" || model.productType == "R")
-                  customBadgeSpecial(model.productType)
-                else
-                  customTypeBadge(model.productType),
-                Text("Pick Up: ${model.pickupBy}"),
-                Text("สถานะล่าสุด: ${model.lastStatus}"),
-                SizedBox(height: 30),
-                remarkFailed != null
-                    ? Container(
-                        child: Text(
-                          "$remarkFailed",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.red[200],
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      )
-                    : SizedBox(),
-                SizedBox(height: 10),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('สแกนต่อ'),
-              onPressed: () {
-                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                _isShowDialog = false;
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget customBadgeSpecial(String productType) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text("Type:  "),
-        Container(
-          width: 25,
-          height: 25,
-          decoration: BoxDecoration(
-            color: productType == "G" ? Colors.green : Colors.red,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              productType,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget customTypeBadge(String productType) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text("Type:  "),
-        Container(
-          width: 30,
-          height: 25,
-          decoration: BoxDecoration(color: Colors.yellow),
-          child: Center(
-            child: Text(
-              productType,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
-  Future<void> showConfirmRepackDialog(String uuid) async {
-    _imageRepack.value = null;
-
-    if (_isShowDialog) {
-      Navigator.of(context).pop();
-      _isShowDialog = false;
-    }
-    _isShowDialog = true;
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: RichText(
-            text: TextSpan(
-              text: 'สาเหตุ',
-              style: TextStyle(color: Colors.black),
-              children: [
-                TextSpan(
-                  text: ' *',
-                  style: TextStyle(
-                    color: Colors.red,
-                  ),
-                )
-              ],
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                Text("ยินยันการ Repack"),
-                SizedBox(
-                  height: 30,
-                ),
-                ValueListenableBuilder<File?>(
-                  valueListenable: _imageRepack,
-                  builder: (context, capturedImage, child) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        capturedImage == null
-                            ? SizedBox()
-                            : Center(
-                                child: Image.file(
-                                  capturedImage,
-                                  height: 200,
-                                  width: 200,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  style: TextButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  child: const Text('ถ่ายรูป'),
-                  onPressed: () async {
-                    final ImagePicker picker = ImagePicker();
-                    final XFile? image = await picker.pickImage(
-                      source: ImageSource.camera,
-                      maxWidth: 1080,
-                      maxHeight: 1080,
-                      imageQuality: 100,
-                    );
-                    if (image != null) {
-                      setState(() {
-                        _imageRepack.value = File(image.path);
-                      });
-                    }
-                  },
-                ),
-                Row(children: [
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      textStyle: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    child: const Text('ยกเลิก'),
-                    onPressed: () {
-                      _isShowDialog = false;
-                      _imageRepack.value = null;
-                      context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      textStyle: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    child: const Text('ยืนยัน'),
-                    onPressed: () async {
-                      if (_imageRepack.value != null) {
-                        await DataService().sendRepack(uuid, datePicked, _imageRepack.value!).then((res) {
-                          if (res == "success") {
-                            _imageRepack.value = null;
-                            snackBarUtil('แจ้งการ Repack สำเร็จ');
-                          } else {
-                            snackBarUtil('แจ้งการ Repack ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-                          }
-                        });
-                        _isShowDialog = false;
-                        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                        Navigator.of(context).pop();
-                      } else {
-                        snackBarUtil('กรุณาถ่ายรูปเพื่อเปลี่ยนสถานะเป็น Repack');
-                      }
-                    },
-                  ),
-                ])
-              ],
-            )
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> showConfirmFindItemDialog(String uuid) async {
-    TextEditingController _controllerRemark = TextEditingController();
-    String? reasonValue;
-
-    Map<String, dynamic> result = await DataService().getProblemList();
-    List<DropdownMenuEntry<String>> reasonList = (result['data'] as List)
-        .map((item) => DropdownMenuEntry<String>(label: item['text'], value: item['value']))
-        .toList();
-
-    if (_isShowDialog) {
-      Navigator.of(context).pop();
-      _isShowDialog = false;
-    }
-    _isShowDialog = true;
-    return await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: RichText(
-            text: TextSpan(
-              text: 'สาเหตุ',
-              style: TextStyle(color: Colors.black),
-              children: [
-                TextSpan(
-                  text: ' *',
-                  style: TextStyle(
-                    color: Colors.red,
-                  ),
-                )
-              ],
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: Form(
-              key: _reportFormKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  DropdownButtonFormField<String>(
-                    value: reasonValue,
-                    decoration: InputDecoration(
-                      labelText: 'เลือกสาเหตุ',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: [
-                      for (var dropValue in reasonList)
-                        DropdownMenuItem(value: '${dropValue.value}', child: Text('${dropValue.label}')),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        reasonValue = value!;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'กรุณาเลือกสาเหตุในการแจ้งปัญหา';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 10),
-                  Text("หมายเหตุ"),
-                  TextFormField(
-                    controller: _controllerRemark,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'ระบุหมายเหตุ...',
-                    ),
-                  ),
-                  SizedBox(height: 30),
-                  ValueListenableBuilder<File?>(
-                    valueListenable: _imageReport,
-                    builder: (context, capturedImage, child) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          capturedImage == null
-                              ? SizedBox()
-                              : Center(
-                                  child: Image.file(
-                                    capturedImage,
-                                    height: 200,
-                                    width: 200,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                        ],
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  style: TextButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  child: const Text('ถ่ายรูป'),
-                  onPressed: () async {
-                    final ImagePicker picker = ImagePicker();
-                    final XFile? image = await picker.pickImage(
-                      source: ImageSource.camera,
-                      maxWidth: 1080,
-                      maxHeight: 1080,
-                      imageQuality: 100,
-                    );
-                    if (image != null) {
-                      setState(() {
-                        _imageReport.value = File(image.path);
-                      });
-                    }
-                  },
-                ),
-                Row(children: [
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      textStyle: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    child: const Text('ยกเลิก'),
-                    onPressed: () {
-                      _isShowDialog = false;
-                      _imageReport.value = null;
-                      context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      textStyle: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    child: const Text('ยืนยัน'),
-                    onPressed: () async {
-                      var res;
-                      if (_reportFormKey.currentState!.validate()) {
-                        if (reasonValue == "03") {
-                          if (_imageReport.value != null) {
-                            res = await DataService().sendReport(uuid, datePicked, reasonValue!,
-                                image: _imageReport.value!, remark: _controllerRemark.text);
-
-                            if (res == "success") {
-                              snackBarUtil('แจ้งปัญหาสำเร็จ');
-                            } else {
-                              snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-                            }
-                            _isShowDialog = false;
-                            _imageReport.value = null;
-                            context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                            Navigator.of(context).pop();
-                          } else {
-                            snackBarUtil('กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา');
-                          }
-                        } else {
-                          if (_imageReport.value != null) {
-                            res = await DataService().sendReport(uuid, datePicked, reasonValue!,
-                                image: _imageReport.value!, remark: _controllerRemark.text);
-                          } else {
-                            res = await DataService()
-                                .sendReport(uuid, datePicked, reasonValue!, remark: _controllerRemark.text);
-                          }
-                          if (res == "success") {
-                            snackBarUtil('แจ้งปัญหาสำเร็จ');
-                          } else {
-                            snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-                          }
-                          _isShowDialog = false;
-                          _imageReport.value = null;
-                          context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                          Navigator.of(context).pop();
-                        }
-                      }
-                    },
-                  ),
-                ])
-              ],
-            )
-          ],
-        );
-      },
-    );
-  }
-
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBarUtil(String title) {
-    return ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(title),
-        duration: Duration(seconds: 3),
-      ),
-    );
-  }
-
   void _startEventTable() {
     Map<String, dynamic> date = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     setState(() {
@@ -885,12 +381,15 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     var data = dataGetScan["body"];
     try {
       ScanListenerModel result = ScanListenerModel.fromJson(data);
+
       if (dataGetScan["code"] == 200) {
         if (data["appCode"] == "01" && data["statusCode"] == "03") {
           // Dialog 5
-          showScanDialog(
-            parentContext,
-            result,
+          DialogScan().showScanDialog(
+            isShowDialog: _isShowDialog,
+            parentContext: parentContext,
+            model: result,
+            datePicked: datePicked,
             statusCode: 200,
             nameReportBtn: "แจ้งปัญหา",
             typeDialogScan: TypeDialogScanItems.dialog5,
@@ -899,23 +398,45 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
       } else if (dataGetScan["code"] == 400) {
         if (data["appCode"] == "03") {
           // Dialog 1
-          showScanNoHawbDialog();
-        } else if (data["appCode"] == "02" && (data["statusCode"] == "04" || data["statusCode"] == "05")) {
+          DialogScan().showScanNoHawbDialog(isShowDialog: _isShowDialog, context: context, datePicked: datePicked);
+        } else if (data["appCode"] == "02" &&
+            (data["statusCode"] == "04" ||
+                data["statusCode"] == "05" ||
+                data["statusCode"] == "10" ||
+                data["statusCode"] == "11")) {
           // Dialog 2
-          showScanDialog(parentContext, result, statusCode: 400, remarkFailed: "สถานะไม่ถูกต้อง");
+          DialogScan().showScanDialog(
+            isShowDialog: _isShowDialog,
+            parentContext: parentContext,
+            model: result,
+            datePicked: datePicked,
+            statusCode: 400,
+            nameReportBtn: "แจ้งปัญหา",
+            remarkFailed: "สถานะไม่ถูกต้อง",
+            typeDialogScan: TypeDialogScanItems.dialog5,
+          );
         } else if (data["appCode"] == "02" && (data["statusCode"] == "08" && data["subStatusCode"] == "03")) {
           // Dialog 3
-          showScanDialog(parentContext, result,
-              statusCode: 400,
-              typeDialogScan: TypeDialogScanItems.dialog3,
-              nameReportBtn: "ยืนยัน\nRepack",
-              remarkFailed: "เป็นงาน DMC คุณต้องการยืนยันการ\nRepack(หากยืนยันบังคับถ่ายรูป)");
+          DialogScan().showScanDialog(
+            isShowDialog: _isShowDialog,
+            parentContext: parentContext,
+            model: result,
+            datePicked: datePicked,
+            statusCode: 400,
+            typeDialogScan: TypeDialogScanItems.dialog3,
+            nameReportBtn: "ยืนยัน\nRepack",
+            remarkFailed: "เป็นงาน DMC คุณต้องการยืนยันการ\nRepack(หากยืนยันบังคับถ่ายรูป)",
+          );
         } else if (data["appCode"] == "02" &&
-            (data["statusCode"] == "03" || data["statusCode"] == "06" || data["statusCode"] == "08")) {
+            (data["statusCode"] == "03" ||
+                data["statusCode"] == "06" ||
+                data["statusCode"] == "09")) {
           // Dialog 4
-          showScanDialog(
-            parentContext,
-            result,
+          DialogScan().showScanDialog(
+            isShowDialog: _isShowDialog,
+            parentContext: parentContext,
+            model: result,
+            datePicked: datePicked,
             statusCode: 400,
             remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว",
             nameReportBtn: "แจ้งปัญหา",
@@ -934,77 +455,8 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
         if (event != null) {
           _textEditing.text = "";
           _focusBarcodeField.requestFocus();
-          // FocusScope.of(context).requestFocus(_focusBarcodeField);
         }
       });
     };
   }
 }
-
-// class ScanFindItemsPage extends StatefulWidget {
-//   const ScanFindItemsPage({super.key});
-
-//   @override
-//   State<ScanFindItemsPage> createState() => _ScanFindItemsPageState();
-// }
-
-// class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
-//   TextEditingController _textEditing = TextEditingController();
-//   FocusNode _focusBarcodeField = FocusNode();
-
-//   @override
-//   void initState() {
-//     _onScannListener();
-//     super.initState();
-//   }
-
-//   @override
-//   void didChangeDependencies() {
-//     _onScannListener();
-//     super.didChangeDependencies();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Container(
-//           child: Center(
-//         child: Row(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             Text("HAWB ล่าสุด : "),
-//             SizedBox(width: 10),
-//             SizedBox(
-//               width: MediaQuery.of(context).size.height * 0.3,
-//               child: TextField(
-//                 controller: _textEditing,
-//                 onChanged: (value) {
-//                   print(value);
-//                 },
-//                 keyboardType: TextInputType.none,
-//                 focusNode: _focusBarcodeField,
-//                 style: TextStyle(
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//                 // decoration: InputDecoration(
-//                 //   hintText: "ยังไม่มีการสแกน",
-//                 // ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       )),
-//     );
-//   }
-
-//   void _onScannListener() {
-//     CustomButtonListener.onButtonPressed = (event) {
-//       setState(() {
-//         if (event != null) {
-//           _textEditing.text = "";
-//           FocusScope.of(context).requestFocus(_focusBarcodeField);
-//         }
-//       });
-//     };
-//   }
-// }

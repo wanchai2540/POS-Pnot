@@ -77,7 +77,7 @@ class DataService {
     if (type != "99" && type != "all") {
       query.addAll({"status_code": type});
     } else if (type == "99") {
-      List<String> typeOther = ["01", "02", "06", "07"];
+      List<String> typeOther = ["02", "06", "07"];
       List<Map<String, dynamic>> result = await _getDataTypeOther(typeOther, path, date, accessToken);
       try {
         if (result.length == 0) {

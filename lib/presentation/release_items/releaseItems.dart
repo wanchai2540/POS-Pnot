@@ -1,18 +1,14 @@
 // ignore_for_file: avoid_unnecessary_containers
 
 import 'dart:collection';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:pos/data/api/api.dart';
 import 'package:pos/button_listener.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pos/data/models/release_model.dart';
-import 'package:pos/data/models/scanAndRelease_model.dart';
 import 'package:pos/data/models/scanFindItems_model.dart';
-import 'package:pos/data/models/scan_listener_model.dart';
 import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 
 typedef MenuEntry = DropdownMenuEntry<String>;
@@ -31,7 +27,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   List<MenuEntry> menuEntries = [];
   final FocusNode _focusNode = FocusNode();
   final TextEditingController _controller = TextEditingController();
-  List<String> list = ["ทั้งหมด", "เจอของ", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
+  List<String> list = ["ทั้งหมด", "สแกนแล้ว", "ยังไม่ได้สแกน", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
   final _formKey = GlobalKey<FormState>();
 
   bool _isShowDialog = false;
@@ -157,10 +153,16 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
               ScanPageGetDataEvent(date: datePicked),
             );
         break;
-      case "เจอของ":
+      case "สแกนแล้ว":
         dropdownValue = "03";
         context.read<ScanFindItemsPageBloc>().add(
               ScanPageGetDataEvent(date: datePicked, type: "03"),
+            );
+        break;
+      case "ยังไม่ได้สแกน":
+        dropdownValue = "01";
+        context.read<ScanFindItemsPageBloc>().add(
+              ScanPageGetDataEvent(date: datePicked, type: "01"),
             );
         break;
       case "ของพร้อมปล่อย":
@@ -551,7 +553,9 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                 data["statusCode"] == "02" ||
                 data["statusCode"] == "03" ||
                 data["statusCode"] == "06" ||
-                data["statusCode"] == "08")) {
+                data["statusCode"] == "08" ||
+                data["statusCode"] == "09" ||
+                data["statusCode"] == "10")) {
           // Dialog 3
           showScanDialog(result, remarkFailed: "สถานะไม่ถูกต้อง");
         }
@@ -567,7 +571,6 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
         if (event != null) {
           _textEditing.text = "";
           _focusBarcodeField.requestFocus();
-          // FocusScope.of(context).requestFocus(_focusBarcodeField);
         }
       });
     };

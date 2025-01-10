@@ -25,7 +25,6 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   String dropdownLabel = "";
   String dropdownValue = "";
   List<MenuEntry> menuEntries = [];
-  final FocusNode _focusNode = FocusNode();
   final TextEditingController _controller = TextEditingController();
   List<String> list = ["ทั้งหมด", "สแกนแล้ว", "ยังไม่ได้สแกน", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
   final _formKey = GlobalKey<FormState>();

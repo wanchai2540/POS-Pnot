@@ -15,7 +15,6 @@ class RepackPage extends StatefulWidget {
 
 class _RepackPageState extends State<RepackPage> {
   final _reportFormKey = GlobalKey<FormState>();
-  String? reasonValue;
   Map<String, dynamic> result = {};
   List<DropdownMenuEntry<String>> reasonList = [];
   final ValueNotifier<File?> _imageRepack = ValueNotifier<File?>(null);
@@ -25,28 +24,15 @@ class _RepackPageState extends State<RepackPage> {
   @override
   void initState() {
     super.initState();
-    getListResaon();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    getListResaon();
 
     final args = ModalRoute.of(context)?.settings.arguments as Map;
     uuid = args["uuid"];
     datePicked = args["datePicked"];
-  }
-
-  Future<void> getListResaon() async {
-    Map<String, dynamic>? problemList = await DataService().getProblemList();
-    List<DropdownMenuEntry<String>> dropReasonList = (problemList['data'] as List)
-        .map((item) => DropdownMenuEntry<String>(label: item['text'], value: item['value']))
-        .toList();
-    setState(() {
-      result = problemList;
-      reasonList = dropReasonList;
-    });
   }
 
   @override

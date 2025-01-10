@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
-import 'package:pos/data/models/detailItemScan_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DataService {
@@ -196,9 +195,9 @@ class DataService {
     }
   }
 
-  Future<Map<String, dynamic>> getProblemList() async {
+  Future<Map<String, dynamic>> getProblemList([String? statusCode]) async {
     final String path = '/public/master/problem_pickup';
-    final Uri url = Uri.https(_baseUrl, path);
+    final Uri url = Uri.https(_baseUrl, path, {"status_code": statusCode});
     try {
       final response = await http.get(url);
       if (response.statusCode == 200 || response.statusCode == 201) {

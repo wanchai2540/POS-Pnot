@@ -506,15 +506,6 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
     );
   }
 
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBarUtil(String title) {
-    return ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(title),
-        duration: Duration(seconds: 3),
-      ),
-    );
-  }
-
   void _startEventTable() {
     Map<String, dynamic> date = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     setState(() {

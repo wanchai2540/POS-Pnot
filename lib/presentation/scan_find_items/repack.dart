@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pos/common.dart';
 import 'package:pos/data/api/api.dart';
 import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 
@@ -149,22 +150,22 @@ class _RepackPageState extends State<RepackPage> {
                                     setState(() {
                                       _imageRepack.value = null;
                                     });
-                                    snackBarUtil('แจ้งการ Repack สำเร็จ');
+                                    DialogScan().snackBarUtil(context, 'แจ้งการ Repack สำเร็จ');
                                     context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                                     Navigator.of(context).pop();
                                   } else {
-                                    snackBarUtil('แจ้งการ Repack ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+                                    DialogScan().snackBarUtil(context, 'แจ้งการ Repack ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                                   }
                                 });
                               } catch (e) {
-                                snackBarUtil('เกิดข้อผิดพลาด: ${e.toString()}');
+                                DialogScan().snackBarUtil(context, 'เกิดข้อผิดพลาด: ${e.toString()}');
                               } finally {
                                 setState(() {
                                   _isProcessing = false;
                                 });
                               }
                             } else {
-                              snackBarUtil('กรุณาถ่ายรูปเพื่อเปลี่ยนสถานะเป็น Repack');
+                              DialogScan().snackBarUtil(context, 'กรุณาถ่ายรูปเพื่อเปลี่ยนสถานะเป็น Repack');
                             }
                           },
                         ),
@@ -183,15 +184,6 @@ class _RepackPageState extends State<RepackPage> {
               ),
             ),
         ],
-      ),
-    );
-  }
-
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBarUtil(String title) {
-    return ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(title),
-        duration: Duration(seconds: 3),
       ),
     );
   }

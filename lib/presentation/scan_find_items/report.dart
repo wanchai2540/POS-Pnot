@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pos/common.dart';
 import 'package:pos/data/api/api.dart';
 import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 
@@ -212,12 +213,12 @@ class _ReportPageState extends State<ReportPage> {
                                       );
 
                                       if (res == "success") {
-                                        snackBarUtil('แจ้งปัญหาสำเร็จ');
+                                        DialogScan().snackBarUtil(context, 'แจ้งปัญหาสำเร็จ');
                                       } else {
-                                        snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+                                        DialogScan().snackBarUtil(context, 'แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                                       }
                                     } else {
-                                      snackBarUtil('กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา');
+                                      DialogScan().snackBarUtil(context, 'กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา');
                                     }
                                     _imageReport.value = null;
                                     context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
@@ -240,9 +241,9 @@ class _ReportPageState extends State<ReportPage> {
                                       );
                                     }
                                     if (res == "success") {
-                                      snackBarUtil('แจ้งปัญหาสำเร็จ');
+                                      DialogScan().snackBarUtil(context, 'แจ้งปัญหาสำเร็จ');
                                     } else {
-                                      snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+                                      DialogScan().snackBarUtil(context, 'แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                                     }
 
                                     _imageReport.value = null;
@@ -250,7 +251,7 @@ class _ReportPageState extends State<ReportPage> {
                                     Navigator.of(context).pop();
                                   }
                                 } catch (e) {
-                                  snackBarUtil('เกิดข้อผิดพลาด: ${e.toString()}');
+                                  DialogScan().snackBarUtil(context, 'เกิดข้อผิดพลาด: ${e.toString()}');
                                 } finally {
                                   setState(() {
                                     _isProcessing = false;
@@ -273,15 +274,6 @@ class _ReportPageState extends State<ReportPage> {
               ),
             ),
         ],
-      ),
-    );
-  }
-
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBarUtil(String title) {
-    return ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(title),
-        duration: Duration(seconds: 3),
       ),
     );
   }

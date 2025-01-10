@@ -22,7 +22,8 @@ class _ReportPageState extends State<ReportPage> {
   final ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
   String uuid = "";
   String datePicked = "";
-
+  bool _isProcessing = false;
+  String _problemCode = "08";
   @override
   void initState() {
     super.initState();
@@ -32,21 +33,29 @@ class _ReportPageState extends State<ReportPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    getListResaon();
 
     final args = ModalRoute.of(context)?.settings.arguments as Map;
     uuid = args["uuid"];
     datePicked = args["datePicked"];
+    if (args["problemCode"] != null) {
+      setState(() {
+        _problemCode = args["problemCode"];
+        getListResaon();
+      });
+    }
   }
 
   Future<void> getListResaon() async {
-    Map<String, dynamic>? problemList = await DataService().getProblemList();
-    List<DropdownMenuEntry<String>> dropReasonList = (problemList['data'] as List)
-        .map((item) => DropdownMenuEntry<String>(label: item['text'], value: item['value']))
-        .toList();
+    List<DropdownMenuEntry<String>>? dropReasonList;
+    Map<String, dynamic>? problemList = await DataService().getProblemList(_problemCode);
+    if (problemList.isNotEmpty) {
+      dropReasonList = (problemList['data'] as List)
+          .map((item) => DropdownMenuEntry<String>(label: item['text'], value: item['value']))
+          .toList();
+    }
     setState(() {
       result = problemList;
-      reasonList = dropReasonList;
+      reasonList = dropReasonList ?? [];
     });
   }
 
@@ -57,173 +66,214 @@ class _ReportPageState extends State<ReportPage> {
         backgroundColor: Color(0xFFF5ECD5),
         title: Text("แจ้งปัญหา"),
       ),
-      body: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              SizedBox(height: 20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      text: 'สาเหตุ',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: ' *',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: 20,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 15),
-                  Form(
-                    key: _reportFormKey,
-                    child: Column(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    SizedBox(height: 20),
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        DropdownButtonFormField<String>(
-                          value: reasonValue,
-                          decoration: InputDecoration(
-                            labelText: 'เลือกสาเหตุ',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: [
-                            for (var dropValue in reasonList)
-                              DropdownMenuItem(value: '${dropValue.value}', child: Text('${dropValue.label}')),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              reasonValue = value!;
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'กรุณาเลือกสาเหตุในการแจ้งปัญหา';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 10),
-                        Text("หมายเหตุ", style: TextStyle(fontSize: 20)),
-                        TextFormField(
-                          controller: _controllerRemark,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'ระบุหมายเหตุ...',
+                        RichText(
+                          text: TextSpan(
+                            text: 'สาเหตุ',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: ' *',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 20,
+                                ),
+                              )
+                            ],
                           ),
                         ),
-                        SizedBox(height: 30),
-                        ValueListenableBuilder<File?>(
-                          valueListenable: _imageReport,
-                          builder: (context, capturedImage, child) {
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                capturedImage == null
-                                    ? SizedBox()
-                                    : Center(
-                                        child: Image.file(
-                                          capturedImage,
-                                          height: 200,
-                                          width: 200,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                              ],
-                            );
-                          },
+                        SizedBox(height: 15),
+                        Form(
+                          key: _reportFormKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              DropdownButtonFormField<String>(
+                                value: reasonValue,
+                                decoration: InputDecoration(
+                                  labelText: 'เลือกสาเหตุ',
+                                  border: OutlineInputBorder(),
+                                ),
+                                items: [
+                                  for (var dropValue in reasonList)
+                                    DropdownMenuItem(value: '${dropValue.value}', child: Text('${dropValue.label}')),
+                                ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    reasonValue = value!;
+                                  });
+                                },
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'กรุณาเลือกสาเหตุในการแจ้งปัญหา';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              SizedBox(height: 10),
+                              Text("หมายเหตุ", style: TextStyle(fontSize: 20)),
+                              TextFormField(
+                                controller: _controllerRemark,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  hintText: 'ระบุหมายเหตุ...',
+                                ),
+                              ),
+                              SizedBox(height: 30),
+                              ValueListenableBuilder<File?>(
+                                valueListenable: _imageReport,
+                                builder: (context, capturedImage, child) {
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      capturedImage == null
+                                          ? SizedBox()
+                                          : Center(
+                                              child: Image.file(
+                                                capturedImage,
+                                                height: 200,
+                                                width: 200,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    child: const Text('ถ่ายรูป', style: TextStyle(fontSize: 18)),
-                    onPressed: () async {
-                      final ImagePicker picker = ImagePicker();
-                      final XFile? image = await picker.pickImage(
-                        source: ImageSource.camera,
-                        maxWidth: 1080,
-                        maxHeight: 1080,
-                        imageQuality: 100,
-                      );
-                      if (image != null) {
-                        setState(() {
-                          _imageReport.value = File(image.path);
-                        });
-                      }
-                    },
-                  ),
-                  Row(children: [
-                    TextButton(
-                      child: const Text('ยกเลิก', style: TextStyle(fontSize: 18)),
-                      onPressed: () {
-                        setState(() {
-                          _imageReport.value = null;
-                        });
-                        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                    SizedBox(width: 10),
-                    TextButton(
-                      child: const Text('ยืนยัน', style: TextStyle(fontSize: 18)),
-                      onPressed: () async {
-                        var res;
-                        if (_reportFormKey.currentState!.validate()) {
-                          if (reasonValue == "03") {
-                            if (_imageReport.value != null) {
-                              res = await DataService().sendReport(uuid, datePicked, reasonValue!,
-                                  image: _imageReport.value!, remark: _controllerRemark.text);
-
-                              if (res == "success") {
-                                snackBarUtil('แจ้งปัญหาสำเร็จ');
-                              } else {
-                                snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-                              }
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          child: const Text('ถ่ายรูป', style: TextStyle(fontSize: 18)),
+                          onPressed: () async {
+                            final ImagePicker picker = ImagePicker();
+                            final XFile? image = await picker.pickImage(
+                              source: ImageSource.camera,
+                              maxWidth: 1080,
+                              maxHeight: 1080,
+                              imageQuality: 100,
+                            );
+                            if (image != null) {
+                              setState(() {
+                                _imageReport.value = File(image.path);
+                              });
+                            }
+                          },
+                        ),
+                        Row(children: [
+                          TextButton(
+                            child: const Text('ยกเลิก', style: TextStyle(fontSize: 18)),
+                            onPressed: () {
+                              setState(() {
+                                _imageReport.value = null;
+                              });
                               context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                               Navigator.of(context).pop();
-                            } else {
-                              snackBarUtil('กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา');
-                            }
-                          } else {
-                            if (_imageReport.value != null) {
-                              res = await DataService().sendReport(uuid, datePicked, reasonValue!,
-                                  image: _imageReport.value!, remark: _controllerRemark.text);
-                            } else {
-                              res = await DataService()
-                                  .sendReport(uuid, datePicked, reasonValue!, remark: _controllerRemark.text);
-                            }
-                            if (res == "success") {
-                              snackBarUtil('แจ้งปัญหาสำเร็จ');
-                            } else {
-                              snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-                            }
-                            _imageReport.value = null;
-                            context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                            Navigator.of(context).pop();
-                          }
-                        }
-                      },
-                    ),
-                  ])
-                ],
-              )
-            ],
-          )),
+                            },
+                          ),
+                          SizedBox(width: 10),
+                          TextButton(
+                            child: const Text('ยืนยัน', style: TextStyle(fontSize: 18)),
+                            onPressed: () async {
+                              if (_reportFormKey.currentState!.validate()) {
+                                setState(() {
+                                  _isProcessing = true;
+                                });
+                                var res;
+
+                                try {
+                                  if (reasonValue == "03") {
+                                    if (_imageReport.value != null) {
+                                      res = await DataService().sendReport(
+                                        uuid,
+                                        datePicked,
+                                        reasonValue!,
+                                        image: _imageReport.value!,
+                                        remark: _controllerRemark.text,
+                                      );
+
+                                      if (res == "success") {
+                                        snackBarUtil('แจ้งปัญหาสำเร็จ');
+                                      } else {
+                                        snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+                                      }
+                                    } else {
+                                      snackBarUtil('กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา');
+                                    }
+                                    _imageReport.value = null;
+                                    context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                                    Navigator.of(context).pop();
+                                  } else {
+                                    if (_imageReport.value != null) {
+                                      res = await DataService().sendReport(
+                                        uuid,
+                                        datePicked,
+                                        reasonValue!,
+                                        image: _imageReport.value!,
+                                        remark: _controllerRemark.text,
+                                      );
+                                    } else {
+                                      res = await DataService().sendReport(
+                                        uuid,
+                                        datePicked,
+                                        reasonValue!,
+                                        remark: _controllerRemark.text,
+                                      );
+                                    }
+                                    if (res == "success") {
+                                      snackBarUtil('แจ้งปัญหาสำเร็จ');
+                                    } else {
+                                      snackBarUtil('แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+                                    }
+
+                                    _imageReport.value = null;
+                                    context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                                    Navigator.of(context).pop();
+                                  }
+                                } catch (e) {
+                                  snackBarUtil('เกิดข้อผิดพลาด: ${e.toString()}');
+                                } finally {
+                                  setState(() {
+                                    _isProcessing = false;
+                                  });
+                                }
+                              }
+                            },
+                          ),
+                        ])
+                      ],
+                    )
+                  ],
+                )),
+          ),
+          if (_isProcessing)
+            Container(
+              color: Colors.black.withOpacity(0.5), // Dimmed background
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
+      ),
     );
   }
 

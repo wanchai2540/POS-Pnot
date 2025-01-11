@@ -526,6 +526,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
     var data = dataGetScan["body"];
     try {
       ReleaseModel result = ReleaseModel.fromJson(data);
+
       if (dataGetScan["code"] == 200) {
         if (data["appCode"] == "01" && data["statusCode"] == "05") {
           // Dialog 1

@@ -7,6 +7,10 @@ class ScanAndReleaseModel {
   String productType;
   String pickupBy;
   String lastStatus;
+  String itemNo;
+  String consigneeName;
+  String ctns;
+  String reason;
 
   ScanAndReleaseModel({
     required this.appCode,
@@ -17,9 +21,13 @@ class ScanAndReleaseModel {
     required this.productType,
     required this.pickupBy,
     required this.lastStatus,
+    required this.itemNo,
+    required this.consigneeName,
+    required this.ctns,
+    required this.reason,
   });
 
-    factory ScanAndReleaseModel.fromJson(Map<String, dynamic> json) {
+  factory ScanAndReleaseModel.fromJson(Map<String, dynamic> json) {
     return ScanAndReleaseModel(
       appCode: json["appCode"] ?? "",
       statusCode: json["statusCode"] ?? "",
@@ -29,6 +37,10 @@ class ScanAndReleaseModel {
       productType: json["productType"] ?? "",
       pickupBy: json["pickupBy"] ?? "",
       lastStatus: json["lastStatus"] ?? "",
+      itemNo: json["itemNo"].toString() ?? "",
+      consigneeName: json["consigneeName"] ?? "",
+      ctns: json["ctns"].toString() ?? "",
+      reason: json["reason"] ?? "",
     );
   }
 
@@ -42,6 +54,10 @@ class ScanAndReleaseModel {
       "productType": productType,
       "pickupBy": pickupBy,
       "lastStatus": lastStatus,
+      "itemNo": itemNo,
+      "consigneeName": consigneeName,
+      "ctns": ctns,
+      "reason": reason,
     };
   }
 }

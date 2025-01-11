@@ -220,7 +220,8 @@ class DataService {
     }
   }
 
-  Future<String> sendReport(String uuid, String date, String problemCode, {File? image, String? remark}) async {
+  Future<String> sendReport(String uuid, String date, String problemCode, String module,
+      {File? image, String? remark}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
@@ -236,6 +237,7 @@ class DataService {
       request.fields['uuid'] = uuid;
       request.fields['date'] = date;
       request.fields['problemCode'] = problemCode;
+      request.fields['module'] = module;
       if (remark != null || remark!.isEmpty) {
         request.fields['remark'] = remark;
       }
@@ -278,6 +280,38 @@ class DataService {
         return Future.value("faild");
       }
     } catch (e) {
+      return Future.value("error");
+    }
+  }
+
+  Future<String> sendApproveProblem(String uuid, String date, String module, {File? image}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String accessToken = prefs.getString("accessToken") ?? "";
+
+    final String path = '/v1/ip/m/approve_problem';
+    final Uri url = Uri.https(_baseUrl, path);
+
+    try {
+      final request = http.MultipartRequest("POST", url);
+      request.headers.addAll({
+        'Authorization': "Bearer $accessToken",
+        'Content-Type': 'multipart/form-data',
+      });
+      request.fields['uuid'] = uuid;
+      request.fields['date'] = date;
+      request.fields['module'] = module;
+      if (image != null) {
+        request.files.add(await http.MultipartFile.fromPath('image', image.path));
+      }
+
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        return Future.value("success");
+      } else {
+        return Future.value("faild");
+      }
+    } catch (e) {
+      Exception('Exception occurred: $e');
       return Future.value("error");
     }
   }

@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_unnecessary_containers
 
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +11,7 @@ import 'package:pos/button_listener.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pos/data/models/scanAndRelease_model.dart';
 import 'package:pos/data/models/scanFindItems_model.dart';
+import 'package:pos/data/models/scan_result_model.dart';
 import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 
 typedef MenuEntry = DropdownMenuEntry<String>;
@@ -34,6 +36,9 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
   final FocusNode _focusBarcodeField = FocusNode();
   final TextEditingController _textEditing = TextEditingController();
   final FocusNode _keyboardListenerFocusNode = FocusNode();
+  ValueNotifier<File?> _imageNoDMC = ValueNotifier<File?>(null);
+  final _reportFormKey = GlobalKey<FormState>();
+  ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
 
   @override
   void initState() {
@@ -376,19 +381,23 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
     var data = dataGetScan["body"];
     try {
       ScanAndReleaseModel result = ScanAndReleaseModel.fromJson(data);
+
       if (dataGetScan["code"] == 200) {
         if (data["appCode"] == "01" && data["statusCode"] == "04" ||
             data["statusCode"] == "07" ||
             data["statusCode"] == "11") {
           // Dialog 1
           DialogScan().showScanAndReleaseDialog(
-              isShowDialog: _isShowDialog,
-              model: result,
-              parentContext: parentContext,
-              datePicked: datePicked,
-              nameReportBtn: "แจ้งปัญหา",
-              remarkFailed: "สแกนของพร้อมปล่อยสำเร็จ",
-              isGreen: true);
+            isShowDialog: _isShowDialog,
+            model: result,
+            parentContext: parentContext,
+            datePicked: datePicked,
+            formKeyDialogConfirm: _reportFormKey,
+            imageDialogConfirm: _imageReport,
+            nameReportBtn: "แจ้งปัญหา",
+            remarkFailed: "สแกนของพร้อมปล่อยสำเร็จ",
+            isGreen: true,
+          );
         }
       } else if (dataGetScan["code"] == 400) {
         if (data["appCode"] == "03") {
@@ -398,6 +407,19 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
             context: context,
             datePicked: datePicked,
           );
+        } else if (data["appCode"] == "02" && data["statusCode"] == "10") {
+          // Dialog 5
+          ScanResultModel result = ScanResultModel.fromJson(data);
+
+          DialogScan().showNoDMCDialog(
+            isShowDialog: _isShowDialog,
+            parentContext: parentContext,
+            model: result,
+            datePicked: datePicked,
+            module: "1",
+            remarkFailed: 'เป็นงาน "${result.reason}"' + "\nต้องการยืนยันการตรวจสอบ",
+            imageNoDMC: _imageNoDMC,
+          );
         } else if (data["appCode"] == "02" &&
             (data["statusCode"] == "04" || data["statusCode"] == "07" || data["statusCode"] == "11")) {
           // Dialog 2
@@ -406,6 +428,8 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
             model: result,
             parentContext: parentContext,
             datePicked: datePicked,
+            formKeyDialogConfirm: _reportFormKey,
+            imageDialogConfirm: _imageReport,
             nameReportBtn: "แจ้งปัญหา",
             remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว",
           );
@@ -420,6 +444,8 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
             model: result,
             parentContext: parentContext,
             datePicked: datePicked,
+            formKeyDialogConfirm: _reportFormKey,
+            imageDialogConfirm: _imageReport,
             remarkFailed: "สถานะไม่ถูกต้อง",
           );
         }

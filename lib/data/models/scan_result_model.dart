@@ -1,4 +1,4 @@
-class ScanListenerModel {
+class ScanResultModel {
   String appCode;
   String statusCode;
   String subStatusCode;
@@ -12,7 +12,7 @@ class ScanListenerModel {
   String ctns;
   String reason;
 
-  ScanListenerModel({
+  ScanResultModel({
     required this.appCode,
     required this.statusCode,
     required this.subStatusCode,
@@ -27,8 +27,8 @@ class ScanListenerModel {
     required this.reason,
   });
 
-  factory ScanListenerModel.fromJson(Map<String, dynamic> json) {
-    return ScanListenerModel(
+  factory ScanResultModel.fromJson(Map<String, dynamic> json) {
+    return ScanResultModel(
       appCode: json["appCode"] ?? "",
       statusCode: json["statusCode"] ?? "",
       subStatusCode: json["subStatusCode"] ?? "",

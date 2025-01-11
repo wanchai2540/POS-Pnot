@@ -208,6 +208,7 @@ class _ReportPageState extends State<ReportPage> {
                                         uuid,
                                         datePicked,
                                         reasonValue!,
+                                        "2",
                                         image: _imageReport.value!,
                                         remark: _controllerRemark.text,
                                       );
@@ -229,6 +230,7 @@ class _ReportPageState extends State<ReportPage> {
                                         uuid,
                                         datePicked,
                                         reasonValue!,
+                                        "2",
                                         image: _imageReport.value!,
                                         remark: _controllerRemark.text,
                                       );
@@ -237,6 +239,7 @@ class _ReportPageState extends State<ReportPage> {
                                         uuid,
                                         datePicked,
                                         reasonValue!,
+                                        "2",
                                         remark: _controllerRemark.text,
                                       );
                                     }

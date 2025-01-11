@@ -12,6 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pos/data/models/scanFindItems_model.dart';
 import 'package:pos/data/models/scan_listener_model.dart';
 import 'package:pos/common.dart';
+import 'package:pos/data/models/scan_result_model.dart';
 import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 
 typedef MenuEntry = DropdownMenuEntry<String>;
@@ -31,14 +32,16 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   final TextEditingController _controller = TextEditingController();
 
   List<String> list = ["ทั้งหมด", "สแกนแล้ว", "ยังไม่ได้สแกน", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
-  final ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
-  final ValueNotifier<File?> _imageRepack = ValueNotifier<File?>(null);
   final _formKey = GlobalKey<FormState>();
   final _reportFormKey = GlobalKey<FormState>();
   bool _isShowDialog = false;
   final FocusNode _focusBarcodeField = FocusNode();
   final TextEditingController _textEditing = TextEditingController();
   final FocusNode _keyboardListenerFocusNode = FocusNode();
+
+  ValueNotifier<File?> _imageNoDMC = ValueNotifier<File?>(null);
+  ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
+  ValueNotifier<File?> _imageRepack = ValueNotifier<File?>(null);
   @override
   void initState() {
     CustomButtonListener.initialize();
@@ -384,66 +387,85 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
 
       if (dataGetScan["code"] == 200) {
         if (data["appCode"] == "01" && data["statusCode"] == "03") {
-          // Dialog 5
+          // Dialog 6
           DialogScan().showScanDialog(
             isShowDialog: _isShowDialog,
             parentContext: parentContext,
             model: result,
             datePicked: datePicked,
+            formKeyDialogConfirm: _reportFormKey,
+            imageDialogConfirm: _imageReport,
             statusCode: 200,
             nameReportBtn: "แจ้งปัญหา",
-            typeDialogScan: TypeDialogScanItems.dialog5,
+            typeDialogScan: TypeDialogScanItems.dialog6,
           );
         }
       } else if (dataGetScan["code"] == 400) {
-        if (data["appCode"] == "03") {
+        if (data["appCode"] == "02" && data["statusCode"] == "08" && data["subStatusCode"] != "03") {
           // Dialog 1
+          ScanResultModel result = ScanResultModel.fromJson(data);
+          DialogScan().showNoDMCDialog(
+            isShowDialog: _isShowDialog,
+            parentContext: parentContext,
+            model: result,
+            datePicked: datePicked,
+            module: "1",
+            remarkFailed: 'เป็นงาน "${result.reason}"' + "\nต้องการยืนยันการตรวจสอบ",
+            imageNoDMC: _imageNoDMC,
+          );
+        } else if (data["appCode"] == "03") {
+          // Dialog 2
           DialogScan().showScanNoHawbDialog(isShowDialog: _isShowDialog, context: context, datePicked: datePicked);
         } else if (data["appCode"] == "02" &&
             (data["statusCode"] == "04" ||
                 data["statusCode"] == "05" ||
                 data["statusCode"] == "10" ||
                 data["statusCode"] == "11")) {
-          // Dialog 2
-          DialogScan().showScanDialog(
-            isShowDialog: _isShowDialog,
-            parentContext: parentContext,
-            model: result,
-            datePicked: datePicked,
-            statusCode: 400,
-            nameReportBtn: "แจ้งปัญหา",
-            remarkFailed: "สถานะไม่ถูกต้อง",
-            typeDialogScan: TypeDialogScanItems.dialog5,
-          );
-        } else if (data["appCode"] == "02" && (data["statusCode"] == "08" && data["subStatusCode"] == "03")) {
           // Dialog 3
           DialogScan().showScanDialog(
             isShowDialog: _isShowDialog,
             parentContext: parentContext,
             model: result,
             datePicked: datePicked,
+            formKeyDialogConfirm: _reportFormKey,
+            imageDialogConfirm: _imageReport,
             statusCode: 400,
+            remarkFailed: "สถานะไม่ถูกต้อง",
             typeDialogScan: TypeDialogScanItems.dialog3,
-            nameReportBtn: "ยืนยัน\nRepack",
-            remarkFailed: "เป็นงาน DMC คุณต้องการยืนยันการ\nRepack(หากยืนยันบังคับถ่ายรูป)",
           );
-        } else if (data["appCode"] == "02" &&
-            (data["statusCode"] == "03" ||
-                data["statusCode"] == "06" ||
-                data["statusCode"] == "09")) {
+        } else if (data["appCode"] == "02" && data["statusCode"] == "08" && data["subStatusCode"] == "03") {
           // Dialog 4
           DialogScan().showScanDialog(
             isShowDialog: _isShowDialog,
             parentContext: parentContext,
             model: result,
             datePicked: datePicked,
+            formKeyDialogConfirm: _reportFormKey,
+            imageDialogConfirm: _imageRepack,
+            statusCode: 400,
+            typeDialogScan: TypeDialogScanItems.dialog4,
+            nameReportBtn: "ยืนยัน\nRepack",
+            remarkFailed: "เป็นงาน DMC คุณต้องการยืนยันการ\nRepack(หากยืนยันบังคับถ่ายรูป)",
+          );
+        } else if (data["appCode"] == "02" &&
+            (data["statusCode"] == "03" || data["statusCode"] == "06" || data["statusCode"] == "09")) {
+          // Dialog 5
+          DialogScan().showScanDialog(
+            isShowDialog: _isShowDialog,
+            parentContext: parentContext,
+            model: result,
+            datePicked: datePicked,
+            formKeyDialogConfirm: _reportFormKey,
+            imageDialogConfirm: _imageReport,
             statusCode: 400,
             remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว",
             nameReportBtn: "แจ้งปัญหา",
-            typeDialogScan: TypeDialogScanItems.dialog4,
+            typeDialogScan: TypeDialogScanItems.dialog5,
           );
         }
       }
+
+      ///
     } catch (e) {
       Exception(e);
     }

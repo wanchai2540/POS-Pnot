@@ -416,7 +416,7 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
             parentContext: parentContext,
             model: result,
             datePicked: datePicked,
-            module: "1",
+            module: "2",
             remarkFailed: 'เป็นงาน "${result.reason}"' + "\nต้องการยืนยันการตรวจสอบ",
             imageNoDMC: _imageNoDMC,
           );

@@ -352,6 +352,7 @@ class DialogScan {
                           imageReport: imageDialogConfirm,
                           datePicked: datePicked,
                           module: "2",
+                          problemCode: "10",
                         );
                       },
                       child: Text("$nameReportBtn"),

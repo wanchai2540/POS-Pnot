@@ -308,15 +308,17 @@ class DialogScan {
 
                               if (res == "success") {
                                 snackBarUtil(context, 'แจ้งปัญหาสำเร็จ');
-                                isShowDialog = false;
-                                imageNoDMC.value = null;
-                                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                               } else {
                                 snackBarUtil(context, 'แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                               }
+
                               setState(() {
                                 _isProgressing = false;
                               });
+                              isShowDialog = false;
+                              imageNoDMC.value = null;
+                              context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+
                               Navigator.of(context).pop();
                             },
                           ),
@@ -609,24 +611,23 @@ class DialogScan {
 
                                   if (res == "success") {
                                     snackBarUtil(context, 'แจ้งปัญหาสำเร็จ');
-
-                                    isShowDialog = false;
-                                    imageReport.value = null;
-                                    context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                                    setState(() {
-                                      _isProgressing = false;
-                                    });
-                                    Navigator.of(context).pop();
                                   } else {
-                                    setState(() {
-                                      _isProgressing = false;
-                                    });
                                     snackBarUtil(context, 'แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                                   }
+
+                                  setState(() {
+                                    _isProgressing = false;
+                                  });
+                                  isShowDialog = false;
+                                  imageReport.value = null;
+                                  context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+
+                                  Navigator.of(context).pop();
                                 } else {
                                   setState(() {
                                     _isProgressing = false;
                                   });
+
                                   snackBarUtil(context, 'กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา');
                                 }
                               } else {
@@ -650,14 +651,18 @@ class DialogScan {
                                 }
                                 if (res == "success") {
                                   snackBarUtil(context, 'แจ้งปัญหาสำเร็จ');
-
-                                  isShowDialog = false;
-                                  imageReport.value = null;
-                                  context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                                  Navigator.of(context).pop();
                                 } else {
                                   snackBarUtil(context, 'แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                                 }
+
+                                setState(() {
+                                  _isProgressing = false;
+                                });
+                                isShowDialog = false;
+                                imageReport.value = null;
+                                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+
+                                Navigator.of(context).pop();
                               }
                             }
                           },
@@ -796,26 +801,26 @@ class DialogScan {
                               });
                               await DataService().sendRepack(uuid, datePicked, imageRepack.value!).then((res) {
                                 if (res == "success") {
-                                  imageRepack.value = null;
                                   snackBarUtil(context, 'แจ้งการ Repack สำเร็จ');
-                                  isShowDialog = false;
-                                  context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                                  setState(() {
-                                    _isProgressing = false;
-                                  });
-                                  Navigator.of(context).pop();
                                 } else {
                                   snackBarUtil(context, 'แจ้งการ Repack ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-                                  setState(() {
-                                    _isProgressing = false;
-                                  });
                                 }
+
+                                setState(() {
+                                  _isProgressing = false;
+                                });
+                                isShowDialog = false;
+                                imageRepack.value = null;
+                                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+
+                                Navigator.of(context).pop();
                               });
                             } else {
-                              snackBarUtil(context, 'กรุณาถ่ายรูปเพื่อเปลี่ยนสถานะเป็น Repack');
                               setState(() {
                                 _isProgressing = false;
                               });
+
+                              snackBarUtil(context, 'กรุณาถ่ายรูปเพื่อเปลี่ยนสถานะเป็น Repack');
                             }
                           },
                         ),

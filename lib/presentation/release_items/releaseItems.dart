@@ -233,7 +233,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
             1: FlexColumnWidth(50),
             2: FixedColumnWidth(60),
           },
-          border: TableBorder.all(color: Colors.black, style: BorderStyle.solid, width: 2),
+          border: TableBorder.all(color: Colors.black, style: BorderStyle.solid, width: 1),
           children: [
             TableRow(
               decoration: BoxDecoration(color: Colors.white),

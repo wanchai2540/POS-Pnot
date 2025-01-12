@@ -33,6 +33,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   final FocusNode _focusBarcodeField = FocusNode();
   final TextEditingController _textEditing = TextEditingController();
   final FocusNode _keyboardListenerFocusNode = FocusNode();
+  int _countListType = 0;
 
   @override
   void initState() {
@@ -42,6 +43,14 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
     _onScannListener();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startEventTable();
+
+      context.read<ScanFindItemsPageBloc>().stream.listen((state) {
+        if (state is ScanPageGetLoadedState) {
+          setState(() {
+            _countListType = state.model.length;
+          });
+        }
+      });
     });
     super.initState();
   }
@@ -81,15 +90,22 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  DropdownMenu<String>(
-                    initialSelection: list.first,
-                    onSelected: (String? value) {
-                      setState(() {
-                        dropdownLabel = value!;
-                        _handleDropdownSelection(value);
-                      });
-                    },
-                    dropdownMenuEntries: menuEntries,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      DropdownMenu<String>(
+                        initialSelection: list.first,
+                        onSelected: (String? value) {
+                          setState(() {
+                            dropdownLabel = value!;
+                            _handleDropdownSelection(value);
+                          });
+                        },
+                        dropdownMenuEntries: menuEntries,
+                      ),
+                      SizedBox(width: 10),
+                      Text("จำนวน: $_countListType", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ],
                   ),
                   SizedBox(height: 20),
                   Padding(
@@ -123,6 +139,20 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                     ),
                   ),
                   SizedBox(height: 20),
+                  BlocListener<ScanFindItemsPageBloc, ScanPageBlocState>(
+                    listener: (context, state) {
+                      if (state is ScanPageGetLoadedState) {
+                        setState(() {
+                          _countListType = state.model.length;
+                        });
+                      } else if (state is ScanPageGetErrorState) {
+                        setState(() {
+                          _countListType = 0;
+                        });
+                      }
+                    },
+                    child: SizedBox(),
+                  ),
                   BlocBuilder<ScanFindItemsPageBloc, ScanPageBlocState>(
                     builder: (context, state) {
                       if (state is ScanPageGetLoadingState) {

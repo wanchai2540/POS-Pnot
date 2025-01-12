@@ -270,44 +270,57 @@ class DialogScan {
                           }
                         },
                       ),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          textStyle: Theme.of(context).textTheme.labelLarge,
-                        ),
-                        child: const Text('ยืนยัน'),
-                        onPressed: () async {
-                          var res;
-                          setState(() {
-                            _isProgressing = true;
-                          });
-                          if (imageNoDMC.value != null) {
-                            res = await DataService().sendApproveProblem(
-                              model.uuid,
-                              datePicked,
-                              module,
-                              image: imageNoDMC.value!,
-                            );
-                          } else {
-                            res = await DataService().sendApproveProblem(
-                              model.uuid,
-                              datePicked,
-                              module,
-                            );
-                          }
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              isShowDialog = false;
+                              imageNoDMC.value = null;
+                              context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                              Navigator.of(context).pop();
+                            },
+                            child: Text("ยกเลิก"),
+                          ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              textStyle: Theme.of(context).textTheme.labelLarge,
+                            ),
+                            child: const Text('ยืนยัน'),
+                            onPressed: () async {
+                              var res;
+                              setState(() {
+                                _isProgressing = true;
+                              });
+                              if (imageNoDMC.value != null) {
+                                res = await DataService().sendApproveProblem(
+                                  model.uuid,
+                                  datePicked,
+                                  module,
+                                  image: imageNoDMC.value!,
+                                );
+                              } else {
+                                res = await DataService().sendApproveProblem(
+                                  model.uuid,
+                                  datePicked,
+                                  module,
+                                );
+                              }
 
-                          if (res == "success") {
-                            snackBarUtil(context, 'แจ้งปัญหาสำเร็จ');
-                            isShowDialog = false;
-                            imageNoDMC.value = null;
-                            context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                          } else {
-                            snackBarUtil(context, 'แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
-                          }
-                          setState(() {
-                            _isProgressing = false;
-                          });
-                          Navigator.of(context).pop();
-                        },
+                              if (res == "success") {
+                                snackBarUtil(context, 'แจ้งปัญหาสำเร็จ');
+                                isShowDialog = false;
+                                imageNoDMC.value = null;
+                                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                              } else {
+                                snackBarUtil(context, 'แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+                              }
+                              setState(() {
+                                _isProgressing = false;
+                              });
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),

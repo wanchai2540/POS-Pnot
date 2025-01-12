@@ -7,6 +7,10 @@ class ReleaseModel {
   String productType;
   String pickupBy;
   String lastStatus;
+  String itemNo;
+  String consigneeName;
+  String ctns;
+  String reason;
 
   ReleaseModel({
     required this.appCode,
@@ -17,6 +21,10 @@ class ReleaseModel {
     required this.productType,
     required this.pickupBy,
     required this.lastStatus,
+    required this.itemNo,
+    required this.consigneeName,
+    required this.ctns,
+    required this.reason,
   });
 
   factory ReleaseModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +37,10 @@ class ReleaseModel {
       productType: json["productType"] ?? "",
       pickupBy: json["pickupBy"] ?? "",
       lastStatus: json["lastStatus"] ?? "",
+      itemNo: json["itemNo"].toString() ?? "",
+      consigneeName: json["consigneeName"] ?? "",
+      ctns: json["ctns"].toString() ?? "",
+      reason: json["reason"] ?? "",
     );
   }
 
@@ -42,6 +54,10 @@ class ReleaseModel {
       "productType": productType,
       "pickupBy": pickupBy,
       "lastStatus": lastStatus,
+      "itemNo": itemNo,
+      "consigneeName": consigneeName,
+      "ctns": ctns,
+      "reason": reason,
     };
   }
 }

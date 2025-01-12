@@ -420,6 +420,9 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                   customTypeBadge(model.productType),
                 Text("Pick Up: ${model.pickupBy}"),
                 Text("สถานะล่าสุด: ${model.lastStatus}"),
+                Text("Item No: ${model.itemNo}"),
+                Text("Consignee: ${model.consigneeName}"),
+                Text("CTNS: ${model.ctns}"),
                 SizedBox(height: 30),
                 remarkFailed != null
                     ? Container(

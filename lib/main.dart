@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pos/button_listener.dart';
-import 'package:pos/presentation/detail_items_scan/bloc/detail_item_scan_bloc.dart';
-import 'package:pos/presentation/home/bloc/home_bloc.dart';
-import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
-import 'package:pos/route.dart';
+import 'package:kymscanner/presentation/detail_items_scan/bloc/detail_item_scan_bloc.dart';
+import 'package:kymscanner/presentation/home/bloc/home_bloc.dart';
+import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
+import 'package:kymscanner/route.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

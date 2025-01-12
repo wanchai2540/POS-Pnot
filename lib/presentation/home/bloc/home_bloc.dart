@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
-import 'package:pos/data/api/api.dart';
-import 'package:pos/data/models/home_model.dart';
+import 'package:kymscanner/data/api/api.dart';
+import 'package:kymscanner/data/models/home_model.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';

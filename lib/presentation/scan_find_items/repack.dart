@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:pos/common.dart';
-import 'package:pos/data/api/api.dart';
-import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
+import 'package:kymscanner/common.dart';
+import 'package:kymscanner/data/api/api.dart';
+import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 
 class RepackPage extends StatefulWidget {
   const RepackPage({super.key});

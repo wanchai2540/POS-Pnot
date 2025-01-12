@@ -177,7 +177,7 @@
     },
     {
       "name": "http_parser",
-      "rootUri": "file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.1.1",
+      "rootUri": "file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.1.2",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -195,7 +195,7 @@
     },
     {
       "name": "image_picker_android",
-      "rootUri": "file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/image_picker_android-0.8.12+19",
+      "rootUri": "file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/image_picker_android-0.8.12+20",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
@@ -207,9 +207,9 @@
     },
     {
       "name": "image_picker_ios",
-      "rootUri": "file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/image_picker_ios-0.8.12+1",
+      "rootUri": "file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/image_picker_ios-0.8.12+2",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.4"
     },
     {
       "name": "image_picker_linux",
@@ -225,9 +225,9 @@
     },
     {
       "name": "image_picker_platform_interface",
-      "rootUri": "file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/image_picker_platform_interface-2.10.0",
+      "rootUri": "file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/image_picker_platform_interface-2.10.1",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.4"
     },
     {
       "name": "image_picker_windows",
@@ -363,13 +363,13 @@
     },
     {
       "name": "shared_preferences",
-      "rootUri": "file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.3.4",
+      "rootUri": "file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.3.5",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
     {
       "name": "shared_preferences_android",
-      "rootUri": "file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.4.0",
+      "rootUri": "file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.4.1",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
@@ -494,13 +494,13 @@
       "languageVersion": "3.4"
     },
     {
-      "name": "pos",
+      "name": "kymscanner",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "3.6"
     }
   ],
-  "generated": "2025-01-12T07:11:02.437665Z",
+  "generated": "2025-01-12T15:39:43.991557Z",
   "generator": "pub",
   "generatorVersion": "3.6.0",
   "flutterRoot": "file:///D:/Flutter/Install/flutter",

@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pos/data/models/detailItemScan_model.dart';
-import 'package:pos/presentation/detail_items_scan/bloc/detail_item_scan_bloc.dart';
+import 'package:kymscanner/data/models/detailItemScan_model.dart';
+import 'package:kymscanner/presentation/detail_items_scan/bloc/detail_item_scan_bloc.dart';
 
 class DetailScanItemPage extends StatefulWidget {
   const DetailScanItemPage({super.key});

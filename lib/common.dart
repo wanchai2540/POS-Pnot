@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:pos/constant.dart';
-import 'package:pos/data/api/api.dart';
-import 'package:pos/data/models/scanAndRelease_model.dart';
-import 'package:pos/data/models/scan_listener_model.dart';
-import 'package:pos/data/models/scan_result_model.dart';
-import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
+import 'package:kymscanner/constant.dart';
+import 'package:kymscanner/data/api/api.dart';
+import 'package:kymscanner/data/models/scanAndRelease_model.dart';
+import 'package:kymscanner/data/models/scan_listener_model.dart';
+import 'package:kymscanner/data/models/scan_result_model.dart';
+import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 
 class DialogScan {
   Future<void> showScanNoHawbDialog({

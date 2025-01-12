@@ -1,6 +1,6 @@
 {
-    "name": "pos",
-    "short_name": "pos",
+    "name": "kymscanner",
+    "short_name": "kymscanner",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

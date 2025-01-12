@@ -34,7 +34,9 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   List<String> list = ["ทั้งหมด", "สแกนแล้ว", "ยังไม่ได้สแกน", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
   final _formKey = GlobalKey<FormState>();
   final _reportFormKey = GlobalKey<FormState>();
-  bool _isShowDialog = false;
+  // bool _isShowDialog = false;
+  ValueNotifier<bool> _isShowDialog = ValueNotifier<bool>(false);
+
   final FocusNode _focusBarcodeField = FocusNode();
   final TextEditingController _textEditing = TextEditingController();
   final FocusNode _keyboardListenerFocusNode = FocusNode();

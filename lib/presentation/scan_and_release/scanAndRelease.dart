@@ -31,8 +31,10 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
   final TextEditingController _controller = TextEditingController();
   List<String> list = ["ทั้งหมด", "สแกนแล้ว", "ยังไม่ได้สแกน", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
   final _formKey = GlobalKey<FormState>();
+  
+  // bool _isShowDialog = false;
+  ValueNotifier<bool> _isShowDialog = ValueNotifier<bool>(false);
 
-  bool _isShowDialog = false;
   final FocusNode _focusBarcodeField = FocusNode();
   final TextEditingController _textEditing = TextEditingController();
   final FocusNode _keyboardListenerFocusNode = FocusNode();

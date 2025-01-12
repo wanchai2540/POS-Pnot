@@ -12,15 +12,15 @@ import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_pag
 
 class DialogScan {
   Future<void> showScanNoHawbDialog({
-    required bool isShowDialog,
+    required ValueNotifier<bool> isShowDialog,
     required BuildContext context,
     required String datePicked,
   }) {
-    if (isShowDialog) {
+    if (isShowDialog.value) {
       Navigator.of(context).pop();
-      isShowDialog = false;
+      isShowDialog.value = false;
     }
-    isShowDialog = true;
+    isShowDialog.value = true;
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -46,7 +46,7 @@ class DialogScan {
               child: const Text('สแกนต่อ'),
               onPressed: () {
                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                isShowDialog = false;
+                isShowDialog.value = false;
                 Navigator.of(context).pop();
               },
             ),
@@ -56,23 +56,24 @@ class DialogScan {
     );
   }
 
-  Future<void> showScanDialog(
-      {required bool isShowDialog,
-      required BuildContext parentContext,
-      required ScanListenerModel model,
-      required String datePicked,
-      required GlobalKey<FormState> formKeyDialogConfirm,
-      required ValueNotifier<File?> imageDialogConfirm,
-      int? statusCode,
-      TypeDialogScanItems? typeDialogScan,
-      String? nameReportBtn,
-      String? remarkSuccess,
-      String? remarkFailed}) {
-    if (isShowDialog) {
+  Future<void> showScanDialog({
+    required ValueNotifier<bool> isShowDialog,
+    required BuildContext parentContext,
+    required ScanListenerModel model,
+    required String datePicked,
+    required GlobalKey<FormState> formKeyDialogConfirm,
+    required ValueNotifier<File?> imageDialogConfirm,
+    int? statusCode,
+    TypeDialogScanItems? typeDialogScan,
+    String? nameReportBtn,
+    String? remarkSuccess,
+    String? remarkFailed,
+  }) {
+    if (isShowDialog.value) {
       Navigator.of(parentContext).pop();
-      isShowDialog = false;
+      isShowDialog.value = false;
     }
-    isShowDialog = true;
+    isShowDialog.value = true;
     return showDialog(
       context: parentContext,
       barrierDismissible: false,
@@ -86,7 +87,7 @@ class DialogScan {
                       onPressed: () async {
                         if (typeDialogScan == TypeDialogScanItems.dialog5 ||
                             typeDialogScan == TypeDialogScanItems.dialog6) {
-                          isShowDialog = false;
+                          isShowDialog.value = false;
                           Navigator.of(context).pop();
                           // Navigator.of(parentContext).pushNamed("/report", arguments: {
                           //   "uuid": model.uuid,
@@ -103,7 +104,7 @@ class DialogScan {
                             module: "1",
                           );
                         } else if (statusCode == 400 && typeDialogScan == TypeDialogScanItems.dialog4) {
-                          isShowDialog = false;
+                          isShowDialog.value = false;
                           Navigator.of(context).pop();
                           // Navigator.of(parentContext).pushNamed("/repack", arguments: {
                           //   "uuid": model.uuid,
@@ -163,7 +164,7 @@ class DialogScan {
               child: const Text('สแกนต่อ'),
               onPressed: () {
                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                isShowDialog = false;
+                isShowDialog.value = false;
                 Navigator.of(context).pop();
               },
             ),
@@ -174,7 +175,7 @@ class DialogScan {
   }
 
   Future<void> showNoDMCDialog({
-    required bool isShowDialog,
+    required ValueNotifier<bool> isShowDialog,
     required BuildContext parentContext,
     required ScanResultModel model,
     required String datePicked,
@@ -184,11 +185,11 @@ class DialogScan {
   }) {
     bool _isProgressing = false;
 
-    if (isShowDialog) {
+    if (isShowDialog.value) {
       Navigator.of(parentContext).pop();
-      isShowDialog = false;
+      isShowDialog.value = false;
     }
-    isShowDialog = true;
+    isShowDialog.value = true;
     return showDialog(
       context: parentContext,
       barrierDismissible: false,
@@ -274,7 +275,7 @@ class DialogScan {
                         children: [
                           TextButton(
                             onPressed: () {
-                              isShowDialog = false;
+                              isShowDialog.value = false;
                               imageNoDMC.value = null;
                               context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                               Navigator.of(context).pop();
@@ -315,7 +316,7 @@ class DialogScan {
                               setState(() {
                                 _isProgressing = false;
                               });
-                              isShowDialog = false;
+                              isShowDialog.value = false;
                               imageNoDMC.value = null;
                               context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
 
@@ -343,7 +344,7 @@ class DialogScan {
   }
 
   Future<void> showScanAndReleaseDialog({
-    required bool isShowDialog,
+    required ValueNotifier<bool> isShowDialog,
     required ScanAndReleaseModel model,
     required BuildContext parentContext,
     required String datePicked,
@@ -357,11 +358,11 @@ class DialogScan {
     String? remarkFailed,
     bool isGreen = false,
   }) {
-    if (isShowDialog) {
+    if (isShowDialog.value) {
       Navigator.of(parentContext).pop();
-      isShowDialog = false;
+      isShowDialog.value = false;
     }
-    isShowDialog = true;
+    isShowDialog.value = true;
     return showDialog(
       context: parentContext,
       barrierDismissible: false,
@@ -373,7 +374,7 @@ class DialogScan {
               child: nameReportBtn != null
                   ? ElevatedButton(
                       onPressed: () async {
-                        isShowDialog = false;
+                        isShowDialog.value = false;
                         Navigator.of(context).pop();
                         // Navigator.of(parentContext).pushNamed("/report", arguments: {
                         //   "uuid": model.uuid,
@@ -434,7 +435,7 @@ class DialogScan {
               child: const Text('สแกนต่อ'),
               onPressed: () {
                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                isShowDialog = false;
+                isShowDialog.value = false;
                 Navigator.of(context).pop();
               },
             ),
@@ -445,7 +446,7 @@ class DialogScan {
   }
 
   Future<void> showConfirmFindItemDialog({
-    required bool isShowDialog,
+    required ValueNotifier<bool> isShowDialog,
     required BuildContext parentContext,
     required String uuid,
     required GlobalKey<FormState> reportFormKey,
@@ -463,11 +464,11 @@ class DialogScan {
         .map((item) => DropdownMenuEntry<String>(label: item['text'], value: item['value']))
         .toList();
 
-    if (isShowDialog) {
+    if (isShowDialog.value) {
       Navigator.of(parentContext).pop();
-      isShowDialog = false;
+      isShowDialog.value = false;
     }
-    isShowDialog = true;
+    isShowDialog.value = true;
     return await showDialog(
       context: parentContext,
       barrierDismissible: false,
@@ -580,7 +581,7 @@ class DialogScan {
                           ),
                           child: const Text('ยกเลิก'),
                           onPressed: () {
-                            isShowDialog = false;
+                            isShowDialog.value = false;
                             imageReport.value = null;
                             context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                             Navigator.of(context).pop();
@@ -618,7 +619,7 @@ class DialogScan {
                                   setState(() {
                                     _isProgressing = false;
                                   });
-                                  isShowDialog = false;
+                                  isShowDialog.value = false;
                                   imageReport.value = null;
                                   context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
 
@@ -658,7 +659,7 @@ class DialogScan {
                                 setState(() {
                                   _isProgressing = false;
                                 });
-                                isShowDialog = false;
+                                isShowDialog.value = false;
                                 imageReport.value = null;
                                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
 
@@ -687,7 +688,7 @@ class DialogScan {
   }
 
   Future<void> showConfirmRepackDialog({
-    required bool isShowDialog,
+    required ValueNotifier<bool> isShowDialog,
     required BuildContext parentContext,
     required String uuid,
     required GlobalKey<FormState> repackFormKey,
@@ -697,11 +698,11 @@ class DialogScan {
     imageRepack.value = null;
     bool _isProgressing = false;
 
-    if (isShowDialog) {
+    if (isShowDialog.value) {
       Navigator.of(parentContext).pop();
-      isShowDialog = false;
+      isShowDialog.value = false;
     }
-    isShowDialog = true;
+    isShowDialog.value = true;
     return showDialog(
       context: parentContext,
       barrierDismissible: false,
@@ -783,7 +784,7 @@ class DialogScan {
                           ),
                           child: const Text('ยกเลิก'),
                           onPressed: () {
-                            isShowDialog = false;
+                            isShowDialog.value = false;
                             imageRepack.value = null;
                             context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                             Navigator.of(context).pop();
@@ -809,7 +810,7 @@ class DialogScan {
                                 setState(() {
                                   _isProgressing = false;
                                 });
-                                isShowDialog = false;
+                                isShowDialog.value = false;
                                 imageRepack.value = null;
                                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
 

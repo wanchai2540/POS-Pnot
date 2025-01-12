@@ -3,6 +3,7 @@
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pos/data/models/home_model.dart';
 import 'package:pos/presentation/home/bloc/home_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +17,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   DateTime selectedDate = DateTime.now();
+  String _appVersion = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAppVersion();
+  }
 
   @override
   void didChangeDependencies() {
@@ -23,132 +31,147 @@ class _HomePageState extends State<HomePage> {
     super.didChangeDependencies();
   }
 
+  Future<void> _fetchAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _appVersion = 'v${packageInfo.version}';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFFFFAEC),
       body: SafeArea(
-        child: SizedBox(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    height: MediaQuery.of(context).size.height * 0.1,
-                    alignment: Alignment.center,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
+        child: Stack(
+          children: [
+            SizedBox(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        height: MediaQuery.of(context).size.height * 0.1,
+                        alignment: Alignment.center,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                _selectDate(context);
-                              },
-                              child: Text(
-                                'Select date',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
+                            Row(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    _selectDate(context);
+                                  },
+                                  child: Text(
+                                    'Select date',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.greenAccent),
                                 ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.greenAccent),
+                                SizedBox(width: 20),
+                                Text(
+                                  "${selectedDate.toLocal()}".split(' ')[0],
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ],
                             ),
-                            SizedBox(width: 20),
-                            Text(
-                              "${selectedDate.toLocal()}".split(' ')[0],
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
+                            IconButton(
+                              icon: Icon(Icons.account_circle),
+                              onPressed: () async {
+                                confirmLogout(context);
+                              },
                             ),
                           ],
                         ),
-                        IconButton(
-                          icon: Icon(Icons.account_circle),
-                          onPressed: () async {
-                            confirmLogout(context);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  BlocBuilder<HomeBloc, HomeState>(
-                    builder: (context, state) {
-                      if (state is HomeLoadingState) {
-                        return CircularProgressIndicator();
-                      } else if (state is HomeErrorState) {
-                        return Center(child: Text("เกิดข้อผิดพลาดบางอย่าง"));
-                      } else if (state is HomeLoadedState) {
-                        HomeModel model = state.model;
-                        return Column(
+                      ),
+                      BlocBuilder<HomeBloc, HomeState>(
+                        builder: (context, state) {
+                          if (state is HomeLoadingState) {
+                            return CircularProgressIndicator();
+                          } else if (state is HomeErrorState) {
+                            return Center(child: Text("เกิดข้อผิดพลาดบางอย่าง"));
+                          } else if (state is HomeLoadedState) {
+                            HomeModel model = state.model;
+                            return Column(
+                              children: [
+                                Container(
+                                  height: MediaQuery.of(context).size.height * 0.06,
+                                  alignment: Alignment.center,
+                                  child: Text("Total: ${model.totalPickup.toString()}", style: TextStyle(fontSize: 20)),
+                                ),
+                                _colorItems(model.countGreen, model.countRed, model.countOther),
+                                Container(
+                                  height: MediaQuery.of(context).size.height * 0.06,
+                                  alignment: Alignment.center,
+                                  child: DottedLine(
+                                    lineThickness: 2,
+                                    dashLength: 3,
+                                  ),
+                                ),
+                                Container(
+                                  height: MediaQuery.of(context).size.height * 0.06,
+                                  alignment: Alignment.center,
+                                  child: Text("Pick Up", style: TextStyle(fontSize: 20)),
+                                ),
+                                _releaseItemss(model.countPickupByUps, model.countPickupBySkl, model.countPickupByL),
+                                Container(
+                                  height: MediaQuery.of(context).size.height * 0.06,
+                                  alignment: Alignment.center,
+                                  child: DottedLine(
+                                    lineThickness: 2,
+                                    dashLength: 3,
+                                  ),
+                                ),
+                                _countStatusText("เจอของ", model.scannedPickup),
+                                _countStatusText("ของพร้อมปล่อย", model.pendingReleasePickup),
+                                _countStatusText("ปล่อยของ", model.releasePickup),
+                                _countStatusText("พบปัญหา", model.problemPickup),
+                                _countStatusText("อื่นๆ", model.otherPickup),
+                              ],
+                            );
+                          }
+                          return Center(child: Text("เกิดข้อผิดพลาดบางอย่าง"));
+                        },
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 30),
+                        child: Column(
                           children: [
-                            Container(
-                              height: MediaQuery.of(context).size.height * 0.06,
-                              alignment: Alignment.center,
-                              child: Text(
-                                  "Total: ${model.totalPickup.toString()}",
-                                  style: TextStyle(fontSize: 20)),
-                            ),
-                            _colorItems(model.countGreen, model.countRed,
-                                model.countOther),
-                            Container(
-                              height: MediaQuery.of(context).size.height * 0.06,
-                              alignment: Alignment.center,
-                              child: DottedLine(
-                                lineThickness: 2,
-                                dashLength: 3,
-                              ),
-                            ),
-                            Container(
-                              height: MediaQuery.of(context).size.height * 0.06,
-                              alignment: Alignment.center,
-                              child: Text("Pick Up",
-                                  style: TextStyle(fontSize: 20)),
-                            ),
-                            _releaseItemss(model.countPickupByUps,
-                                model.countPickupBySkl, model.countPickupByL),
-                            Container(
-                              height: MediaQuery.of(context).size.height * 0.06,
-                              alignment: Alignment.center,
-                              child: DottedLine(
-                                lineThickness: 2,
-                                dashLength: 3,
-                              ),
-                            ),
-                            _countStatusText("เจอของ", model.scannedPickup),
-                            _countStatusText(
-                                "ของพร้อมปล่อย", model.pendingReleasePickup),
-                            _countStatusText("ปล่อยของ", model.releasePickup),
-                            _countStatusText("พบปัญหา", model.problemPickup),
-                            _countStatusText("อื่นๆ", model.otherPickup),
+                            _scanFindItemsButton(),
+                            SizedBox(height: 20),
+                            _scanAndRelease(),
+                            SizedBox(height: 20),
+                            _releaseItemsButton(),
                           ],
-                        );
-                      }
-                      return Center(child: Text("เกิดข้อผิดพลาดบางอย่าง"));
-                    },
+                        ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 30),
-                    child: Column(
-                      children: [
-                        _scanFindItemsButton(),
-                        SizedBox(height: 20),
-                        _scanAndRelease(),
-                        SizedBox(height: 20),
-                        _releaseItemsButton(),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+            Positioned(
+              bottom: 8,
+              right: 10,
+              child: Text(
+                _appVersion,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -207,8 +230,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         selectedDate = picked;
       });
-      context.read<HomeBloc>().add(HomeLoadingEvent(
-          date: "${picked.year}-${picked.month}-${picked.day}"));
+      context.read<HomeBloc>().add(HomeLoadingEvent(date: "${picked.year}-${picked.month}-${picked.day}"));
     }
   }
 
@@ -222,8 +244,7 @@ class _HomePageState extends State<HomePage> {
         ),
         Text(
           "$count",
-          style: TextStyle(
-              color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20),
+          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20),
         ),
         Text(
           ")",
@@ -364,17 +385,14 @@ class _HomePageState extends State<HomePage> {
       width: MediaQuery.of(context).size.width,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/scanFindItems", arguments: {
-            "datePick":
-                "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"
-          }).then((value) {
-            context.read<HomeBloc>().add(HomeLoadingEvent(
-                date:
-                    "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+          Navigator.pushNamed(context, "/scanFindItems",
+              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"}).then((value) {
+            context
+                .read<HomeBloc>()
+                .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
           });
         },
-        child: Text("สแกนหาของ",
-            style: TextStyle(color: Colors.black, fontSize: 18)),
+        child: Text("สแกนหาของ", style: TextStyle(color: Colors.black, fontSize: 18)),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.lightGreenAccent),
           textStyle: WidgetStateProperty.all(
@@ -401,17 +419,14 @@ class _HomePageState extends State<HomePage> {
       width: MediaQuery.of(context).size.width,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/scanAndRelease", arguments: {
-            "datePick":
-                "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"
-          }).then((value) {
-            context.read<HomeBloc>().add(HomeLoadingEvent(
-                date:
-                    "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+          Navigator.pushNamed(context, "/scanAndRelease",
+              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"}).then((value) {
+            context
+                .read<HomeBloc>()
+                .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
           });
         },
-        child: Text("สแกนพร้อมปล่อยของ",
-            style: TextStyle(color: Colors.black, fontSize: 18)),
+        child: Text("สแกนพร้อมปล่อยของ", style: TextStyle(color: Colors.black, fontSize: 18)),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.lightGreenAccent),
           textStyle: WidgetStateProperty.all(
@@ -438,17 +453,14 @@ class _HomePageState extends State<HomePage> {
       width: MediaQuery.of(context).size.width,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/releaseItems", arguments: {
-            "datePick":
-                "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"
-          }).then((value) {
-            context.read<HomeBloc>().add(HomeLoadingEvent(
-                date:
-                    "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+          Navigator.pushNamed(context, "/releaseItems",
+              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"}).then((value) {
+            context
+                .read<HomeBloc>()
+                .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
           });
         },
-        child: Text("ปล่อยของ",
-            style: TextStyle(color: Colors.black, fontSize: 18)),
+        child: Text("ปล่อยของ", style: TextStyle(color: Colors.black, fontSize: 18)),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.lightGreenAccent),
           textStyle: WidgetStateProperty.all(
@@ -471,8 +483,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _startEventHome() {
-    String date =
-        "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}";
+    String date = "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}";
     context.read<HomeBloc>().add(HomeLoadingEvent(date: date));
   }
 }

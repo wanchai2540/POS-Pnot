@@ -34,31 +34,33 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
       appBar: AppBar(
         title: const Text('Detail Scan'),
       ),
-      body: SizedBox(
-        child: Column(
-          children: [
-            SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("HAWB", style: TextStyle(fontSize: 20)),
-                SizedBox(width: 10),
-                Text("(${detailData["hawb"]})", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            SizedBox(height: 30),
-            BlocBuilder<DetailItemScanBloc, DetailItemScanState>(
-              builder: (context, state) {
-                if (state is DetailItemScanLoadingState) {
-                  return CircularProgressIndicator();
-                } else if (state is DetailItemScanLoadedState) {
-                  return _tableDetailData(state.model);
-                } else {
-                  return Center(child: Text("ไม่มีข้อมูล"));
-                }
-              },
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: SizedBox(
+          child: Column(
+            children: [
+              SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("HAWB", style: TextStyle(fontSize: 20)),
+                  SizedBox(width: 10),
+                  Text("(${detailData["hawb"]})", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              SizedBox(height: 30),
+              BlocBuilder<DetailItemScanBloc, DetailItemScanState>(
+                builder: (context, state) {
+                  if (state is DetailItemScanLoadingState) {
+                    return CircularProgressIndicator();
+                  } else if (state is DetailItemScanLoadedState) {
+                    return _tableDetailData(state.model);
+                  } else {
+                    return Center(child: Text("ไม่มีข้อมูล"));
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -137,7 +139,7 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
                     if (data.imageUrl != "" || data.remark != "")
                       IconButton(
                         onPressed: () {
-                          _showCustomDialog(context, detailData["hawb"], data.status, data.remark, data.imageUrl);
+                          _showCustomDialog(context, detailData["hawb"], data);
                         },
                         icon: Icon(Icons.warning, color: Colors.orange),
                       )
@@ -152,86 +154,115 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> {
     );
   }
 
-  void _showCustomDialog(BuildContext context, String hwb, String status, String remark, [String? image]) {
+  void _showCustomDialog(BuildContext context, String hawb, DetailitemScanModel model) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.warning, color: Colors.orange),
               SizedBox(width: 8),
-              Text('พบปัญหา (DMC)'),
+              Text('รายละเอียด', style: TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('$hwb : พบปัญหา (DMC)'),
-              SizedBox(height: 16),
-              Text('หมายเหตุ: ${!remark.isEmpty ? remark : "ไม่มี"}'),
-              SizedBox(height: 16),
-              // image != null
-              //     ?
-              Column(
-                children: [
-                  Align(alignment: Alignment.centerLeft, child: Text('รูปภาพ:')),
-                  SizedBox(height: 16),
-                  Center(
-                    child: Image.network(
-                      image ?? "",
-                      height: 200,
-                      width: 200,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) {
-                          return child;
-                        }
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                : null,
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              "assets/images/no-image.png",
-                              height: 200,
-                              width: 200,
-                            ),
-                          ],
-                        );
-                      },
+              RichText(
+                text: TextSpan(
+                  style: TextStyle(color: Colors.black, fontSize: 18),
+                  children: [
+                    TextSpan(
+                      text: 'HAWB: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                  ),
-                ],
-              )
-              // : SizedBox(),
-              // Container(
-              //   height: 100,
-              //   width: double.infinity,
-              //   decoration: BoxDecoration(
-              //     border: Border.all(color: Colors.grey),
-              //     borderRadius: BorderRadius.circular(8),
-              //     color: Colors.grey[200],
-              //   ),
-              //   child: image == null
-              //       ? SizedBox()
-              //       : Center(
-              //           child: Image.network(
-              //             image,
-              //             height: 200,
-              //             width: 200,
-              //             fit: BoxFit.cover,
-              //           ),
-              //         ),
-              // ),
+                    TextSpan(
+                      text: hawb,
+                      style: TextStyle(fontWeight: FontWeight.normal),
+                    ),
+                  ],
+                ),
+              ),
+              RichText(
+                text: TextSpan(
+                  style: TextStyle(color: Colors.black, fontSize: 18),
+                  children: [
+                    TextSpan(
+                      text: 'สถานะ: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(
+                      text: '${model.status}',
+                      style: TextStyle(fontWeight: FontWeight.normal),
+                    ),
+                  ],
+                ),
+              ),
+              model.remark.isNotEmpty
+                  ? RichText(
+                      text: TextSpan(
+                        style: TextStyle(color: Colors.black, fontSize: 18),
+                        children: [
+                          TextSpan(
+                            text: 'หมายเหตุ: ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          TextSpan(
+                            text: '${model.remark}',
+                            style: TextStyle(fontWeight: FontWeight.normal),
+                          ),
+                        ],
+                      ),
+                    )
+                  : SizedBox(),
+              model.imageUrl.isNotEmpty
+                  ? Column(
+                      children: [
+                        Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'รูปภาพ:',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            )),
+                        SizedBox(height: 16),
+                        Center(
+                          child: Image.network(
+                            model.imageUrl,
+                            height: 200,
+                            width: 200,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) {
+                                return child;
+                              }
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    "assets/images/no-image.png",
+                                    height: 200,
+                                    width: 200,
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    )
+                  : SizedBox(),
             ],
           ),
           actions: [

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:pos/data/api/api.dart';
+import 'package:kymscanner/data/api/api.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

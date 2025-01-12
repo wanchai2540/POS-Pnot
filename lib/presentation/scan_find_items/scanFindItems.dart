@@ -5,15 +5,15 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pos/constant.dart';
-import 'package:pos/data/api/api.dart';
-import 'package:pos/button_listener.dart';
+import 'package:kymscanner/constant.dart';
+import 'package:kymscanner/data/api/api.dart';
+import 'package:kymscanner/button_listener.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pos/data/models/scanFindItems_model.dart';
-import 'package:pos/data/models/scan_listener_model.dart';
-import 'package:pos/common.dart';
-import 'package:pos/data/models/scan_result_model.dart';
-import 'package:pos/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
+import 'package:kymscanner/data/models/scanFindItems_model.dart';
+import 'package:kymscanner/data/models/scan_listener_model.dart';
+import 'package:kymscanner/common.dart';
+import 'package:kymscanner/data/models/scan_result_model.dart';
+import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 
 typedef MenuEntry = DropdownMenuEntry<String>;
 

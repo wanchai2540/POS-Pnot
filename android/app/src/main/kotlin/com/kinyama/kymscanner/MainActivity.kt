@@ -1,4 +1,4 @@
-package com.example.pos
+package com.kinyama.kymscanner
 
 import android.view.KeyEvent
 import io.flutter.embedding.android.FlutterActivity

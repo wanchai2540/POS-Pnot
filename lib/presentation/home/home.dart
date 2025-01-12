@@ -4,8 +4,8 @@ import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:pos/data/models/home_model.dart';
-import 'package:pos/presentation/home/bloc/home_bloc.dart';
+import 'package:kymscanner/data/models/home_model.dart';
+import 'package:kymscanner/presentation/home/bloc/home_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {

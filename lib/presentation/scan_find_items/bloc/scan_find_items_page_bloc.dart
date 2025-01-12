@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
-import 'package:pos/data/api/api.dart';
-import 'package:pos/data/models/scanFindItems_model.dart';
-import 'package:pos/data/models/scan_listener_model.dart';
+import 'package:kymscanner/data/api/api.dart';
+import 'package:kymscanner/data/models/scanFindItems_model.dart';
+import 'package:kymscanner/data/models/scan_listener_model.dart';
 
 part 'scan_find_items_page_event.dart';
 part 'scan_find_items_page_state.dart';

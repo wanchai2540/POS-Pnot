@@ -31,7 +31,7 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
   final TextEditingController _controller = TextEditingController();
   List<String> list = ["ทั้งหมด", "สแกนแล้ว", "ยังไม่ได้สแกน", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
   final _formKey = GlobalKey<FormState>();
-  
+
   // bool _isShowDialog = false;
   ValueNotifier<bool> _isShowDialog = ValueNotifier<bool>(false);
 
@@ -274,41 +274,15 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
               ],
             ),
             for (var data in model)
-              TableRow(
-                decoration: BoxDecoration(color: Colors.white),
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("${data.hawb}", style: TextStyle(fontSize: 16)),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "${data.lastStatus}",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: _colorStatus(data.lastStatus),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, "/detailItemScan",
-                              arguments: {"uuid": data.uuid, "hawb": data.hawb});
-                        },
-                        icon: Image.asset("assets/images/file.png", width: 25, height: 25),
-                      ),
-                    ],
-                  ),
-                ],
+              TableRowScan(
+                context: context,
+                uuid: data.uuid,
+                hawb: data.hawb,
+                itemNo: data.itemNo,
+                consigneeName: data.consigneeName,
+                ctns: data.ctns,
+                lastStatus: data.lastStatus,
+                colorsStatus: _colorStatus(data.lastStatus)!,
               ),
           ],
         ),

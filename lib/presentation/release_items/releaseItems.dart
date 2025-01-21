@@ -4,6 +4,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:kymscanner/common.dart';
 import 'package:kymscanner/data/api/api.dart';
 import 'package:kymscanner/button_listener.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -266,43 +267,15 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
               ],
             ),
             for (var data in model)
-              TableRow(
-                decoration: BoxDecoration(color: Colors.white),
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Center(child: Text("${data.hawb}", style: TextStyle(fontSize: 16))),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Center(
-                        child: Text(
-                          "${data.lastStatus}",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: _colorStatus(data.lastStatus),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, "/detailItemScan",
-                              arguments: {"uuid": data.uuid, "hawb": data.hawb});
-                        },
-                        icon: Image.asset("assets/images/file.png", width: 25, height: 25),
-                      ),
-                    ],
-                  ),
-                ],
+              TableRowScan(
+                context: context,
+                uuid: data.uuid,
+                hawb: data.hawb,
+                itemNo: data.itemNo,
+                consigneeName: data.consigneeName,
+                ctns: data.ctns,
+                lastStatus: data.lastStatus,
+                colorsStatus: _colorStatus(data.lastStatus)!,
               ),
           ],
         ),

@@ -10,7 +10,7 @@ class ScanFindItemsPageBloc extends Bloc<ScanPageBlocEvent, ScanPageBlocState> {
   ScanFindItemsPageBloc() : super(ScanPageBlocInitialState()) {
     on<ScanPageGetDataEvent>((event, emit) async {
       emit(ScanPageGetLoadingState());
-      var data = await DataService().getscanFindItems(event.date, event.type);
+      var data = await DataService().getScanFindItems(event.date, event.type);
       if (data["status"] == "success") {
         List<ScanfinditemsModel> result = (data["data"] as List).map((item) {
           return ScanfinditemsModel.fromJson(item);

@@ -904,3 +904,100 @@ class DialogScan {
     );
   }
 }
+
+TableRow TableRowScan(
+    {required BuildContext context,
+    required String uuid,
+    required String hawb,
+    required String itemNo,
+    required String consigneeName,
+    required String ctns,
+    required String lastStatus,
+    required Color colorsStatus}) {
+  return TableRow(
+    decoration: BoxDecoration(color: Colors.white),
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                Text(
+                  hawb,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  "ItemNo: ",
+                  style: TextStyle(fontSize: 14),
+                ),
+                Text(
+                  itemNo,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  "Cons: ",
+                  style: TextStyle(fontSize: 14),
+                ),
+                Expanded(
+                  child: Text(
+                    consigneeName,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  "CTNS: ",
+                  style: TextStyle(fontSize: 14),
+                ),
+                Text(
+                  ctns,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            lastStatus,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: colorsStatus,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, "/detailItemScan", arguments: {"uuid": uuid, "hawb": hawb});
+            },
+            icon: Image.asset("assets/images/file.png", width: 25, height: 25),
+          ),
+        ],
+      ),
+    ],
+  );
+}

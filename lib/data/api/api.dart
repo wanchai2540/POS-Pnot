@@ -67,7 +67,7 @@ class DataService {
     }
   }
 
-  Future<Map<String, dynamic>> getscanFindItems(String date, [String type = "all", String? barcode]) async {
+  Future<Map<String, dynamic>> getScanFindItems(String date, [String type = "all", String? barcode]) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
@@ -98,12 +98,20 @@ class DataService {
 
         for (var data in body["data"]) {
           result.add({
-            "uuid": data["uuid"],
-            "hawb": data["hawb"],
-            "lastStatus": data["lastStatus"],
+            "uuid": data["uuid"].toString(),
+            "itemNo": data["itemNo"].toString(),
+            "productType": data["productType"].toString(),
+            "hawb": data["hawb"].toString(),
+            "type": data["type"].toString(),
+            "pickUpBy": data["pickUpBy"].toString(),
+            "statusCode": data["statusCode"].toString(),
+            "subStatusCode": data["subStatusCode"].toString(),
+            "lastStatus": data["lastStatus"].toString(),
+            "isProblem": data["isProblem"].toString(),
+            "ctns": data["ctns"].toString(),
+            "consigneeName": data["consigneeName"].toString(),
           });
         }
-
         return {"status": "success", "text": "login success", "data": result};
       } else {
         return {"status": "failed", "text": "login failed", "data": null};

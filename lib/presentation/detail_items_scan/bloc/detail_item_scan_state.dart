@@ -8,8 +8,8 @@ final class DetailItemScanInitialState extends DetailItemScanState {}
 final class DetailItemScanLoadingState extends DetailItemScanState {}
 
 final class DetailItemScanLoadedState extends DetailItemScanState {
-  List<DetailitemScanModel> model;
-  DetailItemScanLoadedState({required this.model});
+  List<dynamic> data;
+  DetailItemScanLoadedState({required this.data});
 }
 
 final class DetailItemScanErrorState extends DetailItemScanState {}

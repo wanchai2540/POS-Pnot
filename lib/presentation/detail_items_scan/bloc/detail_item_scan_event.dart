@@ -5,5 +5,6 @@ sealed class DetailItemScanEvent {}
 
 class DetailItemScanLoadingEvent extends DetailItemScanEvent {
   String uuid;
-  DetailItemScanLoadingEvent({required this.uuid});
+  String typeData;
+  DetailItemScanLoadingEvent({required this.uuid,required this.typeData});
 }

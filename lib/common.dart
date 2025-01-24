@@ -640,7 +640,7 @@ class DialogScan {
                               itemCount: _imagesGridView.value.length,
                               itemBuilder: (context, index) {
                                 return GestureDetector(
-                                  onTap: () => _showImagePreview(context, _imagesGridView.value[index]!),
+                                  onTap: () => showImagePreview(context, _imagesGridView.value[index]!),
                                   child: Image.file(
                                     _imagesGridView.value[index]!,
                                     height: 200,
@@ -743,7 +743,7 @@ class DialogScan {
     );
   }
 
-  void _showImagePreview(BuildContext context, File imageUrl) {
+  void showImagePreview(BuildContext context, File imageUrl) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -860,7 +860,7 @@ class DialogScan {
                                 itemCount: _imagesGridView.value.length,
                                 itemBuilder: (context, index) {
                                   return GestureDetector(
-                                    onTap: () => _showImagePreview(context, _imagesGridView.value[index]!),
+                                    onTap: () => showImagePreview(context, _imagesGridView.value[index]!),
                                     child: Image.file(
                                       _imagesGridView.value[index]!,
                                       height: 200,
@@ -1077,7 +1077,7 @@ class DialogScan {
                               itemCount: _imagesGridView.value.length,
                               itemBuilder: (context, index) {
                                 return GestureDetector(
-                                  onTap: () => _showImagePreview(context, _imagesGridView.value[index]!),
+                                  onTap: () => showImagePreview(context, _imagesGridView.value[index]!),
                                   child: Image.file(
                                     _imagesGridView.value[index]!,
                                     height: 200,

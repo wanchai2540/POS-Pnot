@@ -359,17 +359,18 @@ class DataService {
     }
   }
 
-  Future<Map<String, dynamic>> getDetailItem(String uuid) async {
+  Future<Map<String, dynamic>> getDetailItem(String uuid, String typeData) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m/item/$uuid';
+    final String path = '/v1/ip/item/$uuid';
+    
     final Uri url = Uri.https(_baseUrl, path);
     try {
       final response = await http.get(url, headers: {'Authorization': "Bearer $accessToken"});
       if (response.statusCode == 200 || response.statusCode == 201) {
         Map<String, dynamic> body = jsonDecode(response.body);
-        return {"status": "success", "text": "login success", "data": body["data"]};
+        return {"status": "success", "text": "login success", "data": body["data"][typeData]};
       } else {
         return {"status": "failed", "text": "login failed", "data": null};
       }
@@ -378,7 +379,7 @@ class DataService {
       return {"status": "error", "text": "Exception occurred: $e", "data": null};
     }
   }
-
+  
   Future<List<Map<String, dynamic>>> _getDataTypeOther(
       List<String> typeOther, String path, String date, String accessToken) async {
     List<Map<String, dynamic>> result = [];

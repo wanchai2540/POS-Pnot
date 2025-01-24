@@ -2,13 +2,18 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kymscanner/constant.dart';
+import 'package:image/image.dart' as img;
 import 'package:kymscanner/data/api/api.dart';
+import 'package:kymscanner/data/models/release_model.dart';
 import 'package:kymscanner/data/models/scanAndRelease_model.dart';
 import 'package:kymscanner/data/models/scan_listener_model.dart';
 import 'package:kymscanner/data/models/scan_result_model.dart';
 import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
+import 'package:watermark_unique/image_format.dart';
+import 'package:watermark_unique/watermark_unique.dart';
 
 class DialogScan {
   Future<void> showScanNoHawbDialog({
@@ -63,6 +68,7 @@ class DialogScan {
     required String datePicked,
     required GlobalKey<FormState> formKeyDialogConfirm,
     required ValueNotifier<File?> imageDialogConfirm,
+    required String module,
     int? statusCode,
     TypeDialogScanItems? typeDialogScan,
     String? nameReportBtn,
@@ -101,7 +107,8 @@ class DialogScan {
                             reportFormKey: formKeyDialogConfirm,
                             imageReport: imageDialogConfirm,
                             datePicked: datePicked,
-                            module: "1",
+                            hawb: model.hawb,
+                            module: module,
                           );
                         } else if (statusCode == 400 && typeDialogScan == TypeDialogScanItems.dialog4) {
                           isShowDialog.value = false;
@@ -115,8 +122,8 @@ class DialogScan {
                             parentContext: parentContext,
                             uuid: model.uuid,
                             repackFormKey: formKeyDialogConfirm,
-                            imageRepack: imageDialogConfirm,
                             datePicked: datePicked,
+                            hawb: model.hawb,
                           );
                         }
                       },
@@ -157,16 +164,46 @@ class DialogScan {
             ),
           ),
           actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('สแกนต่อ'),
-              onPressed: () {
-                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                isShowDialog.value = false;
-                Navigator.of(context).pop();
-              },
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                typeDialogScan == TypeDialogScanItems.dialog5 || typeDialogScan == TypeDialogScanItems.dialog6
+                    ? TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text('เพิ่มรูป'),
+                        onPressed: () async {
+                          isShowDialog.value = false;
+                          Navigator.of(context).pop();
+                          await dialogTakeAImage(
+                            parentContext: parentContext,
+                            isShowDialog: isShowDialog,
+                            datePicked: datePicked,
+                            uuid: model.uuid,
+                            hawb: model.hawb,
+                            module: module,
+                            reason: model.reason,
+                          );
+                        },
+                      )
+                    : SizedBox(),
+                Row(
+                  children: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        textStyle: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      child: const Text('สแกนต่อ'),
+                      onPressed: () {
+                        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                        isShowDialog.value = false;
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                )
+              ],
             ),
           ],
         );
@@ -226,26 +263,6 @@ class DialogScan {
                             )
                           : SizedBox(),
                       SizedBox(height: 30),
-                      ValueListenableBuilder<File?>(
-                        valueListenable: imageNoDMC,
-                        builder: (context, capturedImage, child) {
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              capturedImage == null
-                                  ? SizedBox()
-                                  : Center(
-                                      child: Image.file(
-                                        capturedImage,
-                                        height: 200,
-                                        width: 200,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                            ],
-                          );
-                        },
-                      ),
                     ],
                   ),
                 ),
@@ -257,18 +274,19 @@ class DialogScan {
                         style: TextButton.styleFrom(
                           textStyle: Theme.of(context).textTheme.labelLarge,
                         ),
-                        child: const Text('ถ่ายรูป'),
+                        child: const Text('เพิ่มรูป'),
                         onPressed: () async {
-                          final ImagePicker picker = ImagePicker();
-                          final XFile? image = await picker.pickImage(
-                            source: ImageSource.camera,
-                            maxWidth: 1080,
-                            maxHeight: 1080,
-                            imageQuality: 100,
+                          isShowDialog.value = false;
+                          Navigator.of(context).pop();
+                          await dialogTakeAImage(
+                            parentContext: parentContext,
+                            isShowDialog: isShowDialog,
+                            datePicked: datePicked,
+                            uuid: model.uuid,
+                            hawb: model.hawb,
+                            module: module,
+                            reason: model.reason,
                           );
-                          if (image != null) {
-                            imageNoDMC.value = File(image.path);
-                          }
                         },
                       ),
                       Row(
@@ -350,6 +368,7 @@ class DialogScan {
     required String datePicked,
     required GlobalKey<FormState> formKeyDialogConfirm,
     required ValueNotifier<File?> imageDialogConfirm,
+    required String module,
     TypeDialogScanItems? typeDialogScan,
     int? statusCode,
     bool isDialog3 = false,
@@ -388,7 +407,8 @@ class DialogScan {
                           reportFormKey: formKeyDialogConfirm,
                           imageReport: imageDialogConfirm,
                           datePicked: datePicked,
-                          module: "2",
+                          hawb: model.hawb,
+                          module: module,
                           problemCode: "10",
                         );
                       },
@@ -428,18 +448,313 @@ class DialogScan {
             ),
           ),
           actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('สแกนต่อ'),
-              onPressed: () {
-                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-                isShowDialog.value = false;
-                Navigator.of(context).pop();
-              },
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                typeDialogScan == TypeDialogScanItems.dialog1 || typeDialogScan == TypeDialogScanItems.dialog2
+                    ? TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text('เพิ่มรูป'),
+                        onPressed: () async {
+                          isShowDialog.value = false;
+                          Navigator.of(context).pop();
+                          await dialogTakeAImage(
+                            parentContext: parentContext,
+                            isShowDialog: isShowDialog,
+                            datePicked: datePicked,
+                            uuid: model.uuid,
+                            hawb: model.hawb,
+                            module: module,
+                            reason: model.reason,
+                          );
+                        },
+                      )
+                    : SizedBox(),
+                Row(
+                  children: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        textStyle: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      child: const Text('สแกนต่อ'),
+                      onPressed: () {
+                        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                        isShowDialog.value = false;
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
+        );
+      },
+    );
+  }
+
+  Future<void> showReleaseScanDialog({
+    required BuildContext parentContext,
+    required ReleaseModel model,
+    required ValueNotifier<bool> isShowDialog,
+    required String datePicked,
+    int? statusCode,
+    bool isDialog3 = false,
+    String? nameReportBtn,
+    String? remarkSuccess,
+    String? remarkFailed,
+    bool isGreen = false,
+    TypeDialogScanItems? typeDialogScanItems,
+  }) {
+    if (isShowDialog.value) {
+      Navigator.of(parentContext).pop();
+      isShowDialog.value = false;
+    }
+    isShowDialog.value = true;
+    return showDialog(
+      context: parentContext,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                Text("HAWB: ${model.hawb}"),
+                if (model.productType == "G" || model.productType == "R")
+                  customBadgeSpecial(model.productType)
+                else
+                  customTypeBadge(model.productType),
+                Text("Pick Up: ${model.pickupBy}"),
+                Text("สถานะล่าสุด: ${model.lastStatus}"),
+                Text("Item No: ${model.itemNo}"),
+                Text("Consignee: ${model.consigneeName}"),
+                Text("CTNS: ${model.ctns}"),
+                SizedBox(height: 30),
+                remarkFailed != null
+                    ? Container(
+                        child: Text(
+                          "$remarkFailed",
+                          style: TextStyle(
+                            color: isGreen ? Colors.green[200] : Colors.red[200],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      )
+                    : SizedBox(),
+                SizedBox(height: 10),
+              ],
+            ),
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                typeDialogScanItems == TypeDialogScanItems.dialog1 || typeDialogScanItems == TypeDialogScanItems.dialog2
+                    ? TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text('เพิ่มรูป'),
+                        onPressed: () async {
+                          isShowDialog.value = false;
+                          Navigator.of(context).pop();
+                          await dialogTakeAImage(
+                            parentContext: parentContext,
+                            isShowDialog: isShowDialog,
+                            datePicked: datePicked,
+                            uuid: model.uuid,
+                            hawb: model.hawb,
+                            module: "3",
+                            reason: model.reason,
+                          );
+                        },
+                      )
+                    : SizedBox(),
+                Row(
+                  children: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        textStyle: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      child: const Text('สแกนต่อ'),
+                      onPressed: () {
+                        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                        isShowDialog.value = false;
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> dialogTakeAImage({
+    required BuildContext parentContext,
+    required ValueNotifier<bool> isShowDialog,
+    required String datePicked,
+    required String uuid,
+    required String hawb,
+    required String module,
+    required String reason,
+  }) async {
+    if (isShowDialog.value) {
+      Navigator.of(parentContext).pop();
+      isShowDialog.value = false;
+    }
+    isShowDialog.value = true;
+    bool _isProgressing = false;
+    ValueNotifier<List<File?>> _imagesGridView = ValueNotifier<List<File?>>([]);
+
+    return await showDialog(
+      context: parentContext,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return Stack(
+            children: [
+              AlertDialog(
+                content: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(height: 10),
+                      ValueListenableBuilder<List<File?>>(
+                        valueListenable: _imagesGridView,
+                        builder: (context, capturedImage, child) {
+                          return SizedBox(
+                            width: double.maxFinite,
+                            height: 300.0,
+                            child: GridView.builder(
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 4.0,
+                                mainAxisSpacing: 4.0,
+                              ),
+                              itemCount: _imagesGridView.value.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () => _showImagePreview(context, _imagesGridView.value[index]!),
+                                  child: Image.file(
+                                    _imagesGridView.value[index]!,
+                                    height: 200,
+                                    width: 200,
+                                    fit: BoxFit.contain,
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text('ถ่ายรูป'),
+                        onPressed: () async {
+                          File? resultImageWaterMark = await takePhoto(hawb: hawb, module: module);
+                          if (resultImageWaterMark != null) {
+                            setState(() {
+                              _imagesGridView.value.add(resultImageWaterMark);
+                            });
+                          }
+                        },
+                      ),
+                      Row(children: [
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            textStyle: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          child: const Text('ยกเลิก'),
+                          onPressed: () {
+                            isShowDialog.value = false;
+                            context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            textStyle: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          child: const Text('ยืนยัน'),
+                          onPressed: () async {
+                            if (_imagesGridView.value.length > 0) {
+                              setState(() {
+                                _isProgressing = true;
+                              });
+
+                              await DataService()
+                                  .sendOnlyImage(uuid, datePicked, _imagesGridView.value, module)
+                                  .then((res) {
+                                if (res == "success") {
+                                  snackBarUtil(context, 'ยืนยันสำเร็จ');
+                                } else {
+                                  snackBarUtil(context, 'ไม่สามารถยืนยันได้ กรุณาลองใหม่อีกครั้ง');
+                                }
+
+                                setState(() {
+                                  _isProgressing = false;
+                                });
+                                isShowDialog.value = false;
+                                _imagesGridView.value = [];
+                                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+
+                                Navigator.of(context).pop();
+                              });
+                            } else {
+                              setState(() {
+                                _isProgressing = false;
+                              });
+
+                              snackBarUtil(context, "กรุณาถ่ายรูปเพื่อยืนยัน");
+                            }
+                          },
+                        ),
+                      ])
+                    ],
+                  )
+                ],
+              ),
+              if (_isProgressing)
+                Container(
+                  color: Colors.black.withOpacity(0.1), // Dimmed background
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+            ],
+          );
+        });
+      },
+    );
+  }
+
+  void _showImagePreview(BuildContext context, File imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Image.file(
+              imageUrl,
+              fit: BoxFit.cover,
+            ),
+          ),
         );
       },
     );
@@ -453,11 +768,13 @@ class DialogScan {
     required ValueNotifier<File?> imageReport,
     required String datePicked,
     required String module,
+    required String hawb,
     String? problemCode = "08",
   }) async {
     TextEditingController _controllerRemark = TextEditingController();
     String? reasonValue;
     bool _isProgressing = false;
+    ValueNotifier<List<File?>> _imagesGridView = ValueNotifier<List<File?>>([]);
 
     Map<String, dynamic> result = await DataService().getProblemList(problemCode);
     List<DropdownMenuEntry<String>> reasonList = (result['data'] as List)
@@ -528,23 +845,31 @@ class DialogScan {
                           ),
                         ),
                         SizedBox(height: 30),
-                        ValueListenableBuilder<File?>(
-                          valueListenable: imageReport,
+                        ValueListenableBuilder<List<File?>>(
+                          valueListenable: _imagesGridView,
                           builder: (context, capturedImage, child) {
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                capturedImage == null
-                                    ? SizedBox()
-                                    : Center(
-                                        child: Image.file(
-                                          capturedImage,
-                                          height: 200,
-                                          width: 200,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                              ],
+                            return SizedBox(
+                              width: double.maxFinite,
+                              height: 300.0,
+                              child: GridView.builder(
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  crossAxisSpacing: 4.0,
+                                  mainAxisSpacing: 4.0,
+                                ),
+                                itemCount: _imagesGridView.value.length,
+                                itemBuilder: (context, index) {
+                                  return GestureDetector(
+                                    onTap: () => _showImagePreview(context, _imagesGridView.value[index]!),
+                                    child: Image.file(
+                                      _imagesGridView.value[index]!,
+                                      height: 200,
+                                      width: 200,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  );
+                                },
+                              ),
                             );
                           },
                         ),
@@ -562,15 +887,20 @@ class DialogScan {
                         ),
                         child: const Text('ถ่ายรูป'),
                         onPressed: () async {
-                          final ImagePicker picker = ImagePicker();
-                          final XFile? image = await picker.pickImage(
-                            source: ImageSource.camera,
-                            maxWidth: 1080,
-                            maxHeight: 1080,
-                            imageQuality: 100,
-                          );
-                          if (image != null) {
-                            imageReport.value = File(image.path);
+                          if (reasonValue == null) {
+                            snackBarUtil(context, "กรุณาเลือกสาเหตุ");
+                          } else {
+                            String reasonLabel = _getLabelNameFromReasonList(reasonList, reasonValue!);
+                            File? resultImageWaterMark = await takePhoto(
+                              hawb: hawb,
+                              module: module,
+                              reason: reasonLabel,
+                            );
+                            if (resultImageWaterMark != null) {
+                              setState(() {
+                                _imagesGridView.value.add(resultImageWaterMark);
+                              });
+                            }
                           }
                         },
                       ),
@@ -582,7 +912,7 @@ class DialogScan {
                           child: const Text('ยกเลิก'),
                           onPressed: () {
                             isShowDialog.value = false;
-                            imageReport.value = null;
+                            _imagesGridView.value = [];
                             context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                             Navigator.of(context).pop();
                           },
@@ -600,13 +930,13 @@ class DialogScan {
                               });
 
                               if (reasonValue == "03") {
-                                if (imageReport.value != null) {
+                                if (_imagesGridView.value.length > 0) {
                                   res = await DataService().sendReport(
                                     uuid,
                                     datePicked,
                                     reasonValue!,
                                     module,
-                                    image: imageReport.value!,
+                                    image: _imagesGridView.value,
                                     remark: _controllerRemark.text,
                                   );
 
@@ -620,7 +950,7 @@ class DialogScan {
                                     _isProgressing = false;
                                   });
                                   isShowDialog.value = false;
-                                  imageReport.value = null;
+                                  _imagesGridView.value = [];
                                   context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
 
                                   Navigator.of(context).pop();
@@ -632,13 +962,13 @@ class DialogScan {
                                   snackBarUtil(context, 'กรุณาถ่ายรูปสินค้าหรือพัสดุเพื่อแจ้งปัญหา');
                                 }
                               } else {
-                                if (imageReport.value != null) {
+                                if (_imagesGridView.value.length > 0) {
                                   res = await DataService().sendReport(
                                     uuid,
                                     datePicked,
                                     reasonValue!,
                                     module,
-                                    image: imageReport.value!,
+                                    image: _imagesGridView.value,
                                     remark: _controllerRemark.text,
                                   );
                                 } else {
@@ -660,7 +990,7 @@ class DialogScan {
                                   _isProgressing = false;
                                 });
                                 isShowDialog.value = false;
-                                imageReport.value = null;
+                                _imagesGridView.value = [];
                                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
 
                                 Navigator.of(context).pop();
@@ -692,10 +1022,10 @@ class DialogScan {
     required BuildContext parentContext,
     required String uuid,
     required GlobalKey<FormState> repackFormKey,
-    required ValueNotifier<File?> imageRepack,
     required String datePicked,
+    required String hawb,
   }) async {
-    imageRepack.value = null;
+    ValueNotifier<List<File?>> _imagesGridView = ValueNotifier<List<File?>>([]);
     bool _isProgressing = false;
 
     if (isShowDialog.value) {
@@ -732,23 +1062,31 @@ class DialogScan {
                       SizedBox(
                         height: 30,
                       ),
-                      ValueListenableBuilder<File?>(
-                        valueListenable: imageRepack,
+                      ValueListenableBuilder<List<File?>>(
+                        valueListenable: _imagesGridView,
                         builder: (context, capturedImage, child) {
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              capturedImage == null
-                                  ? SizedBox()
-                                  : Center(
-                                      child: Image.file(
-                                        capturedImage,
-                                        height: 200,
-                                        width: 200,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                            ],
+                          return SizedBox(
+                            width: double.maxFinite,
+                            height: 300.0,
+                            child: GridView.builder(
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 4.0,
+                                mainAxisSpacing: 4.0,
+                              ),
+                              itemCount: _imagesGridView.value.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () => _showImagePreview(context, _imagesGridView.value[index]!),
+                                  child: Image.file(
+                                    _imagesGridView.value[index]!,
+                                    height: 200,
+                                    width: 200,
+                                    fit: BoxFit.contain,
+                                  ),
+                                );
+                              },
+                            ),
                           );
                         },
                       ),
@@ -765,15 +1103,14 @@ class DialogScan {
                         ),
                         child: const Text('ถ่ายรูป'),
                         onPressed: () async {
-                          final ImagePicker picker = ImagePicker();
-                          final XFile? image = await picker.pickImage(
-                            source: ImageSource.camera,
-                            maxWidth: 1080,
-                            maxHeight: 1080,
-                            imageQuality: 100,
+                          File? resultImageWaterMark = await takePhoto(
+                            hawb: hawb,
+                            module: "1",
                           );
-                          if (image != null) {
-                            imageRepack.value = File(image.path);
+                          if (resultImageWaterMark != null) {
+                            setState(() {
+                              _imagesGridView.value.add(resultImageWaterMark);
+                            });
                           }
                         },
                       ),
@@ -785,7 +1122,7 @@ class DialogScan {
                           child: const Text('ยกเลิก'),
                           onPressed: () {
                             isShowDialog.value = false;
-                            imageRepack.value = null;
+                            _imagesGridView.value = [];
                             context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                             Navigator.of(context).pop();
                           },
@@ -796,11 +1133,11 @@ class DialogScan {
                           ),
                           child: const Text('ยืนยัน'),
                           onPressed: () async {
-                            if (imageRepack.value != null) {
+                            if (_imagesGridView.value.length > 0) {
                               setState(() {
                                 _isProgressing = true;
                               });
-                              await DataService().sendRepack(uuid, datePicked, imageRepack.value!).then((res) {
+                              await DataService().sendRepack(uuid, datePicked, _imagesGridView.value).then((res) {
                                 if (res == "success") {
                                   snackBarUtil(context, 'แจ้งการ Repack สำเร็จ');
                                 } else {
@@ -811,7 +1148,7 @@ class DialogScan {
                                   _isProgressing = false;
                                 });
                                 isShowDialog.value = false;
-                                imageRepack.value = null;
+                                _imagesGridView.value = [];
                                 context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
 
                                 Navigator.of(context).pop();
@@ -903,9 +1240,109 @@ class DialogScan {
       ),
     );
   }
+
+  String _getLabelNameFromReasonList(List<DropdownMenuEntry<String>> reasonList, String valueTarget) {
+    return reasonList.firstWhere((data) {
+      return data.value == valueTarget;
+    }).label;
+  }
 }
 
-TableRow TableRowScan(
+Future<File?> takePhoto({required String hawb, String reason = "", required String module}) async {
+  final ImagePicker picker = ImagePicker();
+  final XFile? image = await picker.pickImage(source: ImageSource.camera);
+  String location = getNameModule(module);
+  if (image != null) {
+    File? watermarkedImage = await addWaterMark(
+        imageBeforeWaterMark: image.path, nameImage: image.name, hawb: hawb, location: location, reason: reason);
+    XFile? reduceImage = await compressImage(watermarkedImage!);
+    File? finalImage = File(reduceImage.path);
+    return finalImage;
+  }
+  return null;
+}
+
+String getNameModule(String module) {
+  switch (module) {
+    case "1":
+      return "สแกนหาของ";
+    case "2":
+      return "สแกนของพร้อมปล่อย";
+    case "3":
+      return "ของพร้อมปล่อย";
+    default:
+      return "สแกนหาของ";
+  }
+}
+
+Future<File?> addWaterMark({
+  required String imageBeforeWaterMark,
+  required String nameImage,
+  required String hawb,
+  required String location,
+  required String reason,
+}) async {
+  final File imageFile = File(imageBeforeWaterMark);
+  final img.Image? originalImage = img.decodeImage(imageFile.readAsBytesSync());
+
+  if (originalImage != null) {
+    int defaultX = 100;
+    int fontSize = 40;
+    int imageHeight = originalImage.height;
+    if (reason.isNotEmpty) {
+      defaultX = 210;
+      // fontSize = 28;
+      reason = "เหตุผล: $reason";
+    }
+
+    final _watermarkPlugin = WatermarkUnique();
+    String text = 'hawb: ${hawb.trim()}\nLocation: ${location.trim()}\n${reason.trim()}';
+    int axisY = (imageHeight - defaultX) - 24;
+    final image = await _watermarkPlugin.addTextWatermark(
+      filePath: imageBeforeWaterMark,
+      text: text,
+      x: 30,
+      y: axisY,
+      textSize: fontSize,
+      color: Colors.white,
+      quality: 50,
+      imageFormat: ImageFormat.png,
+    );
+    File finalFile = File(image!);
+
+    return finalFile;
+  }
+  return null;
+}
+
+Future<XFile> compressImage(File file) async {
+  if (!file.existsSync()) {
+    throw Exception('File does not exist at the given path');
+  }
+  String nameImage = "";
+  if (file.uri.pathSegments.last.endsWith(".png") || file.uri.pathSegments.last.endsWith(".jpg")) {
+    nameImage = file.uri.pathSegments.last.substring(0, file.uri.pathSegments.last.length - 4);
+  } else if (file.uri.pathSegments.last.endsWith(".jpeg")) {
+    nameImage = file.uri.pathSegments.last.substring(0, file.uri.pathSegments.last.length - 5);
+  }
+
+  final compressedFile = await FlutterImageCompress.compressAndGetFile(
+    file.absolute.path,
+    '${file.parent.path}/converted_${nameImage}.jpg',
+    quality: 70,
+    minWidth: 800,
+    minHeight: 800,
+    format: CompressFormat.jpeg,
+  );
+
+  if (compressedFile != null) {
+    return compressedFile;
+  } else {
+    throw Exception('Image compression failed.');
+  }
+}
+
+TableRow tableRowScan(
     {required BuildContext context,
     required String uuid,
     required String hawb,

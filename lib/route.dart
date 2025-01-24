@@ -60,20 +60,20 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
           return ReleaseItemsPage();
         },
       );
-    case '/report':
-      return PageRouteBuilder(
-        settings: settings,
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return ReportPage();
-        },
-      );
-    case '/repack':
-      return PageRouteBuilder(
-        settings: settings,
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return RepackPage();
-        },
-      );
+    // case '/report':
+    //   return PageRouteBuilder(
+    //     settings: settings,
+    //     pageBuilder: (context, animation, secondaryAnimation) {
+    //       return ReportPage();
+    //     },
+    //   );
+    // case '/repack':
+    //   return PageRouteBuilder(
+    //     settings: settings,
+    //     pageBuilder: (context, animation, secondaryAnimation) {
+    //       return RepackPage();
+    //     },
+    //   );
   }
   return null;
 }

@@ -229,18 +229,18 @@ class DataService {
   }
 
   Future<String> sendReport(String uuid, String date, String problemCode, String module,
-      {File? image, String? remark}) async {
+      {List<File?>? image, String? remark}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m/report';
+    final String path = '/v1/ip/report';
     final Uri url = Uri.https(_baseUrl, path);
 
     try {
       final request = http.MultipartRequest("POST", url);
       request.headers.addAll({
         'Authorization': "Bearer $accessToken",
-        'Content-Type': 'multipart/form-data',
+        // 'Content-Type': 'multipart/form-data',
       });
       request.fields['uuid'] = uuid;
       request.fields['date'] = date;
@@ -249,8 +249,11 @@ class DataService {
       if (remark != null || remark!.isEmpty) {
         request.fields['remark'] = remark;
       }
+
       if (image != null) {
-        request.files.add(await http.MultipartFile.fromPath('image', image.path));
+        for (File? img in image) {
+          request.files.add(await http.MultipartFile.fromPath('image', img!.path));
+        }
       }
 
       var response = await request.send();
@@ -265,11 +268,11 @@ class DataService {
     }
   }
 
-  Future<String> sendRepack(String uuid, String date, File image) async {
+  Future<String> sendRepack(String uuid, String date, List<File?> image) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m/repack';
+    final String path = '/v1/ip/repack';
     final Uri url = Uri.https(_baseUrl, path);
     try {
       final request = http.MultipartRequest("POST", url);
@@ -279,7 +282,39 @@ class DataService {
       });
       request.fields['uuid'] = uuid;
       request.fields['date'] = date;
-      request.files.add(await http.MultipartFile.fromPath('image', image.path));
+      for (File? img in image) {
+        request.files.add(await http.MultipartFile.fromPath('image', img!.path));
+      }
+
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        return Future.value("success");
+      } else {
+        return Future.value("faild");
+      }
+    } catch (e) {
+      return Future.value("error");
+    }
+  }
+
+  Future<String> sendOnlyImage(String uuid, String date, List<File?> image, String module) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String accessToken = prefs.getString("accessToken") ?? "";
+
+    final String path = '/v1/ip/image';
+    final Uri url = Uri.https(_baseUrl, path);
+    try {
+      final request = http.MultipartRequest("POST", url);
+      request.headers.addAll({
+        'Authorization': "Bearer $accessToken",
+        'Content-Type': 'multipart/form-data',
+      });
+      request.fields['uuid'] = uuid;
+      request.fields['date'] = date;
+      for (File? img in image) {
+        request.files.add(await http.MultipartFile.fromPath('image', img!.path));
+      }
+      request.fields['module'] = module;
 
       var response = await request.send();
       if (response.statusCode == 200) {

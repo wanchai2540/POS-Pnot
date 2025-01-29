@@ -185,45 +185,31 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   void _handleDropdownSelection(String value) {
     switch (value) {
       case "ทั้งหมด":
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked),
-            );
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
         break;
       case "สแกนแล้ว":
         dropdownValue = "03";
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "03"),
-            );
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "03"));
         break;
       case "ยังไม่ได้สแกน":
         dropdownValue = "01";
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "01"),
-            );
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "01"));
         break;
       case "ของพร้อมปล่อย":
         dropdownValue = "04";
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "04"),
-            );
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "04"));
         break;
       case "ปล่อยของ":
         dropdownValue = "05";
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "05"),
-            );
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "05"));
         break;
       case "พบปัญหา":
         dropdownValue = "08";
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "08"),
-            );
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "08"));
         break;
       case "อื่นๆ":
         dropdownValue = "00";
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "00"),
-            );
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "00"));
         break;
       default:
     }

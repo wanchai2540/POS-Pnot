@@ -14,7 +14,8 @@ class DetailScanItemPage extends StatefulWidget {
 }
 
 class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProviderStateMixin {
-  Map<String, dynamic> detailData = {};
+  List<DetailItemScanModel> detailData = [];
+  List<PhotoItemScanModel> imageData = [];
   late final TabController _tabController;
 
   @override
@@ -22,27 +23,7 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
     super.initState();
     _tabController = TabController(initialIndex: 0, length: 2, vsync: this);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DetailItemScanBloc>().add(DetailItemScanLoadingEvent(uuid: widget.uuid, typeData: "routes"));
-    });
-  }
-
-  @override
-  void didChangeDependencies() {
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging) {
-        switch (_tabController.index) {
-          case 0:
-            context.read<DetailItemScanBloc>().add(DetailItemScanLoadingEvent(uuid: widget.uuid, typeData: "routes"));
-            break;
-          case 1:
-            context.read<DetailItemScanBloc>().add(DetailItemScanLoadingEvent(uuid: widget.uuid, typeData: "images"));
-            break;
-          default:
-        }
-      }
-    });
-    super.didChangeDependencies();
+    context.read<DetailItemScanBloc>().add(DetailItemScanLoadingEvent(uuid: widget.uuid));
   }
 
   @override
@@ -55,91 +36,79 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detail Scan'),
+        title: Text('Detail Scan'),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(50.0),
-          child: BlocBuilder<DetailItemScanBloc, DetailItemScanState>(
-            builder: (context, state) {
-              return TabBar(
-                controller: _tabController,
-                tabs: [
-                  Tab(text: 'Detail'),
-                  Tab(text: 'Photo'),
-                ],
-              );
-            },
+          child: TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(text: 'Detail'),
+              Tab(text: 'Photo'),
+            ],
           ),
         ),
       ),
       body: BlocBuilder<DetailItemScanBloc, DetailItemScanState>(
         builder: (context, state) {
-          return TabBarView(
-            controller: _tabController,
-            children: [
-              SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("HAWB", style: TextStyle(fontSize: 20)),
-                        SizedBox(width: 10),
-                        Text("(${widget.hawb})", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    SizedBox(height: 30),
-                    BlocBuilder<DetailItemScanBloc, DetailItemScanState>(
-                      builder: (context, state) {
-                        if (state is DetailItemScanLoadingState) {
-                          return CircularProgressIndicator();
-                        } else if (state is DetailItemScanLoadedState) {
-                          List<DetailItemScanModel> model = (state.data as List).map((item) {
-                            return DetailItemScanModel.fromJson(item);
-                          }).toList();
-                          return _tableDetailData(model);
-                        } else {
-                          return Center(child: Text("ไม่มีข้อมูล"));
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("HAWB", style: TextStyle(fontSize: 20)),
-                        SizedBox(width: 10),
-                        Text("(${widget.hawb})", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    SizedBox(height: 30),
-                    BlocBuilder<DetailItemScanBloc, DetailItemScanState>(
-                      builder: (context, state) {
-                        if (state is DetailItemScanLoadingState) {
-                          return CircularProgressIndicator();
-                        } else if (state is DetailItemScanLoadedState) {
-                          List<PhotoItemScanModel> model = (state.data as List).map((item) {
-                            return PhotoItemScanModel.fromJson(item);
-                          }).toList();
-                          return _tablePhotoData(model);
-                        } else {
-                          return Center(child: Text("ไม่มีข้อมูล"));
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
+          if (state is DetailItemScanLoadingState) {
+            return Center(child: CircularProgressIndicator());
+          } else if (state is DetailItemScanLoadedState) {
+            if (state.data["routes"] != null) {
+              detailData = (state.data["routes"] as List).map((item) => DetailItemScanModel.fromJson(item)).toList();
+            }
+            if (state.data["images"] != null) {
+              imageData = (state.data["images"] as List).map((item) => PhotoItemScanModel.fromJson(item)).toList();
+            }
+
+            return TabBarView(
+              controller: _tabController,
+              children: [
+                _detailTabContent(),
+                _photoTabContent(),
+              ],
+            );
+          } else {
+            return Center(child: Text("ไม่มีข้อมูล"));
+          }
         },
       ),
+    );
+  }
+
+  Widget _detailTabContent() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          SizedBox(height: 30),
+          _hawbHeader(),
+          SizedBox(height: 30),
+          detailData.isNotEmpty ? _tableDetailData(detailData) : Center(child: Text("ไม่มีข้อมูล")),
+        ],
+      ),
+    );
+  }
+
+  Widget _photoTabContent() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          SizedBox(height: 30),
+          _hawbHeader(),
+          SizedBox(height: 30),
+          imageData.isNotEmpty ? _tablePhotoData(imageData) : Center(child: Text("ไม่มีข้อมูล")),
+        ],
+      ),
+    );
+  }
+
+  Widget _hawbHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("HAWB", style: TextStyle(fontSize: 20)),
+        SizedBox(width: 10),
+        Text("(${widget.hawb})", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      ],
     );
   }
 

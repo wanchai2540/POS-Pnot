@@ -361,7 +361,7 @@ class DataService {
     }
   }
 
-  Future<Map<String, dynamic>> getDetailItem(String uuid, String typeData) async {
+  Future<Map<String, dynamic>> getDetailItem(String uuid) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
@@ -372,7 +372,7 @@ class DataService {
       final response = await http.get(url, headers: {'Authorization': "Bearer $accessToken"});
       if (response.statusCode == 200 || response.statusCode == 201) {
         Map<String, dynamic> body = jsonDecode(response.body);
-        return {"status": "success", "text": "login success", "data": body["data"][typeData]};
+        return {"status": "success", "text": "login success", "data": body["data"]};
       } else {
         return {"status": "failed", "text": "login failed", "data": null};
       }

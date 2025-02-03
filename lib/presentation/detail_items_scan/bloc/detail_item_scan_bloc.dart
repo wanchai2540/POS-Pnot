@@ -9,10 +9,10 @@ class DetailItemScanBloc extends Bloc<DetailItemScanEvent, DetailItemScanState> 
   DetailItemScanBloc() : super(DetailItemScanInitialState()) {
     on<DetailItemScanLoadingEvent>((event, emit) async {
       emit(DetailItemScanLoadingState());
-      var data = await DataService().getDetailItem(event.uuid, event.typeData);
+      var data = await DataService().getDetailItem(event.uuid);
       
       if (data["status"] == "success") {
-        List<dynamic>? result = data["data"];
+        Map<String,dynamic>? result = data["data"];
         if (result != null) {
           emit(DetailItemScanLoadedState(data: result));
         } else {

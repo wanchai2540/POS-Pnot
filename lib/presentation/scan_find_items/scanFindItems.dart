@@ -41,7 +41,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   final TextEditingController _textEditing = TextEditingController();
   final FocusNode _keyboardListenerFocusNode = FocusNode();
 
-  ValueNotifier<File?> _imageNoDMC = ValueNotifier<File?>(null);
   ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
   ValueNotifier<File?> _imageRepack = ValueNotifier<File?>(null);
   List<File?> _imageNoReason = [];
@@ -398,7 +397,6 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
             datePicked: datePicked,
             module: "1",
             remarkFailed: 'เป็นงาน "${result.reason}"' + "\nต้องการยืนยันการตรวจสอบ",
-            imageNoDMC: _imageNoDMC,
           );
         } else if (data["appCode"] == "03") {
           // Dialog 2

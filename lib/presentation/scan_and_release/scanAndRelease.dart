@@ -39,7 +39,6 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
   final FocusNode _focusBarcodeField = FocusNode();
   final TextEditingController _textEditing = TextEditingController();
   final FocusNode _keyboardListenerFocusNode = FocusNode();
-  ValueNotifier<File?> _imageNoDMC = ValueNotifier<File?>(null);
   final _reportFormKey = GlobalKey<FormState>();
   ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
   int _countListType = 0;
@@ -422,7 +421,6 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
             datePicked: datePicked,
             module: "2",
             remarkFailed: 'เป็นงาน "${result.reason}"' + "\nต้องการยืนยันการตรวจสอบ",
-            imageNoDMC: _imageNoDMC,
           );
         } else if (data["appCode"] == "02" &&
             (data["statusCode"] == "04" || data["statusCode"] == "07" || data["statusCode"] == "11")) {

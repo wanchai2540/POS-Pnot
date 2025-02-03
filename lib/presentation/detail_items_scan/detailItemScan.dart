@@ -213,7 +213,7 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (data.imageUrl != "" || data.remark != "")
+                    if (data.albums.length > 0 || data.remark != "")
                       IconButton(
                         onPressed: () {
                           _showCustomDialog(
@@ -305,8 +305,6 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
                   ],
                 ),
                 Builder(builder: (context) {
-                  print("james: ${data.uuid}");
-                  print("james: ${data.location}");
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

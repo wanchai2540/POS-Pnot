@@ -216,7 +216,6 @@ class DialogScan {
     required BuildContext parentContext,
     required ScanResultModel model,
     required String datePicked,
-    required ValueNotifier<File?> imageNoDMC,
     required String module,
     String? remarkFailed,
   }) {
@@ -286,6 +285,7 @@ class DialogScan {
                             hawb: model.hawb,
                             module: module,
                             reason: model.reason,
+                            isNoDMC: true,
                           );
                         },
                       ),
@@ -294,7 +294,6 @@ class DialogScan {
                           TextButton(
                             onPressed: () {
                               isShowDialog.value = false;
-                              imageNoDMC.value = null;
                               context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
                               Navigator.of(context).pop();
                             },
@@ -310,20 +309,11 @@ class DialogScan {
                               setState(() {
                                 _isProgressing = true;
                               });
-                              if (imageNoDMC.value != null) {
-                                res = await DataService().sendApproveProblem(
-                                  model.uuid,
-                                  datePicked,
-                                  module,
-                                  image: imageNoDMC.value!,
-                                );
-                              } else {
-                                res = await DataService().sendApproveProblem(
-                                  model.uuid,
-                                  datePicked,
-                                  module,
-                                );
-                              }
+                              res = await DataService().sendApproveProblem(
+                                model.uuid,
+                                datePicked,
+                                module,
+                              );
 
                               if (res == "success") {
                                 snackBarUtil(context, 'แจ้งปัญหาสำเร็จ');
@@ -335,7 +325,6 @@ class DialogScan {
                                 _isProgressing = false;
                               });
                               isShowDialog.value = false;
-                              imageNoDMC.value = null;
                               context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
 
                               Navigator.of(context).pop();
@@ -604,6 +593,7 @@ class DialogScan {
     required String hawb,
     required String module,
     required String reason,
+    bool isNoDMC = false,
   }) async {
     if (isShowDialog.value) {
       Navigator.of(parentContext).pop();
@@ -697,24 +687,29 @@ class DialogScan {
                                 _isProgressing = true;
                               });
 
-                              await DataService()
-                                  .sendOnlyImage(uuid, datePicked, _imagesGridView.value, module)
-                                  .then((res) {
-                                if (res == "success") {
-                                  snackBarUtil(context, 'ยืนยันสำเร็จ');
-                                } else {
-                                  snackBarUtil(context, 'ไม่สามารถยืนยันได้ กรุณาลองใหม่อีกครั้ง');
-                                }
+                              String resultConfirmImage = "";
+                              if (isNoDMC) {
+                                resultConfirmImage = await DataService()
+                                    .sendApproveProblem(uuid, datePicked, module, image: _imagesGridView.value);
+                              } else {
+                                resultConfirmImage =
+                                    await DataService().sendOnlyImage(uuid, datePicked, _imagesGridView.value, module);
+                              }
 
-                                setState(() {
-                                  _isProgressing = false;
-                                });
-                                isShowDialog.value = false;
-                                _imagesGridView.value = [];
-                                context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                              if (resultConfirmImage == "success") {
+                                snackBarUtil(context, 'ยืนยันสำเร็จ');
+                              } else {
+                                snackBarUtil(context, 'ไม่สามารถยืนยันได้ กรุณาลองใหม่อีกครั้ง');
+                              }
 
-                                Navigator.of(context).pop();
+                              setState(() {
+                                _isProgressing = false;
                               });
+                              isShowDialog.value = false;
+                              _imagesGridView.value = [];
+                              context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+
+                              Navigator.of(context).pop();
                             } else {
                               setState(() {
                                 _isProgressing = false;
@@ -1287,22 +1282,21 @@ Future<File?> addWaterMark({
 
   if (originalImage != null) {
     int defaultX = 100;
-    int fontSize = 40;
+    int fontSize = 170;
     int imageHeight = originalImage.height;
     if (reason.isNotEmpty) {
       defaultX = 210;
-      // fontSize = 28;
       reason = "เหตุผล: $reason";
     }
 
     final _watermarkPlugin = WatermarkUnique();
     String text = 'hawb: ${hawb.trim()}\nLocation: ${location.trim()}\n${reason.trim()}';
-    int axisY = (imageHeight - defaultX) - 24;
+    // int axisY = (imageHeight - defaultX) - 24;
     final image = await _watermarkPlugin.addTextWatermark(
       filePath: imageBeforeWaterMark,
       text: text,
-      x: 30,
-      y: axisY,
+      x: 20,
+      y: (imageHeight * 0.7).ceil(),
       textSize: fontSize,
       color: Colors.white,
       quality: 50,

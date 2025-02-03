@@ -327,11 +327,11 @@ class DataService {
     }
   }
 
-  Future<String> sendApproveProblem(String uuid, String date, String module, {File? image}) async {
+  Future<String> sendApproveProblem(String uuid, String date, String module, {List<File?>? image}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m/approve_problem';
+    final String path = '/v1/ip/approve_problem';
     final Uri url = Uri.https(_baseUrl, path);
 
     try {
@@ -344,7 +344,9 @@ class DataService {
       request.fields['date'] = date;
       request.fields['module'] = module;
       if (image != null) {
-        request.files.add(await http.MultipartFile.fromPath('image', image.path));
+        for (File? img in image) {
+          request.files.add(await http.MultipartFile.fromPath('image', img!.path));
+        }
       }
 
       var response = await request.send();
@@ -364,7 +366,7 @@ class DataService {
     String accessToken = prefs.getString("accessToken") ?? "";
 
     final String path = '/v1/ip/item/$uuid';
-    
+
     final Uri url = Uri.https(_baseUrl, path);
     try {
       final response = await http.get(url, headers: {'Authorization': "Bearer $accessToken"});
@@ -379,7 +381,7 @@ class DataService {
       return {"status": "error", "text": "Exception occurred: $e", "data": null};
     }
   }
-  
+
   Future<List<Map<String, dynamic>>> _getDataTypeOther(
       List<String> typeOther, String path, String date, String accessToken) async {
     List<Map<String, dynamic>> result = [];

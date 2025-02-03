@@ -602,6 +602,7 @@ class DialogScan {
     isShowDialog.value = true;
     bool _isProgressing = false;
     ValueNotifier<List<File?>> _imagesGridView = ValueNotifier<List<File?>>([]);
+    ValueNotifier<bool> _isProcessingImage = ValueNotifier<bool>(false);
 
     return await showDialog(
       context: parentContext,
@@ -627,17 +628,21 @@ class DialogScan {
                                 crossAxisSpacing: 4.0,
                                 mainAxisSpacing: 4.0,
                               ),
-                              itemCount: _imagesGridView.value.length,
+                              itemCount: capturedImage.length + (_isProcessingImage.value ? 1 : 0),
                               itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: () => showImagePreview(context, _imagesGridView.value[index]!),
-                                  child: Image.file(
-                                    _imagesGridView.value[index]!,
-                                    height: 200,
-                                    width: 200,
-                                    fit: BoxFit.contain,
-                                  ),
-                                );
+                                if (index < capturedImage.length) {
+                                  return GestureDetector(
+                                    onTap: () => showImagePreview(context, capturedImage[index]!),
+                                    child: Image.file(
+                                      capturedImage[index]!,
+                                      height: 200,
+                                      width: 200,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  );
+                                } else {
+                                  return Center(child: CircularProgressIndicator());
+                                }
                               },
                             ),
                           );
@@ -656,12 +661,14 @@ class DialogScan {
                         ),
                         child: const Text('ถ่ายรูป'),
                         onPressed: () async {
+                          _isProcessingImage.value = true;
+                          setState(() {});
                           File? resultImageWaterMark = await takePhoto(hawb: hawb, module: module);
                           if (resultImageWaterMark != null) {
-                            setState(() {
-                              _imagesGridView.value.add(resultImageWaterMark);
-                            });
+                            _imagesGridView.value = [..._imagesGridView.value, resultImageWaterMark];
                           }
+                          _isProcessingImage.value = false;
+                          setState(() {});
                         },
                       ),
                       Row(children: [
@@ -682,7 +689,7 @@ class DialogScan {
                           ),
                           child: const Text('ยืนยัน'),
                           onPressed: () async {
-                            if (_imagesGridView.value.length > 0) {
+                            if (_imagesGridView.value.isNotEmpty) {
                               setState(() {
                                 _isProgressing = true;
                               });
@@ -726,7 +733,7 @@ class DialogScan {
               ),
               if (_isProgressing)
                 Container(
-                  color: Colors.black.withOpacity(0.1), // Dimmed background
+                  color: Colors.black.withOpacity(0.1),
                   child: Center(
                     child: CircularProgressIndicator(),
                   ),

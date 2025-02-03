@@ -21,7 +21,7 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
   void initState() {
     super.initState();
     _tabController = TabController(initialIndex: 0, length: 2, vsync: this);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DetailItemScanBloc>().add(DetailItemScanLoadingEvent(uuid: widget.uuid, typeData: "routes"));
     });
@@ -221,7 +221,7 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
                             hawb: widget.hawb,
                             status: data.status,
                             remark: data.remark,
-                            imageUrl: data.imageUrl,
+                            albums: data.albums,
                           );
                         },
                         icon: Icon(Icons.warning, color: Colors.orange),
@@ -334,7 +334,7 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
     required String hawb,
     required String status,
     required String remark,
-    required String imageUrl,
+    required List albums,
   }) {
     showDialog(
       context: context,
@@ -348,103 +348,100 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
               Text('รายละเอียด', style: TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              RichText(
-                text: TextSpan(
-                  style: TextStyle(color: Colors.black, fontSize: 18),
-                  children: [
-                    TextSpan(
-                      text: 'HAWB: ',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(
-                      text: hawb,
-                      style: TextStyle(fontWeight: FontWeight.normal),
-                    ),
-                  ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(color: Colors.black, fontSize: 18),
+                    children: [
+                      TextSpan(
+                        text: 'HAWB: ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                        text: hawb,
+                        style: TextStyle(fontWeight: FontWeight.normal),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              RichText(
-                text: TextSpan(
-                  style: TextStyle(color: Colors.black, fontSize: 18),
-                  children: [
-                    TextSpan(
-                      text: 'สถานะ: ',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(
-                      text: status,
-                      style: TextStyle(fontWeight: FontWeight.normal),
-                    ),
-                  ],
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(color: Colors.black, fontSize: 18),
+                    children: [
+                      TextSpan(
+                        text: 'สถานะ: ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                        text: status,
+                        style: TextStyle(fontWeight: FontWeight.normal),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              remark.isNotEmpty
-                  ? RichText(
-                      text: TextSpan(
-                        style: TextStyle(color: Colors.black, fontSize: 18),
+                remark.isNotEmpty
+                    ? RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black, fontSize: 18),
+                          children: [
+                            TextSpan(
+                              text: 'หมายเหตุ: ',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            TextSpan(
+                              text: remark,
+                              style: TextStyle(fontWeight: FontWeight.normal),
+                            ),
+                          ],
+                        ),
+                      )
+                    : SizedBox(),
+                albums.isNotEmpty
+                    ? Column(
                         children: [
-                          TextSpan(
-                            text: 'หมายเหตุ: ',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          TextSpan(
-                            text: remark,
-                            style: TextStyle(fontWeight: FontWeight.normal),
+                          Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'รูปภาพ:',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              )),
+                          SizedBox(height: 16),
+                          Column(
+                            children: [
+                              SizedBox(
+                                width: double.maxFinite,
+                                height: 300,
+                                child: GridView.builder(
+                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    crossAxisSpacing: 4.0,
+                                    mainAxisSpacing: 4.0,
+                                  ),
+                                  itemCount: albums.length,
+                                  itemBuilder: (context, index) {
+                                    return GestureDetector(
+                                      onTap: () => showImagePreview(context, albums[index]["imageUrl"]),
+                                      child: Image.network(
+                                        albums[index]["imageUrl"],
+                                        height: 200,
+                                        width: 200,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                    )
-                  : SizedBox(),
-              imageUrl.isNotEmpty
-                  ? Column(
-                      children: [
-                        Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'รูปภาพ:',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                            )),
-                        SizedBox(height: 16),
-                        Center(
-                          child: Image.network(
-                            imageUrl,
-                            height: 200,
-                            width: 200,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) {
-                                return child;
-                              }
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                      : null,
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    "assets/images/no-image.png",
-                                    height: 200,
-                                    width: 200,
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    )
-                  : SizedBox(),
-            ],
+                      )
+                    : SizedBox(),
+              ],
+            ),
           ),
           actions: [
             TextButton(

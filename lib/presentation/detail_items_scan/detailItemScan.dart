@@ -393,6 +393,20 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
                                     return GestureDetector(
                                       onTap: () => showImagePreview(context, albums[index]["imageUrl"]),
                                       child: Image.network(
+                                        loadingBuilder: (context, child, loadingProgress) {
+                                          if (loadingProgress == null) {
+                                            return child;
+                                          } else {
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress.expectedTotalBytes != null
+                                                    ? loadingProgress.cumulativeBytesLoaded /
+                                                        (loadingProgress.expectedTotalBytes ?? 1)
+                                                    : null,
+                                              ),
+                                            );
+                                          }
+                                        },
                                         albums[index]["imageUrl"],
                                         height: 200,
                                         width: 200,
@@ -446,6 +460,19 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
                 return GestureDetector(
                   onTap: () => showImagePreview(context, albums[index]["imageUrl"]),
                   child: Image.network(
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      } else {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                                : null,
+                          ),
+                        );
+                      }
+                    },
                     albums[index]["imageUrl"],
                     height: 200,
                     width: 200,
@@ -476,6 +503,19 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
           content: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Image.network(
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                          : null,
+                    ),
+                  );
+                }
+              },
               imageUrl,
               fit: BoxFit.cover,
             ),

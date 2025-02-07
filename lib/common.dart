@@ -1269,9 +1269,10 @@ Future<File?> takePhoto({required String hawb, String reason = "", required Stri
   final XFile? image = await picker.pickImage(source: ImageSource.camera);
   String location = getNameModule(module);
   if (image != null) {
-    File? watermarkedImage = await addWaterMark(
-        imageBeforeWaterMark: image.path, nameImage: image.name, hawb: hawb, location: location, reason: reason);
-    XFile? reduceImage = await compressImage(watermarkedImage!);
+    // File? watermarkedImage = await addWaterMark(
+    //     imageBeforeWaterMark: image.path, nameImage: image.name, hawb: hawb, location: location, reason: reason);
+    File? imageNeedToReduce = File(image.path);
+    XFile? reduceImage = await compressImage(imageNeedToReduce);
     File? finalImage = File(reduceImage.path);
     return finalImage;
   }

@@ -255,7 +255,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m/report';
+    final String path = '/v1/ip/report';
     final Uri url = Uri.https(_baseUrl, path);
 
     try {
@@ -293,7 +293,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m/repack';
+    final String path = '/v1/ip/repack';
     final Uri url = Uri.https(_baseUrl, path);
     try {
       final request = http.MultipartRequest("POST", url);
@@ -322,7 +322,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m/approve_problem';
+    final String path = '/v1/ip/approve_problem';
     final Uri url = Uri.https(_baseUrl, path);
 
     try {
@@ -356,7 +356,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m/item/$uuid';
+    final String path = '/v1/ip/item/$uuid';
     final Uri url = Uri.https(_baseUrl, path);
     try {
       final response = await http.get(url, headers: {'Authorization': "Bearer $accessToken"});

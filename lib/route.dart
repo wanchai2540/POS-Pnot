@@ -43,7 +43,8 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
       return PageRouteBuilder(
         settings: settings,
         pageBuilder: (context, animation, secondaryAnimation) {
-          return DetailScanItemPage();
+          Map args = settings.arguments as Map;
+          return DetailScanItemPage(uuid: args["uuid"], hawb: args["hawb"]);
         },
       );
     case '/scanAndRelease':
@@ -60,20 +61,20 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
           return ReleaseItemsPage();
         },
       );
-    case '/report':
-      return PageRouteBuilder(
-        settings: settings,
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return ReportPage();
-        },
-      );
-    case '/repack':
-      return PageRouteBuilder(
-        settings: settings,
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return RepackPage();
-        },
-      );
+    // case '/report':
+    //   return PageRouteBuilder(
+    //     settings: settings,
+    //     pageBuilder: (context, animation, secondaryAnimation) {
+    //       return ReportPage();
+    //     },
+    //   );
+    // case '/repack':
+    //   return PageRouteBuilder(
+    //     settings: settings,
+    //     pageBuilder: (context, animation, secondaryAnimation) {
+    //       return RepackPage();
+    //     },
+    //   );
   }
   return null;
 }

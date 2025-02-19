@@ -400,25 +400,28 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
           );
         } else if (data["appCode"] == "03") {
           // Dialog 2
-          DialogScan().showScanNoHawbDialog(isShowDialog: _isShowDialog, context: context, datePicked: datePicked);
+          DialogScan().showScanNoHawbDialog(
+              title: "ไม่พบ HAWB ในระบบ", isShowDialog: _isShowDialog, context: context, datePicked: datePicked);
         } else if (data["appCode"] == "02" &&
             (data["statusCode"] == "04" ||
                 data["statusCode"] == "05" ||
                 data["statusCode"] == "10" ||
                 data["statusCode"] == "11")) {
           // Dialog 3
-          DialogScan().showScanDialog(
-            isShowDialog: _isShowDialog,
-            parentContext: parentContext,
-            model: result,
-            datePicked: datePicked,
-            formKeyDialogConfirm: _reportFormKey,
-            imageDialogConfirm: _imageReport,
-            statusCode: 400,
-            module: "1",
-            remarkFailed: "สถานะไม่ถูกต้อง",
-            typeDialogScan: TypeDialogScanItems.dialog3,
-          );
+          // DialogScan().showScanDialog(
+          //   isShowDialog: _isShowDialog,
+          //   parentContext: parentContext,
+          //   model: result,
+          //   datePicked: datePicked,
+          //   formKeyDialogConfirm: _reportFormKey,
+          //   imageDialogConfirm: _imageReport,
+          //   statusCode: 400,
+          //   module: "1",
+          //   remarkFailed: "สถานะไม่ถูกต้อง",
+          //   typeDialogScan: TypeDialogScanItems.dialog3,
+          // );
+          DialogScan().showScanNoHawbDialog(
+              title: "สถานะไม่ถูกต้อง", isShowDialog: _isShowDialog, context: context, datePicked: datePicked);
         } else if (data["appCode"] == "02" && data["statusCode"] == "08" && data["subStatusCode"] == "03") {
           // Dialog 4
           DialogScan().showScanDialog(

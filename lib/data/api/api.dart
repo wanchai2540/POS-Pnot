@@ -313,6 +313,8 @@ class DataService {
       var response = await request.send();
       if (response.statusCode == 200) {
         return Future.value("success");
+      } else if (await _checkTokenExpire(response.statusCode)) {
+        return Future.value("tokenExpired");
       } else {
         return Future.value("faild");
       }

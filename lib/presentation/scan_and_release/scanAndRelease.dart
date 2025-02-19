@@ -406,6 +406,7 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
         if (data["appCode"] == "03") {
           // Dialog 4
           DialogScan().showScanNoHawbDialog(
+            title: "ไม่พบ HAWB ในระบบ",
             isShowDialog: _isShowDialog,
             context: context,
             datePicked: datePicked,
@@ -443,15 +444,21 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                 data["statusCode"] == "05" ||
                 data["statusCode"] == "08")) {
           // Dialog 3
-          DialogScan().showScanAndReleaseDialog(
+          // DialogScan().showScanAndReleaseDialog(
+          //   isShowDialog: _isShowDialog,
+          //   model: result,
+          //   parentContext: parentContext,
+          //   datePicked: datePicked,
+          //   formKeyDialogConfirm: _reportFormKey,
+          //   imageDialogConfirm: _imageReport,
+          //   module: "2",
+          //   remarkFailed: "สถานะไม่ถูกต้อง",
+          // );
+          DialogScan().showScanNoHawbDialog(
+            title: "สถานะไม่ถูกต้อง",
             isShowDialog: _isShowDialog,
-            model: result,
-            parentContext: parentContext,
+            context: context,
             datePicked: datePicked,
-            formKeyDialogConfirm: _reportFormKey,
-            imageDialogConfirm: _imageReport,
-            module: "2",
-            remarkFailed: "สถานะไม่ถูกต้อง",
           );
         }
       }

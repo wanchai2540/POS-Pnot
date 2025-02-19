@@ -437,7 +437,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
         if (data["appCode"] == "03") {
           // Dialog 4
           DialogScan()
-              .showScanNoHawbDialog(isShowDialog: _isShowDialog, context: parentContext, datePicked: datePicked);
+              .showScanNoHawbDialog(title: "ไม่พบ HAWB ในระบบ",isShowDialog: _isShowDialog, context: parentContext, datePicked: datePicked);
         } else if (data["appCode"] == "02" && data["statusCode"] == "05") {
           // Dialog 2
           DialogScan().showReleaseScanDialog(
@@ -457,13 +457,15 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                 data["statusCode"] == "09" ||
                 data["statusCode"] == "10")) {
           // Dialog 3
-          DialogScan().showReleaseScanDialog(
-            model: result,
-            parentContext: parentContext,
-            isShowDialog: _isShowDialog,
-            datePicked: datePicked,
-            remarkFailed: "สถานะไม่ถูกต้อง",
-          );
+          // DialogScan().showReleaseScanDialog(
+          //   model: result,
+          //   parentContext: parentContext,
+          //   isShowDialog: _isShowDialog,
+          //   datePicked: datePicked,
+          //   remarkFailed: "สถานะไม่ถูกต้อง",
+          // );
+          DialogScan()
+              .showScanNoHawbDialog(title: "สถานะไม่ถูกต้อง",isShowDialog: _isShowDialog, context: parentContext, datePicked: datePicked);
         }
       }
     } catch (e) {

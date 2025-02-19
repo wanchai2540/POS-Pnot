@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class DialogScan {
   Future<void> showScanNoHawbDialog({
+    required String title,
     required ValueNotifier<bool> isShowDialog,
     required BuildContext context,
     required String datePicked,
@@ -36,7 +37,7 @@ class DialogScan {
             height: MediaQuery.of(context).size.height * 0.20,
             alignment: Alignment.center,
             child: Text(
-              'ไม่พบ HAWB ในระบบ',
+              title,
               style: TextStyle(
                 color: Colors.red[200],
                 fontWeight: FontWeight.bold,
@@ -708,6 +709,8 @@ class DialogScan {
 
                               if (resultConfirmImage == "success") {
                                 snackBarUtil(context, 'ยืนยันสำเร็จ');
+                              } else if (resultConfirmImage == "tokenExpired") {
+                                snackBarUtil(context, 'เซสชั่นหมดอายุ กรุณาเข้าสู่ระบบใหม่');
                               } else {
                                 snackBarUtil(context, 'ไม่สามารถยืนยันได้ กรุณาลองใหม่อีกครั้ง');
                               }

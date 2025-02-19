@@ -6,6 +6,8 @@ import 'package:kymscanner/presentation/home/bloc/home_bloc.dart';
 import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 import 'package:kymscanner/route.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
@@ -33,6 +35,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         initialRoute: "/splash",
+        navigatorKey: navigatorKey,
         onGenerateRoute: (route) => onGenerateRoute(route),
       ),
     );

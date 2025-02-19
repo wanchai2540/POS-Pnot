@@ -14,6 +14,7 @@ import 'package:kymscanner/data/models/scan_result_model.dart';
 import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 import 'package:watermark_unique/image_format.dart';
 import 'package:watermark_unique/watermark_unique.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DialogScan {
   Future<void> showScanNoHawbDialog({
@@ -317,6 +318,8 @@ class DialogScan {
 
                               if (res == "success") {
                                 snackBarUtil(context, 'แจ้งปัญหาสำเร็จ');
+                              } else if (res == "tokenExpired") {
+                                snackBarUtil(context, 'เซสชั่นหมดอายุ กรุณาเข้าสู่ระบบใหม่');
                               } else {
                                 snackBarUtil(context, 'แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                               }
@@ -951,6 +954,8 @@ class DialogScan {
 
                                   if (res == "success") {
                                     snackBarUtil(context, 'แจ้งปัญหาสำเร็จ');
+                                  } else if (res == "tokenExpired") {
+                                    snackBarUtil(context, 'เซสชั่นหมดอายุ กรุณาเข้าสู่ระบบใหม่');
                                   } else {
                                     snackBarUtil(context, 'แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                                   }
@@ -991,6 +996,8 @@ class DialogScan {
                                 }
                                 if (res == "success") {
                                   snackBarUtil(context, 'แจ้งปัญหาสำเร็จ');
+                                } else if (res == "tokenExpired") {
+                                  snackBarUtil(context, 'เซสชั่นหมดอายุ กรุณาเข้าสู่ระบบใหม่');
                                 } else {
                                   snackBarUtil(context, 'แจ้งปัญหาไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                                 }
@@ -1156,6 +1163,8 @@ class DialogScan {
                               await DataService().sendRepack(uuid, datePicked, _imagesGridView.value).then((res) {
                                 if (res == "success") {
                                   snackBarUtil(context, 'แจ้งการ Repack สำเร็จ');
+                                } else if (res == "tokenExpired") {
+                                  snackBarUtil(context, 'เซสชั่นหมดอายุ กรุณาเข้าสู่ระบบใหม่');
                                 } else {
                                   snackBarUtil(context, 'แจ้งการ Repack ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
                                 }
@@ -1452,5 +1461,40 @@ TableRow tableRowScan(
         ],
       ),
     ],
+  );
+}
+
+Future<String?> checkLogin() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? accessToken = prefs.getString("accessToken");
+  if (accessToken != null) {
+    return accessToken;
+  } else {
+    return null;
+  }
+}
+
+Future<void> showSessionExpiredDialog(BuildContext context, {ValueNotifier<bool>? isShowDialog}) async {
+  if (isShowDialog != null && isShowDialog.value) {
+    Navigator.pop(context);
+  }
+  isShowDialog?.value = true;
+  return await showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Session Expired"),
+        content: Text("เซสชั่นหมดอายุ กรุณาเข้าสู่ระบบใหม่", style: TextStyle(fontSize: 16)),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text("ปิด"),
+          ),
+        ],
+      );
+    },
   );
 }

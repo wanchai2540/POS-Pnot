@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:kymscanner/common.dart';
+import 'package:kymscanner/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DataService {
@@ -58,6 +61,8 @@ class DataService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         Map<String, dynamic> body = jsonDecode(response.body);
         return {"status": "success", "text": "login success", "data": body["data"]};
+      } else if (await _checkTokenExpire(response.statusCode)) {
+        return {"status": "failed", "text": "tokenExpired", "data": null};
       } else {
         return {"status": "failed", "text": "login failed", "data": null};
       }
@@ -113,6 +118,8 @@ class DataService {
           });
         }
         return {"status": "success", "text": "login success", "data": result};
+      } else if (await _checkTokenExpire(response.statusCode)) {
+        return {"status": "failed", "text": "tokenExpired", "data": null};
       } else {
         return {"status": "failed", "text": "login failed", "data": null};
       }
@@ -136,6 +143,11 @@ class DataService {
         headers: {'Authorization': "Bearer $accessToken", 'Content-Type': 'application/json'},
         body: jsonEncode(body),
       );
+
+      if (await _checkTokenExpire(response.statusCode)) {
+        return {"status": "failed", "text": "tokenExpired", "data": null};
+      }
+
       Map<String, dynamic> bodyResponse = jsonDecode(response.body);
       return {
         "status": "success",
@@ -163,6 +175,11 @@ class DataService {
         headers: {'Authorization': "Bearer $accessToken", 'Content-Type': 'application/json'},
         body: jsonEncode(body),
       );
+
+      if (await _checkTokenExpire(response.statusCode)) {
+        return {"status": "error", "text": "tokenExpired", "data": null};
+      }
+
       Map<String, dynamic> bodyResponse = jsonDecode(response.body);
       return {
         "status": "success",
@@ -190,6 +207,11 @@ class DataService {
         headers: {'Authorization': "Bearer $accessToken", 'Content-Type': 'application/json'},
         body: jsonEncode(body),
       );
+
+      if (await _checkTokenExpire(response.statusCode)) {
+        return {"status": "error", "text": "tokenExpired", "data": null};
+      }
+
       Map<String, dynamic> bodyResponse = jsonDecode(response.body);
       return {
         "status": "success",
@@ -256,6 +278,8 @@ class DataService {
       var response = await request.send();
       if (response.statusCode == 200) {
         return Future.value("success");
+      } else if (await _checkTokenExpire(response.statusCode)) {
+        return Future.value("tokenExpired");
       } else {
         return Future.value("faild");
       }
@@ -284,6 +308,8 @@ class DataService {
       var response = await request.send();
       if (response.statusCode == 200) {
         return Future.value("success");
+      } else if (await _checkTokenExpire(response.statusCode)) {
+        return Future.value("tokenExpired");
       } else {
         return Future.value("faild");
       }
@@ -315,6 +341,8 @@ class DataService {
       var response = await request.send();
       if (response.statusCode == 200) {
         return Future.value("success");
+      } else if (await _checkTokenExpire(response.statusCode)) {
+        return Future.value("tokenExpired");
       } else {
         return Future.value("faild");
       }
@@ -335,6 +363,8 @@ class DataService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         Map<String, dynamic> body = jsonDecode(response.body);
         return {"status": "success", "text": "login success", "data": body["data"]};
+      } else if (await _checkTokenExpire(response.statusCode)) {
+        return {"status": "failed", "text": "tokenExpired", "data": null};
       } else {
         return {"status": "failed", "text": "login failed", "data": null};
       }
@@ -362,5 +392,17 @@ class DataService {
     }
 
     return result;
+  }
+
+  Future<bool> _checkTokenExpire(int statusCode) async {
+    if (statusCode == 401) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      showSessionExpiredDialog(navigatorKey.currentContext!).then((value) {
+        prefs.setString("accessToken", "");
+        Navigator.of(navigatorKey.currentContext!).pushNamedAndRemoveUntil("/login", (_) => false);
+      });
+      return true;
+    }
+    return false;
   }
 }

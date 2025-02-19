@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kymscanner/common.dart';
+import 'package:kymscanner/constant.dart';
 import 'package:kymscanner/data/api/api.dart';
 import 'package:kymscanner/button_listener.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,7 +39,6 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
   final FocusNode _focusBarcodeField = FocusNode();
   final TextEditingController _textEditing = TextEditingController();
   final FocusNode _keyboardListenerFocusNode = FocusNode();
-  ValueNotifier<File?> _imageNoDMC = ValueNotifier<File?>(null);
   final _reportFormKey = GlobalKey<FormState>();
   ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
   int _countListType = 0;
@@ -51,12 +51,9 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
     _onScannListener();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startEventTable();
-
       context.read<ScanFindItemsPageBloc>().stream.listen((state) {
         if (state is ScanPageGetLoadedState) {
-          setState(() {
-            _countListType = state.model.length;
-          });
+          _countListType = state.model.length;
         }
       });
     });
@@ -274,7 +271,7 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
               ],
             ),
             for (var data in model)
-              TableRowScan(
+              tableRowScan(
                 context: context,
                 uuid: data.uuid,
                 hawb: data.hawb,
@@ -369,10 +366,8 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
 
   void _startEventTable() {
     Map<String, dynamic> date = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    setState(() {
-      datePicked = date["datePick"];
-      context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
-    });
+    datePicked = date["datePick"];
+    context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
   }
 
   void _initialValueListDropdown() {
@@ -400,9 +395,11 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
             datePicked: datePicked,
             formKeyDialogConfirm: _reportFormKey,
             imageDialogConfirm: _imageReport,
+            module: "2",
             nameReportBtn: "แจ้งปัญหา",
             remarkFailed: "สแกนของพร้อมปล่อยสำเร็จ",
             isGreen: true,
+            typeDialogScan: TypeDialogScanItems.dialog1,
           );
         }
       } else if (dataGetScan["code"] == 400) {
@@ -424,7 +421,6 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
             datePicked: datePicked,
             module: "2",
             remarkFailed: 'เป็นงาน "${result.reason}"' + "\nต้องการยืนยันการตรวจสอบ",
-            imageNoDMC: _imageNoDMC,
           );
         } else if (data["appCode"] == "02" &&
             (data["statusCode"] == "04" || data["statusCode"] == "07" || data["statusCode"] == "11")) {
@@ -436,8 +432,10 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
             datePicked: datePicked,
             formKeyDialogConfirm: _reportFormKey,
             imageDialogConfirm: _imageReport,
+            module: "2",
             nameReportBtn: "แจ้งปัญหา",
             remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว",
+            typeDialogScan: TypeDialogScanItems.dialog2,
           );
         } else if (data["appCode"] == "02" &&
             (data["statusCode"] == "01" ||
@@ -452,6 +450,7 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
             datePicked: datePicked,
             formKeyDialogConfirm: _reportFormKey,
             imageDialogConfirm: _imageReport,
+            module: "2",
             remarkFailed: "สถานะไม่ถูกต้อง",
           );
         }
@@ -463,12 +462,10 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
 
   void _onScannListener() {
     CustomButtonListener.onButtonPressed = (event) {
-      setState(() {
-        if (event != null) {
-          _textEditing.text = "";
-          _focusBarcodeField.requestFocus();
-        }
-      });
+      if (event != null) {
+        _textEditing.text = "";
+        _focusBarcodeField.requestFocus();
+      }
     };
   }
 }

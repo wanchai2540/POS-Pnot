@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _fetchAppVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
     setState(() {
-      _appVersion = 'v${packageInfo.version}';
+      _appVersion = 'v${packageInfo.version}+${packageInfo.buildNumber}';
     });
   }
 

@@ -35,3 +35,8 @@ ios/Flutter/Flutter.podspec
 
 
 package_config.json
+
+
+keystore-kymscanner.jks
+android/keystore.properties
+pubspec.lock

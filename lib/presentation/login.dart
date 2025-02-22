@@ -26,7 +26,6 @@ class _LoginPageState extends State<LoginPage> {
             key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 2,
               children: [
                 Image.asset(
                   "assets/icon/logo-splash.png",

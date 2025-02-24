@@ -186,7 +186,7 @@ class _HomePageState extends State<HomePage> {
             height: MediaQuery.of(context).size.height * 0.20,
             alignment: Alignment.center,
             child: Text(
-              'คุณแน่ใจใช่หรือไม่',
+              'ออกจากระบบบนอุปกรณ์นี้',
             ),
           ),
           actions: [
@@ -203,7 +203,7 @@ class _HomePageState extends State<HomePage> {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('ยืนยัน'),
+              child: const Text('ออกจากระบบ'),
               onPressed: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 prefs.remove("username");

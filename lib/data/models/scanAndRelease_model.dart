@@ -11,6 +11,7 @@ class ScanAndReleaseModel {
   String consigneeName;
   String ctns;
   String reason;
+  bool isSuspended;
 
   ScanAndReleaseModel({
     required this.appCode,
@@ -25,6 +26,7 @@ class ScanAndReleaseModel {
     required this.consigneeName,
     required this.ctns,
     required this.reason,
+    required this.isSuspended,
   });
 
   factory ScanAndReleaseModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class ScanAndReleaseModel {
       consigneeName: json["consigneeName"] ?? "",
       ctns: json["ctns"].toString() ?? "",
       reason: json["reason"] ?? "",
+      isSuspended: json["isSuspended"] ?? false,
     );
   }
 
@@ -58,6 +61,7 @@ class ScanAndReleaseModel {
       "consigneeName": consigneeName,
       "ctns": ctns,
       "reason": reason,
+      "isSuspended": isSuspended,
     };
   }
 }

@@ -11,6 +11,7 @@ class ScanfinditemsModel {
   final String isProblem;
   final String ctns;
   final String consigneeName;
+  final bool isSuspended;
 
   ScanfinditemsModel({
     required this.uuid,
@@ -25,6 +26,7 @@ class ScanfinditemsModel {
     required this.isProblem,
     required this.ctns,
     required this.consigneeName,
+    required this.isSuspended,
   });
 
   factory ScanfinditemsModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class ScanfinditemsModel {
       isProblem: json["isProblem"] ?? '',
       ctns: json["ctns"].toString(),
       consigneeName: json["consigneeName"] ?? '',
+      isSuspended: json["isSuspended"] ?? false,
     );
   }
 
@@ -58,6 +61,7 @@ class ScanfinditemsModel {
       "isProblem": isProblem,
       "ctns": ctns,
       "consigneeName": consigneeName,
+      "isSuspended": isSuspended,
     };
   }
 }

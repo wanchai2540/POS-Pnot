@@ -145,12 +145,12 @@ class DataService {
     }
   }
 
-  Future<Map<String, dynamic>> getScanListener(String date, String hawb) async {
+  Future<Map<String, dynamic>> getScanListener(String hawb) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
     final String path = '/v1/pickup/scan/pickup';
-    Map<String, String> body = {"date": date, "hawb": hawb};
+    Map<String, String> body = {"hawb": hawb};
     final Uri url = Uri.https(_baseUrl, path);
 
     try {
@@ -180,12 +180,12 @@ class DataService {
     }
   }
 
-  Future<Map<String, dynamic>> getPendingReleaseListener(String date, String hawb) async {
+  Future<Map<String, dynamic>> getPendingReleaseListener(String hawb) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
     final String path = '/v1/pickup/scan/pending_release';
-    Map<String, String> body = {"date": date, "hawb": hawb};
+    Map<String, String> body = {"hawb": hawb};
     final Uri url = Uri.https(_baseUrl, path);
 
     try {
@@ -215,12 +215,12 @@ class DataService {
     }
   }
 
-  Future<Map<String, dynamic>> getReleaseListener(String date, String hawb) async {
+  Future<Map<String, dynamic>> getReleaseListener(String hawb) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
     final String path = '/v1/pickup/scan/release';
-    Map<String, String> body = {"date": date, "hawb": hawb};
+    Map<String, String> body = {"hawb": hawb};
     final Uri url = Uri.https(_baseUrl, path);
 
     try {

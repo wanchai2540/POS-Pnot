@@ -131,7 +131,7 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                             // },
                             onSubmitted: (String value) {
                               _textEditing.text = value;
-                              _onScan(parentContext: context, date: datePicked, hawb: value.trim());
+                              _onScan(parentContext: context, hawb: value.trim());
                             },
 
                             // keyboardType: TextInputType.none,
@@ -279,6 +279,7 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                 consigneeName: data.consigneeName,
                 ctns: data.ctns,
                 lastStatus: data.lastStatus,
+                isSuspended: data.isSuspended,
                 colorsStatus: _colorStatus(data.lastStatus)!,
               ),
           ],
@@ -346,7 +347,7 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        _onScan(parentContext: ctx, date: datePicked, hawb: _controller.text);
+                        _onScan(parentContext: ctx, hawb: _controller.text);
                         Navigator.pop(context);
                       }
                       _controller.text = "";
@@ -377,8 +378,8 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
     );
   }
 
-  Future<void> _onScan({required BuildContext parentContext, required String date, required String hawb}) async {
-    var dataGetScan = await DataService().getPendingReleaseListener(date, hawb);
+  Future<void> _onScan({required BuildContext parentContext, required String hawb}) async {
+    var dataGetScan = await DataService().getPendingReleaseListener(hawb);
     var data = dataGetScan["body"];
     try {
       ScanAndReleaseModel result = ScanAndReleaseModel.fromJson(data);

@@ -144,7 +144,10 @@ class DialogScan {
                   customTypeBadge(model.productType),
                 Text("Pick Up: ${model.pickupBy}"),
                 Text("สถานะล่าสุด: ${model.lastStatus}"),
-                Text("Item No: ${model.itemNo}"),
+                ColoredBox(
+                  color: model.isSuspended ? Colors.yellow : Colors.transparent,
+                  child: Text("Item No: ${model.itemNo}"),
+                ),
                 Text("Consignee: ${model.consigneeName}"),
                 Text("CTNS: ${model.ctns}"),
                 SizedBox(height: 30),
@@ -246,7 +249,10 @@ class DialogScan {
                         customTypeBadge(model.productType),
                       Text("Pick Up: ${model.pickupBy}"),
                       Text("สถานะล่าสุด: ${model.lastStatus}"),
-                      Text("Item No: ${model.itemNo}"),
+                      ColoredBox(
+                        color: model.isSuspended ? Colors.yellow : Colors.transparent,
+                        child: Text("Item No: ${model.itemNo}"),
+                      ),
                       Text("Consignee: ${model.consigneeName}"),
                       Text("CTNS: ${model.ctns}"),
                       SizedBox(height: 30),
@@ -420,7 +426,10 @@ class DialogScan {
                   customTypeBadge(model.productType),
                 Text("Pick Up: ${model.pickupBy}"),
                 Text("สถานะล่าสุด: ${model.lastStatus}"),
-                Text("Item No: ${model.itemNo}"),
+                ColoredBox(
+                  color: model.isSuspended ? Colors.yellow : Colors.transparent,
+                  child: Text("Item No: ${model.itemNo}"),
+                ),
                 Text("Consignee: ${model.consigneeName}"),
                 Text("CTNS: ${model.ctns}"),
                 SizedBox(height: 30),
@@ -521,7 +530,10 @@ class DialogScan {
                   customTypeBadge(model.productType),
                 Text("Pick Up: ${model.pickupBy}"),
                 Text("สถานะล่าสุด: ${model.lastStatus}"),
-                Text("Item No: ${model.itemNo}"),
+                ColoredBox(
+                  color: model.isSuspended ? Colors.yellow : Colors.transparent,
+                  child: Text("Item No: ${model.itemNo}"),
+                ),
                 Text("Consignee: ${model.consigneeName}"),
                 Text("CTNS: ${model.ctns}"),
                 SizedBox(height: 30),
@@ -1378,6 +1390,7 @@ TableRow tableRowScan(
     required String consigneeName,
     required String ctns,
     required String lastStatus,
+    bool isSuspended = false,
     required Color colorsStatus}) {
   return TableRow(
     decoration: BoxDecoration(color: Colors.white),
@@ -1395,17 +1408,20 @@ TableRow tableRowScan(
                 ),
               ],
             ),
-            Row(
-              children: [
-                Text(
-                  "ItemNo: ",
-                  style: TextStyle(fontSize: 14),
-                ),
-                Text(
-                  itemNo,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-              ],
+            ColoredBox(
+              color: isSuspended ? Colors.yellow : Colors.transparent,
+              child: Row(
+                children: [
+                  Text(
+                    "ItemNo: ",
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  Text(
+                    itemNo,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
             Row(
               children: [

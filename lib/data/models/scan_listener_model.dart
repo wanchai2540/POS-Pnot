@@ -11,6 +11,7 @@ class ScanListenerModel {
   String consigneeName;
   String ctns;
   String reason;
+  bool isSuspended;
 
   ScanListenerModel({
     required this.appCode,
@@ -25,6 +26,7 @@ class ScanListenerModel {
     required this.consigneeName,
     required this.ctns,
     required this.reason,
+    required this.isSuspended,
   });
 
   factory ScanListenerModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class ScanListenerModel {
       consigneeName: json["consigneeName"] ?? "",
       ctns: json["ctns"].toString() ?? "",
       reason: json["reason"] ?? "",
+      isSuspended: json["isSuspended"] ?? false,
     );
   }
 
@@ -58,6 +61,7 @@ class ScanListenerModel {
       "consigneeName": consigneeName,
       "ctns": ctns,
       "reason": reason,
+      "isSuspended": isSuspended,
     };
   }
 }

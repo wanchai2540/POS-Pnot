@@ -11,6 +11,7 @@ class ScanResultModel {
   String consigneeName;
   String ctns;
   String reason;
+  bool isSuspended;
 
   ScanResultModel({
     required this.appCode,
@@ -25,6 +26,7 @@ class ScanResultModel {
     required this.consigneeName,
     required this.ctns,
     required this.reason,
+    required this.isSuspended,
   });
 
   factory ScanResultModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class ScanResultModel {
       consigneeName: json["consigneeName"] ?? "",
       ctns: json["ctns"].toString() ?? "",
       reason: json["reason"] ?? "",
+      isSuspended: json["isSuspended"] ?? false,
     );
   }
 
@@ -58,6 +61,7 @@ class ScanResultModel {
       "consigneeName": consigneeName,
       "ctns": ctns,
       "reason": reason,
+      "isSuspended": isSuspended,
     };
   }
 }

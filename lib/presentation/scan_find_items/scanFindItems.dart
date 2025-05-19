@@ -132,7 +132,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                             controller: _textEditing,
                             onSubmitted: (String value) {
                               _textEditing.text = value;
-                              _onScan(context, date: datePicked, hawb: value.trim());
+                              _onScan(context, hawb: value.trim());
                             },
 
                             // keyboardType: TextInputType.none,
@@ -266,6 +266,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                 consigneeName: data.consigneeName,
                 ctns: data.ctns,
                 lastStatus: data.lastStatus,
+                isSuspended: data.isSuspended,
                 colorsStatus: _colorStatus(data.lastStatus)!,
               ),
           ],
@@ -333,7 +334,7 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        _onScan(ctx, date: datePicked, hawb: _controller.text.trim());
+                        _onScan(ctx, hawb: _controller.text.trim());
                         Navigator.pop(context);
                       }
                       _controller.text = "";
@@ -364,8 +365,8 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     );
   }
 
-  Future<void> _onScan(BuildContext parentContext, {required String date, required String hawb}) async {
-    var dataGetScan = await DataService().getScanListener(date, hawb);
+  Future<void> _onScan(BuildContext parentContext, {required String hawb}) async {
+    var dataGetScan = await DataService().getScanListener(hawb);
     var data = dataGetScan["body"];
     try {
       ScanListenerModel result = ScanListenerModel.fromJson(data);

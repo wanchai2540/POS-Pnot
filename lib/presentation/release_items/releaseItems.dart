@@ -122,7 +122,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                             controller: _textEditing,
                             onSubmitted: (String value) {
                               _textEditing.text = value;
-                              _onScan(parentContext: context, date: datePicked, hawb: value.trim());
+                              _onScan(parentContext: context, hawb: value.trim());
                             },
 
                             // keyboardType: TextInputType.none,
@@ -270,6 +270,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                 consigneeName: data.consigneeName,
                 ctns: data.ctns,
                 lastStatus: data.lastStatus,
+                isSuspended: data.isSuspended,
                 colorsStatus: _colorStatus(data.lastStatus)!,
               ),
           ],
@@ -332,7 +333,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        _onScan(parentContext: ctx, date: datePicked, hawb: _controller.text);
+                        _onScan(parentContext: ctx, hawb: _controller.text);
                         Navigator.pop(context);
                       }
                       _controller.text = "";
@@ -414,8 +415,8 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
     );
   }
 
-  Future<void> _onScan({required BuildContext parentContext, required String date, required String hawb}) async {
-    var dataGetScan = await DataService().getReleaseListener(date, hawb);
+  Future<void> _onScan({required BuildContext parentContext, required String hawb}) async {
+    var dataGetScan = await DataService().getReleaseListener(hawb);
     var data = dataGetScan["body"];
     try {
       ReleaseModel result = ReleaseModel.fromJson(data);
@@ -436,8 +437,8 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
       } else if (dataGetScan["code"] == 400) {
         if (data["appCode"] == "03") {
           // Dialog 4
-          DialogScan()
-              .showScanNoHawbDialog(title: "ไม่พบ HAWB ในระบบ",isShowDialog: _isShowDialog, context: parentContext, datePicked: datePicked);
+          DialogScan().showScanNoHawbDialog(
+              title: "ไม่พบ HAWB ในระบบ", isShowDialog: _isShowDialog, context: parentContext, datePicked: datePicked);
         } else if (data["appCode"] == "02" && data["statusCode"] == "05") {
           // Dialog 2
           DialogScan().showReleaseScanDialog(
@@ -464,8 +465,8 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
           //   datePicked: datePicked,
           //   remarkFailed: "สถานะไม่ถูกต้อง",
           // );
-          DialogScan()
-              .showScanNoHawbDialog(title: "สถานะไม่ถูกต้อง",isShowDialog: _isShowDialog, context: parentContext, datePicked: datePicked);
+          DialogScan().showScanNoHawbDialog(
+              title: "สถานะไม่ถูกต้อง", isShowDialog: _isShowDialog, context: parentContext, datePicked: datePicked);
         }
       }
     } catch (e) {

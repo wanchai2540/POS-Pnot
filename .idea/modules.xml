@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/pos.iml" filepath="$PROJECT_DIR$/pos.iml" />
       <module fileurl="file://$PROJECT_DIR$/android/pos_android.iml" filepath="$PROJECT_DIR$/android/pos_android.iml" />
     </modules>
   </component>

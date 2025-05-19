@@ -14,7 +14,7 @@ class DataService {
 
   factory DataService() => _instance;
 
-  static final _baseUrl = "skl.happycu.co";
+  static final _baseUrl = "api.kinyamalogistics.com";
 
   Map<String, dynamic> query_string = {};
 
@@ -54,7 +54,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m';
+    final String path = '/v1/pickup/overview';
     final Uri url = Uri.https(_baseUrl, path, {"date": date});
     try {
       final response = await http.get(url, headers: {'Authorization': "Bearer $accessToken"});
@@ -76,7 +76,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m/item';
+    final String path = '/v1/pickup/item';
     Map<String, String> query = {"date": date};
     if (type != "99" && type != "all") {
       query.addAll({"status_code": type});
@@ -133,7 +133,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m/scan/pickup';
+    final String path = '/v1/pickup/scan/pickup';
     Map<String, String> body = {"date": date, "hawb": hawb};
     final Uri url = Uri.https(_baseUrl, path);
 
@@ -165,7 +165,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m/scan/pending_release';
+    final String path = '/v1/pickup/scan/pending_release';
     Map<String, String> body = {"date": date, "hawb": hawb};
     final Uri url = Uri.https(_baseUrl, path);
 
@@ -197,7 +197,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/m/scan/release';
+    final String path = '/v1/pickup/scan/release';
     Map<String, String> body = {"date": date, "hawb": hawb};
     final Uri url = Uri.https(_baseUrl, path);
 
@@ -255,7 +255,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/report';
+    final String path = '/v1/pickup/report';
     final Uri url = Uri.https(_baseUrl, path);
 
     try {
@@ -296,7 +296,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/repack';
+    final String path = '/v1/pickup/repack';
     final Uri url = Uri.https(_baseUrl, path);
     try {
       final request = http.MultipartRequest("POST", url);
@@ -327,7 +327,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/image';
+    final String path = '/v1/pickup/image';
 
     final Uri url = Uri.https(_baseUrl, path);
     try {
@@ -360,7 +360,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/approve_problem';
+    final String path = '/v1/pickup/approve_problem';
     final Uri url = Uri.https(_baseUrl, path);
 
     try {
@@ -396,7 +396,7 @@ class DataService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
-    final String path = '/v1/ip/item/$uuid';
+    final String path = '/v1/pickup/item/$uuid';
 
     final Uri url = Uri.https(_baseUrl, path);
     try {

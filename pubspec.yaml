@@ -1,7 +1,7 @@
 name: kymscanner
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.3+24
+version: 1.0.3+26
 
 environment:
   sdk: ">=3.2.0 <4.0.0"
@@ -21,6 +21,7 @@ dependencies:
   image: ^4.5.2
   watermark_unique: ^1.0.8
   flutter_image_compress: ^2.4.0
+  logger: ^2.5.0
 
 dev_dependencies:
   flutter_test:

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:kymscanner/common.dart';
+import 'package:kymscanner/core_log.dart';
 import 'package:kymscanner/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,12 +41,15 @@ class DataService {
         prefs.setString("username", username);
         prefs.setString("password", password);
         prefs.setString("accessToken", body["data"]["accessToken"]);
+        CoreLog().info("login: login success");
         return {"status": "success", "text": "login success"};
       } else {
+        CoreLog().warning("login: login failed");
         return {"status": "failed", "text": "login failed"};
       }
     } catch (e) {
       Exception('Exception occurred: $e');
+      CoreLog().error("login: Exception occurred: $e");
       return {"status": "error", "text": "Exception occurred: $e"};
     }
   }
@@ -60,14 +64,18 @@ class DataService {
       final response = await http.get(url, headers: {'Authorization': "Bearer $accessToken"});
       if (response.statusCode == 200 || response.statusCode == 201) {
         Map<String, dynamic> body = jsonDecode(response.body);
-        return {"status": "success", "text": "login success", "data": body["data"]};
+        CoreLog().info("getDataHome: recieve data");
+        return {"status": "success", "text": "recieve data", "data": body["data"]};
       } else if (await _checkTokenExpire(response.statusCode)) {
+        CoreLog().warning("getDataHome: tokenExpired");
         return {"status": "failed", "text": "tokenExpired", "data": null};
       } else {
-        return {"status": "failed", "text": "login failed", "data": null};
+        CoreLog().warning("getDataHome: get data failed");
+        return {"status": "failed", "text": "get data failed", "data": null};
       }
     } catch (e) {
       Exception('Exception occurred: $e');
+      CoreLog().error("getDataHome: Exception occurred: $e");
       return {"status": "error", "text": "Exception occurred: $e", "data": null};
     }
   }
@@ -85,10 +93,14 @@ class DataService {
       List<Map<String, dynamic>> result = await _getDataTypeOther(typeOther, path, date, accessToken);
       try {
         if (result.length == 0) {
-          return {"status": "error", "text": "not found data", "data": null};
+          CoreLog().warning("getScanFindItems: Scanned not found data");
+          return {"status": "error", "text": "data not found", "data": null};
+        } else {
+          CoreLog().warning("getScanFindItems: Scanned found data");
+          return {"status": "success", "text": "Scanned found data", "data": result};
         }
-        return {"status": "success", "text": "login success", "data": result};
       } catch (e) {
+        CoreLog().error("getScanFindItems: Exception occurred: $e");
         return {"status": "error", "text": "Exception occurred: $e", "data": null};
       }
     }
@@ -117,14 +129,18 @@ class DataService {
             "consigneeName": data["consigneeName"].toString(),
           });
         }
-        return {"status": "success", "text": "login success", "data": result};
+        CoreLog().info("getScanFindItems: recieve data");
+        return {"status": "success", "text": "recieve data", "data": result};
       } else if (await _checkTokenExpire(response.statusCode)) {
+        CoreLog().warning("getScanFindItems: tokenExpired");
         return {"status": "failed", "text": "tokenExpired", "data": null};
       } else {
-        return {"status": "failed", "text": "login failed", "data": null};
+        CoreLog().warning("getScanFindItems: get data failed");
+        return {"status": "failed", "text": "get data failed", "data": null};
       }
     } catch (e) {
       Exception('Exception occurred: $e');
+      CoreLog().error("getScanFindItems: Exception occurred: $e");
       return {"status": "error", "text": "Exception occurred: $e", "data": null};
     }
   }
@@ -145,18 +161,21 @@ class DataService {
       );
 
       if (await _checkTokenExpire(response.statusCode)) {
+        CoreLog().warning("getScanListener: tokenExpired");
         return {"status": "failed", "text": "tokenExpired", "data": null};
+      } else {
+        Map<String, dynamic> bodyResponse = jsonDecode(response.body);
+        CoreLog().info("getScanListener: receieve data");
+        return {
+          "status": "success",
+          "text": "success",
+          "code": response.statusCode,
+          "body": bodyResponse["data"],
+        };
       }
-
-      Map<String, dynamic> bodyResponse = jsonDecode(response.body);
-      return {
-        "status": "success",
-        "text": "success",
-        "code": response.statusCode,
-        "body": bodyResponse["data"],
-      };
     } catch (e) {
       Exception('Exception occurred: $e');
+      CoreLog().error("getScanListener: Exception occurred: $e");
       return {"status": "error", "text": "Exception occurred: $e", "data": null};
     }
   }
@@ -177,18 +196,21 @@ class DataService {
       );
 
       if (await _checkTokenExpire(response.statusCode)) {
+        CoreLog().warning("getPendingReleaseListener: tokenExpired");
         return {"status": "error", "text": "tokenExpired", "data": null};
+      } else {
+        Map<String, dynamic> bodyResponse = jsonDecode(response.body);
+        CoreLog().info("getPendingReleaseListener: receive data");
+        return {
+          "status": "success",
+          "text": "success",
+          "code": response.statusCode,
+          "body": bodyResponse["data"],
+        };
       }
-
-      Map<String, dynamic> bodyResponse = jsonDecode(response.body);
-      return {
-        "status": "success",
-        "text": "success",
-        "code": response.statusCode,
-        "body": bodyResponse["data"],
-      };
     } catch (e) {
       Exception('Exception occurred: $e');
+      CoreLog().warning("getPendingReleaseListener: Exception occurred: $e");
       return {"status": "error", "text": "Exception occurred: $e", "data": null};
     }
   }
@@ -209,18 +231,21 @@ class DataService {
       );
 
       if (await _checkTokenExpire(response.statusCode)) {
+        CoreLog().warning("getReleaseListener: tokenExpired");
         return {"status": "error", "text": "tokenExpired", "data": null};
+      } else {
+        Map<String, dynamic> bodyResponse = jsonDecode(response.body);
+        CoreLog().info("getReleaseListener: receive data");
+        return {
+          "status": "success",
+          "text": "success",
+          "code": response.statusCode,
+          "body": bodyResponse["data"],
+        };
       }
-
-      Map<String, dynamic> bodyResponse = jsonDecode(response.body);
-      return {
-        "status": "success",
-        "text": "success",
-        "code": response.statusCode,
-        "body": bodyResponse["data"],
-      };
     } catch (e) {
       Exception('Exception occurred: $e');
+      CoreLog().error("getReleaseListener: Exception occurred: $e");
       return {"status": "error", "text": "Exception occurred: $e", "data": null};
     }
   }
@@ -240,12 +265,14 @@ class DataService {
             "value": data["value"],
           });
         }
-
+        CoreLog().info("getProblemList: receive data");
         return {"status": "success", "data": result};
       } else {
+        CoreLog().error("getProblemList: failed to get data");
         throw "error";
       }
     } catch (e) {
+      CoreLog().error("getProblemList: Exception occurred: $e");
       return {"status": "error", "text": "Exception occurred: $e", "data": null};
     }
   }
@@ -280,14 +307,18 @@ class DataService {
 
       var response = await request.send();
       if (response.statusCode == 200) {
+        CoreLog().info("sendReport: success");
         return Future.value("success");
       } else if (await _checkTokenExpire(response.statusCode)) {
+        CoreLog().warning("sendReport: tokenExpired");
         return Future.value("tokenExpired");
       } else {
+        CoreLog().warning("sendReport: failed");
         return Future.value("faild");
       }
     } catch (e) {
       Exception('Exception occurred: $e');
+      CoreLog().error("sendReport: Exception occurred: $e");
       return Future.value("error");
     }
   }
@@ -312,13 +343,17 @@ class DataService {
 
       var response = await request.send();
       if (response.statusCode == 200) {
+        CoreLog().info("sendRepack: success");
         return Future.value("success");
       } else if (await _checkTokenExpire(response.statusCode)) {
+        CoreLog().warning("sendRepack: tokenExpired");
         return Future.value("tokenExpired");
       } else {
+        CoreLog().warning("sendRepack: failed");
         return Future.value("faild");
       }
     } catch (e) {
+      CoreLog().error("sendRepack: Exeption occurred: $e");
       return Future.value("error");
     }
   }
@@ -345,13 +380,17 @@ class DataService {
 
       var response = await request.send();
       if (response.statusCode == 200) {
+        CoreLog().info("sendOnlyImage: success");
         return Future.value("success");
       } else if (await _checkTokenExpire(response.statusCode)) {
+        CoreLog().warning("sendOnlyImage: tokenExpired");
         return Future.value("tokenExpired");
       } else {
+        CoreLog().warning("sendOnlyImage: failed");
         return Future.value("faild");
       }
     } catch (e) {
+      CoreLog().error("sendOnlyImage: Exeption occurred: $e");
       return Future.value("error");
     }
   }
@@ -380,14 +419,18 @@ class DataService {
 
       var response = await request.send();
       if (response.statusCode == 200) {
+        CoreLog().info("sendApproveProblem: success");
         return Future.value("success");
       } else if (await _checkTokenExpire(response.statusCode)) {
+        CoreLog().warning("sendApproveProblem: tokenExpired");
         return Future.value("tokenExpired");
       } else {
+        CoreLog().warning("sendApproveProblem: failed");
         return Future.value("faild");
       }
     } catch (e) {
       Exception('Exception occurred: $e');
+      CoreLog().error("sendApproveProblem: Exception occurred: $e");
       return Future.value("error");
     }
   }
@@ -403,14 +446,18 @@ class DataService {
       final response = await http.get(url, headers: {'Authorization': "Bearer $accessToken"});
       if (response.statusCode == 200 || response.statusCode == 201) {
         Map<String, dynamic> body = jsonDecode(response.body);
-        return {"status": "success", "text": "login success", "data": body["data"]};
+        CoreLog().info("getDetailItem: receive data");
+        return {"status": "success", "text": "receive data", "data": body["data"]};
       } else if (await _checkTokenExpire(response.statusCode)) {
+        CoreLog().warning("getDetailItem: tokenExpired");
         return {"status": "failed", "text": "tokenExpired", "data": null};
       } else {
-        return {"status": "failed", "text": "login failed", "data": null};
+        CoreLog().warning("getDetailItem: not found data");
+        return {"status": "failed", "text": "not found data", "data": null};
       }
     } catch (e) {
       Exception('Exception occurred: $e');
+      CoreLog().error("getDetailItem: Exception occurred: $e");
       return {"status": "error", "text": "Exception occurred: $e", "data": null};
     }
   }

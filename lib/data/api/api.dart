@@ -61,11 +61,16 @@ class DataService {
     final String path = '/v1/pickup/overview';
     final Uri url = Uri.https(_baseUrl, path, {"date": date});
     try {
-      final response = await http.get(url, headers: {'Authorization': "Bearer $accessToken"});
+      final response = await http
+          .get(url, headers: {'Authorization': "Bearer $accessToken"});
       if (response.statusCode == 200 || response.statusCode == 201) {
         Map<String, dynamic> body = jsonDecode(response.body);
         CoreLog().info("getDataHome: recieve data");
-        return {"status": "success", "text": "recieve data", "data": body["data"]};
+        return {
+          "status": "success",
+          "text": "recieve data",
+          "data": body["data"]
+        };
       } else if (await _checkTokenExpire(response.statusCode)) {
         CoreLog().warning("getDataHome: tokenExpired");
         return {"status": "failed", "text": "tokenExpired", "data": null};
@@ -76,11 +81,16 @@ class DataService {
     } catch (e) {
       Exception('Exception occurred: $e');
       CoreLog().error("getDataHome: Exception occurred: $e");
-      return {"status": "error", "text": "Exception occurred: $e", "data": null};
+      return {
+        "status": "error",
+        "text": "Exception occurred: $e",
+        "data": null
+      };
     }
   }
 
-  Future<Map<String, dynamic>> getScanFindItems(String date, [String type = "all", String? barcode]) async {
+  Future<Map<String, dynamic>> getScanFindItems(String date,
+      [String type = "all", String? barcode]) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
@@ -90,24 +100,34 @@ class DataService {
       query.addAll({"status_code": type});
     } else if (type == "99") {
       List<String> typeOther = ["02", "06", "07"];
-      List<Map<String, dynamic>> result = await _getDataTypeOther(typeOther, path, date, accessToken);
+      List<Map<String, dynamic>> result =
+          await _getDataTypeOther(typeOther, path, date, accessToken);
       try {
         if (result.length == 0) {
           CoreLog().warning("getScanFindItems: Scanned not found data");
           return {"status": "error", "text": "data not found", "data": null};
         } else {
           CoreLog().warning("getScanFindItems: Scanned found data");
-          return {"status": "success", "text": "Scanned found data", "data": result};
+          return {
+            "status": "success",
+            "text": "Scanned found data",
+            "data": result
+          };
         }
       } catch (e) {
         CoreLog().error("getScanFindItems: Exception occurred: $e");
-        return {"status": "error", "text": "Exception occurred: $e", "data": null};
+        return {
+          "status": "error",
+          "text": "Exception occurred: $e",
+          "data": null
+        };
       }
     }
     final Uri url = Uri.https(_baseUrl, path, query);
 
     try {
-      final response = await http.get(url, headers: {'Authorization': "Bearer $accessToken"});
+      final response = await http
+          .get(url, headers: {'Authorization': "Bearer $accessToken"});
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Map<String, dynamic> body = jsonDecode(response.body);
@@ -141,7 +161,11 @@ class DataService {
     } catch (e) {
       Exception('Exception occurred: $e');
       CoreLog().error("getScanFindItems: Exception occurred: $e");
-      return {"status": "error", "text": "Exception occurred: $e", "data": null};
+      return {
+        "status": "error",
+        "text": "Exception occurred: $e",
+        "data": null
+      };
     }
   }
 
@@ -156,7 +180,10 @@ class DataService {
     try {
       final response = await http.post(
         url,
-        headers: {'Authorization': "Bearer $accessToken", 'Content-Type': 'application/json'},
+        headers: {
+          'Authorization': "Bearer $accessToken",
+          'Content-Type': 'application/json'
+        },
         body: jsonEncode(body),
       );
 
@@ -176,7 +203,11 @@ class DataService {
     } catch (e) {
       Exception('Exception occurred: $e');
       CoreLog().error("getScanListener: Exception occurred: $e");
-      return {"status": "error", "text": "Exception occurred: $e", "data": null};
+      return {
+        "status": "error",
+        "text": "Exception occurred: $e",
+        "data": null
+      };
     }
   }
 
@@ -191,7 +222,10 @@ class DataService {
     try {
       final response = await http.post(
         url,
-        headers: {'Authorization': "Bearer $accessToken", 'Content-Type': 'application/json'},
+        headers: {
+          'Authorization': "Bearer $accessToken",
+          'Content-Type': 'application/json'
+        },
         body: jsonEncode(body),
       );
 
@@ -211,22 +245,35 @@ class DataService {
     } catch (e) {
       Exception('Exception occurred: $e');
       CoreLog().warning("getPendingReleaseListener: Exception occurred: $e");
-      return {"status": "error", "text": "Exception occurred: $e", "data": null};
+      return {
+        "status": "error",
+        "text": "Exception occurred: $e",
+        "data": null
+      };
     }
   }
 
-  Future<Map<String, dynamic>> getReleaseListener(String hawb) async {
+  Future<Map<String, dynamic>> getReleaseListener(String hawb, String date,
+      String releaseRoundName, String releaseRoundUUID) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
     final String path = '/v1/pickup/scan/release';
-    Map<String, String> body = {"hawb": hawb};
+    Map<String, String> body = {
+      "hawb": hawb,
+      "date": date,
+      "releaseRoundName": releaseRoundName,
+      "releaseRoundUUID": releaseRoundUUID,
+    };
     final Uri url = Uri.https(_baseUrl, path);
 
     try {
       final response = await http.post(
         url,
-        headers: {'Authorization': "Bearer $accessToken", 'Content-Type': 'application/json'},
+        headers: {
+          'Authorization': "Bearer $accessToken",
+          'Content-Type': 'application/json'
+        },
         body: jsonEncode(body),
       );
 
@@ -246,7 +293,11 @@ class DataService {
     } catch (e) {
       Exception('Exception occurred: $e');
       CoreLog().error("getReleaseListener: Exception occurred: $e");
-      return {"status": "error", "text": "Exception occurred: $e", "data": null};
+      return {
+        "status": "error",
+        "text": "Exception occurred: $e",
+        "data": null
+      };
     }
   }
 
@@ -273,11 +324,16 @@ class DataService {
       }
     } catch (e) {
       CoreLog().error("getProblemList: Exception occurred: $e");
-      return {"status": "error", "text": "Exception occurred: $e", "data": null};
+      return {
+        "status": "error",
+        "text": "Exception occurred: $e",
+        "data": null
+      };
     }
   }
 
-  Future<String> sendReport(String uuid, String date, String problemCode, String module,
+  Future<String> sendReport(
+      String uuid, String date, String problemCode, String module,
       {List<File?>? image, String? remark}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
@@ -301,7 +357,8 @@ class DataService {
 
       if (image != null) {
         for (File? img in image) {
-          request.files.add(await http.MultipartFile.fromPath('image', img!.path));
+          request.files
+              .add(await http.MultipartFile.fromPath('image', img!.path));
         }
       }
 
@@ -338,7 +395,8 @@ class DataService {
       request.fields['uuid'] = uuid;
       request.fields['date'] = date;
       for (File? img in image) {
-        request.files.add(await http.MultipartFile.fromPath('image', img!.path));
+        request.files
+            .add(await http.MultipartFile.fromPath('image', img!.path));
       }
 
       var response = await request.send();
@@ -358,7 +416,8 @@ class DataService {
     }
   }
 
-  Future<String> sendOnlyImage(String uuid, String date, List<File?> image, String module) async {
+  Future<String> sendOnlyImage(
+      String uuid, String date, List<File?> image, String module) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
@@ -374,7 +433,8 @@ class DataService {
       request.fields['uuid'] = uuid;
       request.fields['date'] = date;
       for (File? img in image) {
-        request.files.add(await http.MultipartFile.fromPath('image', img!.path));
+        request.files
+            .add(await http.MultipartFile.fromPath('image', img!.path));
       }
       request.fields['module'] = module;
 
@@ -395,7 +455,8 @@ class DataService {
     }
   }
 
-  Future<String> sendApproveProblem(String uuid, String date, String module, {List<File?>? image}) async {
+  Future<String> sendApproveProblem(String uuid, String date, String module,
+      {List<File?>? image}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
 
@@ -413,7 +474,8 @@ class DataService {
       request.fields['module'] = module;
       if (image != null) {
         for (File? img in image) {
-          request.files.add(await http.MultipartFile.fromPath('image', img!.path));
+          request.files
+              .add(await http.MultipartFile.fromPath('image', img!.path));
         }
       }
 
@@ -443,11 +505,16 @@ class DataService {
 
     final Uri url = Uri.https(_baseUrl, path);
     try {
-      final response = await http.get(url, headers: {'Authorization': "Bearer $accessToken"});
+      final response = await http
+          .get(url, headers: {'Authorization': "Bearer $accessToken"});
       if (response.statusCode == 200 || response.statusCode == 201) {
         Map<String, dynamic> body = jsonDecode(response.body);
         CoreLog().info("getDetailItem: receive data");
-        return {"status": "success", "text": "receive data", "data": body["data"]};
+        return {
+          "status": "success",
+          "text": "receive data",
+          "data": body["data"]
+        };
       } else if (await _checkTokenExpire(response.statusCode)) {
         CoreLog().warning("getDetailItem: tokenExpired");
         return {"status": "failed", "text": "tokenExpired", "data": null};
@@ -458,22 +525,123 @@ class DataService {
     } catch (e) {
       Exception('Exception occurred: $e');
       CoreLog().error("getDetailItem: Exception occurred: $e");
-      return {"status": "error", "text": "Exception occurred: $e", "data": null};
+      return {
+        "status": "error",
+        "text": "Exception occurred: $e",
+        "data": null
+      };
     }
   }
 
-  Future<List<Map<String, dynamic>>> _getDataTypeOther(
-      List<String> typeOther, String path, String date, String accessToken) async {
+  Future<List<Map<String, dynamic>>?> getReleaseRound(String date) async {
+    final String path = '/public/master/release_round';
+    final Uri url = Uri.https(_baseUrl, path, {"date": date});
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Map<String, dynamic> body = jsonDecode(response.body);
+        if (body["data"] == null) {
+          CoreLog().info("getReleaseRound: data null");
+          return [];
+        }
+
+        List<Map<String, dynamic>> result = [];
+        for (var data in body["data"]) {
+          result.add({
+            "text": data["text"],
+            "value": data["value"],
+            "totalItem": data["totalItem"],
+          });
+        }
+        CoreLog().info("getReleaseRound: receive data");
+        return result;
+      } else {
+        CoreLog().error("getReleaseRound: failed to get data");
+        throw "error";
+      }
+    } catch (e) {
+      CoreLog().error("getReleaseRound: Exception occurred: $e");
+      return [
+        {"status": "error", "text": "Exception occurred: $e", "data": null}
+      ];
+    }
+
+    // return [
+    //   {
+    //     "text": "รอบ 10:00 || 10",
+    //     "value": "รอบ 10:00",
+    //   },
+    //   {
+    //     "text": "รอบ 11:00 || 10",
+    //     "value": "รอบ 11:00",
+    //   },
+    //   {
+    //     "text": "รอบ 12:00 || 10",
+    //     "value": "รอบ 12:00",
+    //   }
+    // ];
+  }
+
+  Future<Map<String, dynamic>> getItemReleaseByRound(
+      String date, String releaseRoundUUID) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String accessToken = prefs.getString("accessToken") ?? "";
+
+    final String path = '/v1/pickup/item_release';
+    final Uri url = Uri.https(
+        _baseUrl, path, {"date": date, "releaseRoundUUID": releaseRoundUUID});
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': "Bearer $accessToken",
+          'Content-Type': 'application/json'
+        },
+      );
+
+      if (await _checkTokenExpire(response.statusCode)) {
+        CoreLog().warning("getItemReleaseByRound: tokenExpired");
+        return {"status": "error", "text": "tokenExpired", "data": null};
+      } else {
+        Map<String, dynamic> bodyResponse = jsonDecode(response.body);
+        CoreLog().info("getItemReleaseByRound: receive data");
+        return {
+          "status": "success",
+          "text": "success",
+          "code": response.statusCode,
+          "body": bodyResponse["data"],
+        };
+      }
+    } catch (e) {
+      Exception('Exception occurred: $e');
+      CoreLog().error("getItemReleaseByRound: Exception occurred: $e");
+      return {
+        "status": "error",
+        "text": "Exception occurred: $e",
+        "data": null
+      };
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _getDataTypeOther(List<String> typeOther,
+      String path, String date, String accessToken) async {
     List<Map<String, dynamic>> result = [];
     for (var type in typeOther) {
       Uri url = Uri.https(_baseUrl, path, {"date": date, "status_code": type});
-      var response = await http.get(url, headers: {'Authorization': "Bearer $accessToken"});
+      var response = await http
+          .get(url, headers: {'Authorization': "Bearer $accessToken"});
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Map<String, dynamic> body = jsonDecode(response.body);
         if (body["data"] != null) {
           for (var data in body["data"]) {
-            result.add({"uuid": data["uuid"], "hawb": data["hawb"], "lastStatus": data["lastStatus"]});
+            result.add({
+              "uuid": data["uuid"],
+              "hawb": data["hawb"],
+              "lastStatus": data["lastStatus"]
+            });
           }
         }
       }
@@ -487,7 +655,8 @@ class DataService {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       showSessionExpiredDialog(navigatorKey.currentContext!).then((value) {
         prefs.setString("accessToken", "");
-        Navigator.of(navigatorKey.currentContext!).pushNamedAndRemoveUntil("/login", (_) => false);
+        Navigator.of(navigatorKey.currentContext!)
+            .pushNamedAndRemoveUntil("/login", (_) => false);
       });
       return true;
     }

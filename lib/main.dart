@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kymscanner/presentation/detail_items_scan/bloc/detail_item_scan_bloc.dart';
 import 'package:kymscanner/presentation/home/bloc/home_bloc.dart';
+import 'package:kymscanner/presentation/release_items/bloc/release_items_bloc.dart';
 import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 import 'package:kymscanner/route.dart';
 
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<HomeBloc>(create: (BuildContext context) => HomeBloc()),
         BlocProvider<ScanFindItemsPageBloc>(create: (BuildContext context) => ScanFindItemsPageBloc()),
         BlocProvider<DetailItemScanBloc>(create: (BuildContext context) => DetailItemScanBloc()),
+        BlocProvider<ReleaseItemsBloc>(create: (BuildContext context) => ReleaseItemsBloc()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

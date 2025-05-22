@@ -82,6 +82,10 @@ file_selector_windows
 3.4
 file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/file_selector_windows-0.9.3+4/
 file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/file_selector_windows-0.9.3+4/lib/
+fixnum
+3.1
+file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/fixnum-1.1.1/
+file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/fixnum-1.1.1/lib/
 flutter_bloc
 2.12
 file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_bloc-8.1.6/
@@ -286,6 +290,10 @@ source_span
 2.18
 file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/source_span-1.10.0/
 file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/source_span-1.10.0/lib/
+sprintf
+2.12
+file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/sprintf-7.0.0/
+file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/sprintf-7.0.0/lib/
 stack_trace
 3.4
 file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/stack_trace-1.12.0/
@@ -310,6 +318,10 @@ typed_data
 3.5
 file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.4.0/
 file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.4.0/lib/
+uuid
+3.0
+file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/uuid-4.5.1/
+file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/uuid-4.5.1/lib/
 vector_math
 2.14
 file:///C:/Users/Legion%20God/AppData/Local/Pub/Cache/hosted/pub.dev/vector_math-2.1.4/

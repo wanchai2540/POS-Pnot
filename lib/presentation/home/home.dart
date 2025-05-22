@@ -3,10 +3,13 @@
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kymscanner/constant.dart';
+import 'package:kymscanner/data/api/api.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:kymscanner/data/models/home_model.dart';
 import 'package:kymscanner/presentation/home/bloc/home_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,6 +21,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   DateTime selectedDate = DateTime.now();
   String _appVersion = '';
+  final TextEditingController _controllerRemark = TextEditingController();
+  List<Map<String, dynamic>> periodReleaseDialog = [];
 
   @override
   void initState() {
@@ -26,8 +31,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     _startEventHome();
+    periodReleaseDialog = await _getPeriodReleaseForDialog() ?? [];
     super.didChangeDependencies();
   }
 
@@ -73,7 +79,9 @@ class _HomePageState extends State<HomePage> {
                                       fontSize: 18,
                                     ),
                                   ),
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.greenAccent),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.greenAccent,
+                                  ),
                                 ),
                                 SizedBox(width: 20),
                                 Text(
@@ -99,19 +107,25 @@ class _HomePageState extends State<HomePage> {
                           if (state is HomeLoadingState) {
                             return CircularProgressIndicator();
                           } else if (state is HomeErrorState) {
-                            return Center(child: Text("เกิดข้อผิดพลาดบางอย่าง"));
+                            return Center(
+                                child: Text("เกิดข้อผิดพลาดบางอย่าง"));
                           } else if (state is HomeLoadedState) {
                             HomeModel model = state.model;
                             return Column(
                               children: [
                                 Container(
-                                  height: MediaQuery.of(context).size.height * 0.06,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.06,
                                   alignment: Alignment.center,
-                                  child: Text("Total: ${model.totalPickup.toString()}", style: TextStyle(fontSize: 20)),
+                                  child: Text(
+                                      "Total: ${model.totalPickup.toString()}",
+                                      style: TextStyle(fontSize: 20)),
                                 ),
-                                _colorItems(model.countGreen, model.countRed, model.countOther),
+                                _colorItems(model.countGreen, model.countRed,
+                                    model.countOther),
                                 Container(
-                                  height: MediaQuery.of(context).size.height * 0.06,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.06,
                                   alignment: Alignment.center,
                                   child: DottedLine(
                                     lineThickness: 2,
@@ -119,13 +133,19 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 Container(
-                                  height: MediaQuery.of(context).size.height * 0.06,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.06,
                                   alignment: Alignment.center,
-                                  child: Text("Pick Up", style: TextStyle(fontSize: 20)),
+                                  child: Text("Pick Up",
+                                      style: TextStyle(fontSize: 20)),
                                 ),
-                                _releaseItemss(model.countPickupByUps, model.countPickupBySkl, model.countPickupByL),
+                                _releaseItemss(
+                                    model.countPickupByUps,
+                                    model.countPickupBySkl,
+                                    model.countPickupByL),
                                 Container(
-                                  height: MediaQuery.of(context).size.height * 0.06,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.06,
                                   alignment: Alignment.center,
                                   child: DottedLine(
                                     lineThickness: 2,
@@ -133,9 +153,12 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 _countStatusText("เจอของ", model.scannedPickup),
-                                _countStatusText("ของพร้อมปล่อย", model.pendingReleasePickup),
-                                _countStatusText("ปล่อยของ", model.releasePickup),
-                                _countStatusText("พบปัญหา", model.problemPickup),
+                                _countStatusText("ของพร้อมปล่อย",
+                                    model.pendingReleasePickup),
+                                _countStatusText(
+                                    "ปล่อยของ", model.releasePickup),
+                                _countStatusText(
+                                    "พบปัญหา", model.problemPickup),
                                 _countStatusText("อื่นๆ", model.otherPickup),
                               ],
                             );
@@ -230,7 +253,8 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         selectedDate = picked;
       });
-      context.read<HomeBloc>().add(HomeLoadingEvent(date: "${picked.year}-${picked.month}-${picked.day}"));
+      context.read<HomeBloc>().add(HomeLoadingEvent(
+          date: "${picked.year}-${picked.month}-${picked.day}"));
     }
   }
 
@@ -244,7 +268,8 @@ class _HomePageState extends State<HomePage> {
         ),
         Text(
           "$count",
-          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20),
+          style: TextStyle(
+              color: Colors.red, fontWeight: FontWeight.bold, fontSize: 20),
         ),
         Text(
           ")",
@@ -385,14 +410,17 @@ class _HomePageState extends State<HomePage> {
       width: MediaQuery.of(context).size.width,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/scanFindItems",
-              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"}).then((value) {
-            context
-                .read<HomeBloc>()
-                .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+          Navigator.pushNamed(context, "/scanFindItems", arguments: {
+            "datePick":
+                "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"
+          }).then((value) {
+            context.read<HomeBloc>().add(HomeLoadingEvent(
+                date:
+                    "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
           });
         },
-        child: Text("สแกนหาของ", style: TextStyle(color: Colors.black, fontSize: 18)),
+        child: Text("สแกนหาของ",
+            style: TextStyle(color: Colors.black, fontSize: 18)),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.lightGreenAccent),
           textStyle: WidgetStateProperty.all(
@@ -419,14 +447,17 @@ class _HomePageState extends State<HomePage> {
       width: MediaQuery.of(context).size.width,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/scanAndRelease",
-              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"}).then((value) {
-            context
-                .read<HomeBloc>()
-                .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+          Navigator.pushNamed(context, "/scanAndRelease", arguments: {
+            "datePick":
+                "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"
+          }).then((value) {
+            context.read<HomeBloc>().add(HomeLoadingEvent(
+                date:
+                    "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
           });
         },
-        child: Text("สแกนพร้อมปล่อยของ", style: TextStyle(color: Colors.black, fontSize: 18)),
+        child: Text("สแกนพร้อมปล่อยของ",
+            style: TextStyle(color: Colors.black, fontSize: 18)),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.lightGreenAccent),
           textStyle: WidgetStateProperty.all(
@@ -452,15 +483,24 @@ class _HomePageState extends State<HomePage> {
     return Container(
       width: MediaQuery.of(context).size.width,
       child: ElevatedButton(
-        onPressed: () {
-          Navigator.pushNamed(context, "/releaseItems",
-              arguments: {"datePick": "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"}).then((value) {
-            context
-                .read<HomeBloc>()
-                .add(HomeLoadingEvent(date: "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+        onPressed: () async {
+          _controllerRemark.text = "";
+          await _dialogRemarkOfReleaseItem().then((value) async {
+            if (value! == false) {
+              context.read<HomeBloc>().add(HomeLoadingEvent(
+                  date:
+                      "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"));
+              return;
+            } else {
+              Navigator.pushNamed(context, "/releaseItems", arguments: {
+                "datePick":
+                    "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}",
+              });
+            }
           });
         },
-        child: Text("ปล่อยของ", style: TextStyle(color: Colors.black, fontSize: 18)),
+        child: Text("ปล่อยของ",
+            style: TextStyle(color: Colors.black, fontSize: 18)),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.lightGreenAccent),
           textStyle: WidgetStateProperty.all(
@@ -482,8 +522,145 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<bool?> _dialogRemarkOfReleaseItem() async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        final remarkReleaseFormKey = GlobalKey<FormState>();
+
+        String? selectedValue;
+        bool isCustom = false;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+              title: const Text('เลือกตัวเลือก',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              content: Form(
+                key: remarkReleaseFormKey,
+                child: SizedBox(
+                  width: double.maxFinite,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!isCustom)
+                        DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: 'รายการ',
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                          items: periodReleaseDialog.map((value) {
+                            return DropdownMenuItem<String>(
+                              value: value["value"],
+                              child: Text(value["text"]),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              if (value == 'ระบุเอง') {
+                                isCustom = true;
+                              } else {
+                                selectedValue = value;
+                              }
+                            });
+                          },
+                          validator: (value) =>
+                              value == null ? 'กรุณาเลือกตัวเลือก' : null,
+                        ),
+                      if (isCustom)
+                        TextFormField(
+                          controller: _controllerRemark,
+                          decoration: InputDecoration(
+                            labelText: 'ระบุค่าของคุณ',
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.arrow_back),
+                              tooltip: 'ย้อนกลับไปเลือกจากรายการ',
+                              onPressed: () {
+                                setState(() {
+                                  isCustom = false;
+                                  _controllerRemark.clear();
+                                });
+                              },
+                            ),
+                          ),
+                          validator: (value) => (value == null || value.isEmpty)
+                              ? 'กรุณาระบุข้อความ'
+                              : null,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('ยกเลิก'),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                ElevatedButton(
+                  child: const Text('ยืนยัน'),
+                  onPressed: () async {
+                    if (remarkReleaseFormKey.currentState!.validate()) {
+                      String? finalValue =
+                          _setFinalValue(isCustom, selectedValue);
+                      if (finalValue != null) {
+                        await saveSelection(releaseRoundName, finalValue);
+                        await saveSelection(releaseRoundUUID, Uuid().v4());
+                        Navigator.of(context).pop(true);
+                      }
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _startEventHome() {
-    String date = "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}";
+    String date =
+        "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}";
     context.read<HomeBloc>().add(HomeLoadingEvent(date: date));
+  }
+
+  String? _setFinalValue(bool isCustom, String? selectedValue) {
+    String? result;
+    if (isCustom) {
+      // TextFormField
+      String input = _controllerRemark.text.trim();
+      if (input.isNotEmpty) {
+        result = input;
+      }
+    } else {
+      // Dropdown
+      if (selectedValue != null && selectedValue.isNotEmpty) {
+        result = selectedValue;
+      }
+    }
+    return result!;
+  }
+
+  Future<void> saveSelection(String key, String value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+  }
+
+  Future<List<Map<String, dynamic>>?> _getPeriodReleaseForDialog() async {
+    // String date = "${selectedDate.toLocal()}".split(' ')[0];
+    String date =
+        "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}";
+    List<Map<String, dynamic>> periodRelease =
+        await DataService().getReleaseRound(date) ?? [];
+    periodRelease.addAll([
+      {"text": "ระบุเอง", "value": "ระบุเอง"}
+    ]);
+    return periodRelease;
   }
 }

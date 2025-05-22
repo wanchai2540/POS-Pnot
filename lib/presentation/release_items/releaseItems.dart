@@ -1,8 +1,4 @@
 // ignore_for_file: avoid_unnecessary_containers
-
-import 'dart:collection';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kymscanner/common.dart';
@@ -11,8 +7,9 @@ import 'package:kymscanner/data/api/api.dart';
 import 'package:kymscanner/button_listener.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kymscanner/data/models/release_model.dart';
-import 'package:kymscanner/data/models/scanFindItems_model.dart';
-import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
+import 'package:kymscanner/data/models/release_round_model.dart';
+import 'package:kymscanner/presentation/release_items/bloc/release_items_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 typedef MenuEntry = DropdownMenuEntry<String>;
 
@@ -29,7 +26,6 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   String dropdownValue = "";
   List<MenuEntry> menuEntries = [];
   final TextEditingController _controller = TextEditingController();
-  List<String> list = ["ทั้งหมด", "สแกนแล้ว", "ยังไม่ได้สแกน", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
   final _formKey = GlobalKey<FormState>();
 
   ValueNotifier<bool> _isShowDialog = ValueNotifier<bool>(false);
@@ -37,17 +33,18 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   final TextEditingController _textEditing = TextEditingController();
   final FocusNode _keyboardListenerFocusNode = FocusNode();
   int _countListType = 0;
+  String roundName = "";
+  String roundUUID = "";
 
   @override
   void initState() {
     CustomButtonListener.initialize();
 
-    _initialValueListDropdown();
     _onScannListener();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startEventTable();
-      context.read<ScanFindItemsPageBloc>().stream.listen((state) {
-        if (state is ScanPageGetLoadedState) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _startEventTable();
+      context.read<ReleaseItemsBloc>().stream.listen((state) {
+        if (state is ReleasePageGetLoadedState) {
           _countListType = state.model.length;
         }
       });
@@ -75,7 +72,8 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
           focusNode: _keyboardListenerFocusNode,
           autofocus: true,
           onKeyEvent: (event) {
-            if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
+            if (event is KeyDownEvent &&
+                event.logicalKey == LogicalKeyboardKey.enter) {
               // print('Enter key pressed!');
             }
           },
@@ -90,58 +88,57 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      DropdownMenu<String>(
-                        initialSelection: list.first,
-                        onSelected: (String? value) {
-                          setState(() {
-                            dropdownLabel = value!;
-                            _handleDropdownSelection(value);
-                          });
-                        },
-                        dropdownMenuEntries: menuEntries,
-                      ),
-                      SizedBox(width: 10),
-                      Text("จำนวน: $_countListType", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
                       children: [
-                        Text("HAWB ที่สแกน : ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        SizedBox(width: 10),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.height * 0.27,
-                          child: TextField(
-                            focusNode: _focusBarcodeField,
-                            controller: _textEditing,
-                            onSubmitted: (String value) {
-                              _textEditing.text = value;
-                              _onScan(parentContext: context, hawb: value.trim());
-                            },
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("HAWB ที่สแกน : ",
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
+                            SizedBox(width: 10),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.height * 0.27,
+                              child: TextField(
+                                focusNode: _focusBarcodeField,
+                                controller: _textEditing,
+                                onSubmitted: (String value) {
+                                  _textEditing.text = value;
+                                  _onScan(
+                                      parentContext: context,
+                                      hawb: value.trim());
+                                },
 
-                            // keyboardType: TextInputType.none,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
+                                // keyboardType: TextInputType.none,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "จำนวน: $_countListType",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
                     ),
                   ),
                   SizedBox(height: 20),
-                  BlocListener<ScanFindItemsPageBloc, ScanPageBlocState>(
+                  BlocListener<ReleaseItemsBloc, ReleaseItemsState>(
                     listener: (context, state) {
-                      if (state is ScanPageGetLoadedState) {
+                      if (state is ReleasePageGetLoadedState) {
                         setState(() {
                           _countListType = state.model.length;
                         });
-                      } else if (state is ScanPageGetErrorState) {
+                      } else if (state is ReleasePageGetErrorState) {
                         setState(() {
                           _countListType = 0;
                         });
@@ -149,11 +146,12 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                     },
                     child: SizedBox(),
                   ),
-                  BlocBuilder<ScanFindItemsPageBloc, ScanPageBlocState>(
+                  BlocBuilder<ReleaseItemsBloc, ReleaseItemsState>(
                     builder: (context, state) {
-                      if (state is ScanPageGetLoadingState) {
+                      if (state is ReleasePageGetLoadingState) {
                         return CircularProgressIndicator();
-                      } else if (state is ScanPageGetLoadedState) {
+                      } else if (state is ReleasePageGetLoadedState &&
+                          state.model.isNotEmpty) {
                         return _tableListData(state.model);
                       } else {
                         return Center(child: Text("ไม่มีข้อมูล"));
@@ -171,54 +169,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
     );
   }
 
-  void _handleDropdownSelection(String value) {
-    switch (value) {
-      case "ทั้งหมด":
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked),
-            );
-        break;
-      case "สแกนแล้ว":
-        dropdownValue = "03";
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "03"),
-            );
-        break;
-      case "ยังไม่ได้สแกน":
-        dropdownValue = "01";
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "01"),
-            );
-        break;
-      case "ของพร้อมปล่อย":
-        dropdownValue = "04";
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "04"),
-            );
-        break;
-      case "ปล่อยของ":
-        dropdownValue = "05";
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "05"),
-            );
-        break;
-      case "พบปัญหา":
-        dropdownValue = "08";
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "08"),
-            );
-        break;
-      case "อื่นๆ":
-        dropdownValue = "00";
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "00"),
-            );
-        break;
-      default:
-    }
-  }
-
-  Widget _tableListData(List<ScanfinditemsModel> model) {
+  Widget _tableListData(List<ReleaseRoundModel> model) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 15),
       child: Container(
@@ -229,7 +180,8 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
             1: FlexColumnWidth(50),
             2: FixedColumnWidth(60),
           },
-          border: TableBorder.all(color: Colors.black, style: BorderStyle.solid, width: 1),
+          border: TableBorder.all(
+              color: Colors.black, style: BorderStyle.solid, width: 1),
           children: [
             TableRow(
               decoration: BoxDecoration(color: Colors.white),
@@ -241,7 +193,8 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                     child: Center(
                       child: Text(
                         "HAWB",
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -253,7 +206,8 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                     child: Center(
                       child: Text(
                         "Status",
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -266,9 +220,9 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                 context: context,
                 uuid: data.uuid,
                 hawb: data.hawb,
-                itemNo: data.itemNo,
+                itemNo: data.itemNo.toString(),
                 consigneeName: data.consigneeName,
-                ctns: data.ctns,
+                ctns: data.ctns.toString(),
                 lastStatus: data.lastStatus,
                 isSuspended: data.isSuspended,
                 colorsStatus: _colorStatus(data.lastStatus)!,
@@ -402,21 +356,23 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
     );
   }
 
-  void _startEventTable() {
-    Map<String, dynamic> date = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+  Future<void> _startEventTable() async {
+    Map<String, dynamic> date =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     datePicked = date["datePick"];
-    context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      roundName = prefs.getString(releaseRoundName) ?? "";
+      roundUUID = prefs.getString(releaseRoundUUID) ?? "";
+    });
+    context.read<ReleaseItemsBloc>().add(
+        ReleasePageGetDataEvent(date: datePicked, releaseRoundUUID: roundName));
   }
 
-  void _initialValueListDropdown() {
-    dropdownLabel = list.first;
-    menuEntries = UnmodifiableListView<MenuEntry>(
-      list.map<MenuEntry>((String name) => MenuEntry(value: name, label: name)),
-    );
-  }
-
-  Future<void> _onScan({required BuildContext parentContext, required String hawb}) async {
-    var dataGetScan = await DataService().getReleaseListener(hawb);
+  Future<void> _onScan(
+      {required BuildContext parentContext, required String hawb}) async {
+    var dataGetScan =
+        await DataService().getReleaseListener(hawb,datePicked, roundName, roundUUID);
     var data = dataGetScan["body"];
     try {
       ReleaseModel result = ReleaseModel.fromJson(data);
@@ -438,7 +394,10 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
         if (data["appCode"] == "03") {
           // Dialog 4
           DialogScan().showScanNoHawbDialog(
-              title: "ไม่พบ HAWB ในระบบ", isShowDialog: _isShowDialog, context: parentContext, datePicked: datePicked);
+              title: "ไม่พบ HAWB ในระบบ",
+              isShowDialog: _isShowDialog,
+              context: parentContext,
+              datePicked: datePicked);
         } else if (data["appCode"] == "02" && data["statusCode"] == "05") {
           // Dialog 2
           DialogScan().showReleaseScanDialog(
@@ -458,15 +417,11 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                 data["statusCode"] == "09" ||
                 data["statusCode"] == "10")) {
           // Dialog 3
-          // DialogScan().showReleaseScanDialog(
-          //   model: result,
-          //   parentContext: parentContext,
-          //   isShowDialog: _isShowDialog,
-          //   datePicked: datePicked,
-          //   remarkFailed: "สถานะไม่ถูกต้อง",
-          // );
           DialogScan().showScanNoHawbDialog(
-              title: "สถานะไม่ถูกต้อง", isShowDialog: _isShowDialog, context: parentContext, datePicked: datePicked);
+              title: "สถานะไม่ถูกต้อง",
+              isShowDialog: _isShowDialog,
+              context: parentContext,
+              datePicked: datePicked);
         }
       }
     } catch (e) {

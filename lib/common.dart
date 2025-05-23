@@ -11,6 +11,7 @@ import 'package:kymscanner/data/models/release_model.dart';
 import 'package:kymscanner/data/models/scanAndRelease_model.dart';
 import 'package:kymscanner/data/models/scan_listener_model.dart';
 import 'package:kymscanner/data/models/scan_result_model.dart';
+import 'package:kymscanner/presentation/release_items/bloc/release_items_bloc.dart';
 import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 import 'package:watermark_unique/image_format.dart';
 import 'package:watermark_unique/watermark_unique.dart';
@@ -502,6 +503,7 @@ class DialogScan {
     required ReleaseModel model,
     required ValueNotifier<bool> isShowDialog,
     required String datePicked,
+    String? roundUUID,
     int? statusCode,
     bool isDialog3 = false,
     String? nameReportBtn,
@@ -586,7 +588,9 @@ class DialogScan {
                       ),
                       child: const Text('สแกนต่อ'),
                       onPressed: () {
-                        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
+                        context
+                            .read<ReleaseItemsBloc>()
+                            .add(ReleasePageGetDataEvent(date: datePicked, releaseRoundUUID: roundUUID!));
                         isShowDialog.value = false;
                         Navigator.of(context).pop();
                       },

@@ -253,7 +253,7 @@ class DataService {
     }
   }
 
-  Future<Map<String, dynamic>> getReleaseListener(String hawb, String date,
+  Future<Map<String, dynamic>> getReleaseScanListener(String hawb, String date,
       String releaseRoundName, String releaseRoundUUID) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
@@ -566,24 +566,9 @@ class DataService {
         {"status": "error", "text": "Exception occurred: $e", "data": null}
       ];
     }
-
-    // return [
-    //   {
-    //     "text": "รอบ 10:00 || 10",
-    //     "value": "รอบ 10:00",
-    //   },
-    //   {
-    //     "text": "รอบ 11:00 || 10",
-    //     "value": "รอบ 11:00",
-    //   },
-    //   {
-    //     "text": "รอบ 12:00 || 10",
-    //     "value": "รอบ 12:00",
-    //   }
-    // ];
   }
 
-  Future<Map<String, dynamic>> getItemReleaseByRound(
+  Future<Map<String, dynamic>> getTableReleaseByRound(
       String date, String releaseRoundUUID) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String accessToken = prefs.getString("accessToken") ?? "";
@@ -611,7 +596,7 @@ class DataService {
           "status": "success",
           "text": "success",
           "code": response.statusCode,
-          "body": bodyResponse["data"],
+          "data": bodyResponse["data"],
         };
       }
     } catch (e) {

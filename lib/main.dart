@@ -8,6 +8,7 @@ import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_pag
 import 'package:kymscanner/route.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: "/splash",
         navigatorKey: navigatorKey,
+        navigatorObservers: [routeObserver],
         onGenerateRoute: (route) => onGenerateRoute(route),
       ),
     );

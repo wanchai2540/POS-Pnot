@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kymscanner/common.dart';
 import 'package:kymscanner/constant.dart';
+import 'package:kymscanner/core_log.dart';
 import 'package:kymscanner/data/api/api.dart';
 import 'package:kymscanner/button_listener.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -72,8 +73,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
           focusNode: _keyboardListenerFocusNode,
           autofocus: true,
           onKeyEvent: (event) {
-            if (event is KeyDownEvent &&
-                event.logicalKey == LogicalKeyboardKey.enter) {
+            if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
               // print('Enter key pressed!');
             }
           },
@@ -95,9 +95,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("HAWB ที่สแกน : ",
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text("HAWB ที่สแกน : ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                             SizedBox(width: 10),
                             SizedBox(
                               width: MediaQuery.of(context).size.height * 0.27,
@@ -106,9 +104,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                                 controller: _textEditing,
                                 onSubmitted: (String value) {
                                   _textEditing.text = value;
-                                  _onScan(
-                                      parentContext: context,
-                                      hawb: value.trim());
+                                  _onScan(parentContext: context, hawb: value.trim());
                                 },
 
                                 // keyboardType: TextInputType.none,
@@ -123,9 +119,16 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
+                            roundName,
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
                             "จำนวน: $_countListType",
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
@@ -150,8 +153,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                     builder: (context, state) {
                       if (state is ReleasePageGetLoadingState) {
                         return CircularProgressIndicator();
-                      } else if (state is ReleasePageGetLoadedState &&
-                          state.model.isNotEmpty) {
+                      } else if (state is ReleasePageGetLoadedState && state.model.isNotEmpty) {
                         return _tableListData(state.model);
                       } else {
                         return Center(child: Text("ไม่มีข้อมูล"));
@@ -180,8 +182,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
             1: FlexColumnWidth(50),
             2: FixedColumnWidth(60),
           },
-          border: TableBorder.all(
-              color: Colors.black, style: BorderStyle.solid, width: 1),
+          border: TableBorder.all(color: Colors.black, style: BorderStyle.solid, width: 1),
           children: [
             TableRow(
               decoration: BoxDecoration(color: Colors.white),
@@ -193,8 +194,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                     child: Center(
                       child: Text(
                         "HAWB",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -205,9 +205,8 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                     height: MediaQuery.of(context).size.height * 0.05,
                     child: Center(
                       child: Text(
-                        "Status",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+                        "Created At",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -224,6 +223,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                 consigneeName: data.consigneeName,
                 ctns: data.ctns.toString(),
                 lastStatus: data.lastStatus,
+                createdAt: data.createdAt,
                 isSuspended: data.isSuspended,
                 colorsStatus: _colorStatus(data.lastStatus)!,
               ),
@@ -357,22 +357,18 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   }
 
   Future<void> _startEventTable() async {
-    Map<String, dynamic> date =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    Map<String, dynamic> date = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     datePicked = date["datePick"];
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       roundName = prefs.getString(releaseRoundName) ?? "";
       roundUUID = prefs.getString(releaseRoundUUID) ?? "";
     });
-    context.read<ReleaseItemsBloc>().add(
-        ReleasePageGetDataEvent(date: datePicked, releaseRoundUUID: roundName));
+    context.read<ReleaseItemsBloc>().add(ReleasePageGetDataEvent(date: datePicked, releaseRoundUUID: roundUUID));
   }
 
-  Future<void> _onScan(
-      {required BuildContext parentContext, required String hawb}) async {
-    var dataGetScan =
-        await DataService().getReleaseListener(hawb,datePicked, roundName, roundUUID);
+  Future<void> _onScan({required BuildContext parentContext, required String hawb}) async {
+    var dataGetScan = await DataService().getReleaseScanListener(hawb, datePicked, roundName, roundUUID);
     var data = dataGetScan["body"];
     try {
       ReleaseModel result = ReleaseModel.fromJson(data);
@@ -387,6 +383,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
             datePicked: datePicked,
             remarkFailed: "สแกนปล่อยของสำเร็จ",
             isGreen: true,
+            roundUUID: roundUUID,
             typeDialogScanItems: TypeDialogScanItems.dialog1,
           );
         }
@@ -394,10 +391,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
         if (data["appCode"] == "03") {
           // Dialog 4
           DialogScan().showScanNoHawbDialog(
-              title: "ไม่พบ HAWB ในระบบ",
-              isShowDialog: _isShowDialog,
-              context: parentContext,
-              datePicked: datePicked);
+              title: "ไม่พบ HAWB ในระบบ", isShowDialog: _isShowDialog, context: parentContext, datePicked: datePicked);
         } else if (data["appCode"] == "02" && data["statusCode"] == "05") {
           // Dialog 2
           DialogScan().showReleaseScanDialog(
@@ -406,6 +400,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
             isShowDialog: _isShowDialog,
             datePicked: datePicked,
             remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว",
+            roundUUID: roundUUID,
             typeDialogScanItems: TypeDialogScanItems.dialog2,
           );
         } else if (data["appCode"] == "02" &&
@@ -418,15 +413,12 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                 data["statusCode"] == "10")) {
           // Dialog 3
           DialogScan().showScanNoHawbDialog(
-              title: "สถานะไม่ถูกต้อง",
-              isShowDialog: _isShowDialog,
-              context: parentContext,
-              datePicked: datePicked);
+              title: "สถานะไม่ถูกต้อง", isShowDialog: _isShowDialog, context: parentContext, datePicked: datePicked);
         }
       }
     } catch (e) {
       Exception(e);
-      print(e);
+      CoreLog().error("ReleaseItemPage _onScan: Exception occurred: $e");
     }
   }
 
@@ -437,5 +429,108 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
         _focusBarcodeField.requestFocus();
       }
     };
+  }
+
+  TableRow tableRowScan(
+      {required BuildContext context,
+      required String uuid,
+      required String hawb,
+      required String itemNo,
+      required String consigneeName,
+      required String ctns,
+      required String lastStatus,
+      required String createdAt,
+      bool isSuspended = false,
+      required Color colorsStatus}) {
+    String dateCreateAt = createdAt.split(" ").last;
+    return TableRow(
+      decoration: BoxDecoration(color: Colors.white),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    hawb,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              ColoredBox(
+                color: isSuspended ? Colors.yellow : Colors.transparent,
+                child: Row(
+                  children: [
+                    Text(
+                      "ItemNo: ",
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    Text(
+                      itemNo,
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    "Cons: ",
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  Expanded(
+                    child: Text(
+                      consigneeName,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text(
+                    "CTNS: ",
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  Text(
+                    ctns,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              dateCreateAt,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: colorsStatus,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, "/detailItemScan", arguments: {"uuid": uuid, "hawb": hawb});
+              },
+              icon: Image.asset("assets/images/file.png", width: 25, height: 25),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

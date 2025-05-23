@@ -11,6 +11,7 @@ class ReleaseRoundModel {
   bool isProblem;
   int ctns;
   String consigneeName;
+  String createdAt;
   bool isSuspended;
 
   ReleaseRoundModel({
@@ -26,6 +27,7 @@ class ReleaseRoundModel {
     required this.isProblem,
     required this.ctns,
     required this.consigneeName,
+    required this.createdAt,
     required this.isSuspended,
   });
 
@@ -43,6 +45,7 @@ class ReleaseRoundModel {
       isProblem: json["isProblem"] ?? false,
       ctns: json["ctns"] ?? 0,
       consigneeName: json["consigneeName"] ?? "",
+      createdAt: json["createdAt"] ?? "",
       isSuspended: json["isSuspended"] ?? false,
     );
   }
@@ -61,6 +64,7 @@ class ReleaseRoundModel {
       "isProblem": isProblem,
       "ctns": ctns,
       "consigneeName": consigneeName,
+      "createdAt": createdAt,
       "isSuspended": isSuspended,
     };
   }

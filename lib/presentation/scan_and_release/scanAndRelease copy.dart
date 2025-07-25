@@ -41,15 +41,21 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
   final FocusNode _keyboardListenerFocusNode = FocusNode();
   final _reportFormKey = GlobalKey<FormState>();
   ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
-  ValueNotifier<int> _countListType = ValueNotifier<int>(0);
+  int _countListType = 0;
 
   @override
   void initState() {
     CustomButtonListener.initialize();
+
     _initialValueListDropdown();
     _onScannListener();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startEventTable();
+      context.read<ScanFindItemsPageBloc>().stream.listen((state) {
+        if (state is ScanPageGetLoadedState) {
+          _countListType = state.model.length;
+        }
+      });
     });
     super.initState();
   }
@@ -101,18 +107,15 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                       DropdownMenu<String>(
                         initialSelection: list.first,
                         onSelected: (String? value) {
-                          dropdownLabel = value!;
-                          _handleDropdownSelection(value);
+                          setState(() {
+                            dropdownLabel = value!;
+                            _handleDropdownSelection(value);
+                          });
                         },
                         dropdownMenuEntries: menuEntries,
                       ),
                       SizedBox(width: 10),
-                      ValueListenableBuilder<int>(
-                        valueListenable: _countListType,
-                        builder: (context, value, child) {
-                          return Text("จำนวน: $value", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold));
-                        },
-                      ),
+                      Text("จำนวน: $_countListType", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   SizedBox(height: 20),
@@ -128,10 +131,16 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                           child: TextField(
                             focusNode: _focusBarcodeField,
                             controller: _textEditing,
+                            // onChanged: (value) {
+                            //   _onScan(context,
+                            //       date: datePicked, hawb: value.trim());
+                            // },
                             onSubmitted: (String value) {
                               _textEditing.text = value;
                               _onScan(parentContext: context, hawb: value.trim());
                             },
+
+                            // keyboardType: TextInputType.none,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
@@ -144,22 +153,27 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                   BlocListener<ScanFindItemsPageBloc, ScanPageBlocState>(
                     listener: (context, state) {
                       if (state is ScanPageGetLoadedState) {
-                        _countListType.value = state.model.length;
-                      }else{
-                        _countListType.value = 0;
+                        setState(() {
+                          _countListType = state.model.length;
+                        });
+                      } else if (state is ScanPageGetErrorState) {
+                        setState(() {
+                          _countListType = 0;
+                        });
                       }
                     },
-                    child: BlocBuilder<ScanFindItemsPageBloc, ScanPageBlocState>(
-                      builder: (context, state) {
-                        if (state is ScanPageGetLoadingState) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-                        if (state is ScanPageGetLoadedState) {
-                          return _tableListData(state.model);
-                        }
-                        return const Center(child: Text("ไม่มีข้อมูล"));
-                      },
-                    ),
+                    child: SizedBox(),
+                  ),
+                  BlocBuilder<ScanFindItemsPageBloc, ScanPageBlocState>(
+                    builder: (context, state) {
+                      if (state is ScanPageGetLoadingState) {
+                        return CircularProgressIndicator();
+                      } else if (state is ScanPageGetLoadedState) {
+                        return _tableListData(state.model);
+                      } else {
+                        return Center(child: Text("ไม่มีข้อมูล"));
+                      }
+                    },
                   ),
                   SizedBox(height: 80),
                 ],
@@ -180,31 +194,37 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
             );
         break;
       case "สแกนแล้ว":
+        dropdownValue = "03";
         context.read<ScanFindItemsPageBloc>().add(
               ScanPageGetDataEvent(date: datePicked, type: "03"),
             );
         break;
       case "ยังไม่ได้สแกน":
+        dropdownValue = "01";
         context.read<ScanFindItemsPageBloc>().add(
               ScanPageGetDataEvent(date: datePicked, type: "01"),
             );
         break;
       case "ของพร้อมปล่อย":
+        dropdownValue = "04";
         context.read<ScanFindItemsPageBloc>().add(
               ScanPageGetDataEvent(date: datePicked, type: "04"),
             );
         break;
       case "ปล่อยของ":
+        dropdownValue = "05";
         context.read<ScanFindItemsPageBloc>().add(
               ScanPageGetDataEvent(date: datePicked, type: "05"),
             );
         break;
       case "พบปัญหา":
+        dropdownValue = "08";
         context.read<ScanFindItemsPageBloc>().add(
               ScanPageGetDataEvent(date: datePicked, type: "08"),
             );
         break;
       case "อื่นๆ":
+        dropdownValue = "00";
         context.read<ScanFindItemsPageBloc>().add(
               ScanPageGetDataEvent(date: datePicked, type: "00"),
             );
@@ -352,7 +372,8 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
   }
 
   void _startEventTable() {
-    datePicked = (ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>)["datePick"];
+    Map<String, dynamic> date = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    datePicked = date["datePick"];
     context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
   }
 

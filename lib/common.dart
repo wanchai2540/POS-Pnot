@@ -98,11 +98,6 @@ class DialogScan {
                             typeDialogScan == TypeDialogScanItems.dialog6) {
                           isShowDialog.value = false;
                           Navigator.of(context).pop();
-                          // Navigator.of(parentContext).pushNamed("/report", arguments: {
-                          //   "uuid": model.uuid,
-                          //   "datePicked": datePicked,
-                          //   "problemCode": "08",
-                          // });
                           await showConfirmFindItemDialog(
                             isShowDialog: isShowDialog,
                             parentContext: parentContext,
@@ -116,10 +111,6 @@ class DialogScan {
                         } else if (statusCode == 400 && typeDialogScan == TypeDialogScanItems.dialog4) {
                           isShowDialog.value = false;
                           Navigator.of(context).pop();
-                          // Navigator.of(parentContext).pushNamed("/repack", arguments: {
-                          //   "uuid": model.uuid,
-                          //   "datePicked": datePicked,
-                          // });
                           await showConfirmRepackDialog(
                             isShowDialog: isShowDialog,
                             parentContext: parentContext,

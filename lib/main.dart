@@ -26,7 +26,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<HomeBloc>(create: (BuildContext context) => HomeBloc()),
+        BlocProvider<HomeBloc>(create: (BuildContext context) {
+          String date = "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}";
+          return HomeBloc()..add(HomeLoadingEvent(date: date));
+        }),
         BlocProvider<ScanFindItemsPageBloc>(create: (BuildContext context) => ScanFindItemsPageBloc()),
         BlocProvider<DetailItemScanBloc>(create: (BuildContext context) => DetailItemScanBloc()),
         BlocProvider<ReleaseItemsBloc>(create: (BuildContext context) => ReleaseItemsBloc()),

@@ -23,6 +23,9 @@ class ReleaseItemsPage extends StatefulWidget {
 
 class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   String datePicked = "";
+  String dropdownLabel = "";
+  String dropdownValue = "";
+  List<MenuEntry> menuEntries = [];
   final TextEditingController _controller = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -30,16 +33,22 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
   final FocusNode _focusBarcodeField = FocusNode();
   final TextEditingController _textEditing = TextEditingController();
   final FocusNode _keyboardListenerFocusNode = FocusNode();
-  ValueNotifier<int> _countListType = ValueNotifier<int>(0);
-  ValueNotifier<String> roundName = ValueNotifier<String>("");
-  ValueNotifier<String> roundUUID = ValueNotifier<String>("");
+  int _countListType = 0;
+  String roundName = "";
+  String roundUUID = "";
 
   @override
   void initState() {
     CustomButtonListener.initialize();
+
     _onScannListener();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _startEventTable(context);
+      await _startEventTable();
+      context.read<ReleaseItemsBloc>().stream.listen((state) {
+        if (state is ReleasePageGetLoadedState) {
+          _countListType = state.model.length;
+        }
+      });
     });
     super.initState();
   }
@@ -103,6 +112,8 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                                   _textEditing.text = value;
                                   _onScan(parentContext: context, hawb: value.trim());
                                 },
+
+                                // keyboardType: TextInputType.none,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -113,21 +124,17 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                         SizedBox(height: 10),
                         Align(
                           alignment: Alignment.centerLeft,
-                          child: ValueListenableBuilder<String>(
-                            valueListenable: roundName,
-                            builder: (context, value, child) {
-                              return Text("จำนวน: $value", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold));
-                            },
+                          child: Text(
+                            roundName,
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ),
                         SizedBox(height: 10),
                         Align(
                           alignment: Alignment.centerLeft,
-                          child: ValueListenableBuilder<int>(
-                            valueListenable: _countListType,
-                            builder: (context, value, child) {
-                              return Text("จำนวน: $value", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold));
-                            },
+                          child: Text(
+                            "จำนวน: $_countListType",
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
@@ -137,21 +144,27 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                   BlocListener<ReleaseItemsBloc, ReleaseItemsState>(
                     listener: (context, state) {
                       if (state is ReleasePageGetLoadedState) {
-                        _countListType.value = state.model.length;
-                      } else {
-                        _countListType.value = 0;
+                        setState(() {
+                          _countListType = state.model.length;
+                        });
+                      } else if (state is ReleasePageGetErrorState) {
+                        setState(() {
+                          _countListType = 0;
+                        });
                       }
                     },
-                    child: BlocBuilder<ReleaseItemsBloc, ReleaseItemsState>(
-                      builder: (context, state) {
-                        if (state is ReleasePageGetLoadingState) {
-                          return const Center(child: CircularProgressIndicator());
-                        } else if (state is ReleasePageGetLoadedState && state.model.isNotEmpty) {
-                          return _tableListData(state.model);
-                        }
-                        return const Center(child: Text("ไม่มีข้อมูล"));
-                      },
-                    ),
+                    child: SizedBox(),
+                  ),
+                  BlocBuilder<ReleaseItemsBloc, ReleaseItemsState>(
+                    builder: (context, state) {
+                      if (state is ReleasePageGetLoadingState) {
+                        return CircularProgressIndicator();
+                      } else if (state is ReleasePageGetLoadedState && state.model.isNotEmpty) {
+                        return _tableListData(state.model);
+                      } else {
+                        return Center(child: Text("ไม่มีข้อมูล"));
+                      }
+                    },
                   ),
                   SizedBox(height: 80),
                 ],
@@ -349,21 +362,19 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
     );
   }
 
-  Future<void> _startEventTable(BuildContext context) async {
+  Future<void> _startEventTable() async {
     Map<String, dynamic> date = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     datePicked = date["datePick"];
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    roundName.value = prefs.getString(releaseRoundName) ?? "";
-    roundUUID.value = prefs.getString(releaseRoundUUID) ?? "";
-    if (context.mounted) {
-      context
-          .read<ReleaseItemsBloc>()
-          .add(ReleasePageGetDataEvent(date: datePicked, releaseRoundUUID: roundUUID.value));
-    }
+    setState(() {
+      roundName = prefs.getString(releaseRoundName) ?? "";
+      roundUUID = prefs.getString(releaseRoundUUID) ?? "";
+    });
+    context.read<ReleaseItemsBloc>().add(ReleasePageGetDataEvent(date: datePicked, releaseRoundUUID: roundUUID));
   }
 
   Future<void> _onScan({required BuildContext parentContext, required String hawb}) async {
-    var dataGetScan = await DataService().getReleaseScanListener(hawb, datePicked, roundName.value, roundUUID.value);
+    var dataGetScan = await DataService().getReleaseScanListener(hawb, datePicked, roundName, roundUUID);
     var data = dataGetScan["body"];
     try {
       ReleaseModel result = ReleaseModel.fromJson(data);
@@ -378,7 +389,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
             datePicked: datePicked,
             remarkFailed: "สแกนปล่อยของสำเร็จ",
             isGreen: true,
-            roundUUID: roundUUID.value, // TODO: check roundUUID
+            roundUUID: roundUUID,
             typeDialogScanItems: TypeDialogScanItems.dialog1,
           );
         }
@@ -395,7 +406,7 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
             isShowDialog: _isShowDialog,
             datePicked: datePicked,
             remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว",
-            roundUUID: roundUUID.value, // TODO: check roundUUID
+            roundUUID: roundUUID,
             typeDialogScanItems: TypeDialogScanItems.dialog2,
           );
         } else if (data["appCode"] == "02" &&

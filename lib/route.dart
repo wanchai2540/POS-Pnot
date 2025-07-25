@@ -4,8 +4,6 @@ import 'package:kymscanner/presentation/home/home.dart';
 import 'package:kymscanner/presentation/login.dart';
 import 'package:kymscanner/presentation/release_items/releaseItems.dart';
 import 'package:kymscanner/presentation/scan_and_release/scanAndRelease.dart';
-import 'package:kymscanner/presentation/scan_find_items/repack.dart';
-import 'package:kymscanner/presentation/scan_find_items/report.dart';
 import 'package:kymscanner/presentation/scan_find_items/scanFindItems.dart';
 import 'package:kymscanner/presentation/splash.dart';
 

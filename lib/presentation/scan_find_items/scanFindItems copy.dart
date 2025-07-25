@@ -1,55 +1,65 @@
-// ignore_for_file: avoid_unnecessary_containers
+// ignore_for_file: avoid_unnecessary_containers, use_build_context_synchronously
 
 import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:kymscanner/common.dart';
 import 'package:kymscanner/constant.dart';
 import 'package:kymscanner/data/api/api.dart';
 import 'package:kymscanner/button_listener.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kymscanner/data/models/scanAndRelease_model.dart';
 import 'package:kymscanner/data/models/scanFindItems_model.dart';
+import 'package:kymscanner/data/models/scan_listener_model.dart';
+import 'package:kymscanner/common.dart';
 import 'package:kymscanner/data/models/scan_result_model.dart';
 import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 
 typedef MenuEntry = DropdownMenuEntry<String>;
 
-class ScanAndReleasePage extends StatefulWidget {
-  ScanAndReleasePage({super.key});
+class ScanFindItemsPage extends StatefulWidget {
+  ScanFindItemsPage({super.key});
 
   @override
-  State<ScanAndReleasePage> createState() => _ScanAndReleasePageState();
+  State<ScanFindItemsPage> createState() => _ScanFindItemsPageState();
 }
 
-class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
+class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
   String datePicked = "";
   String dropdownLabel = "";
   String dropdownValue = "";
   List<MenuEntry> menuEntries = [];
   final TextEditingController _controller = TextEditingController();
+
   List<String> list = ["ทั้งหมด", "สแกนแล้ว", "ยังไม่ได้สแกน", "ของพร้อมปล่อย", "ปล่อยของ", "พบปัญหา", "อื่นๆ"];
   final _formKey = GlobalKey<FormState>();
+  final _reportFormKey = GlobalKey<FormState>();
 
-  // bool _isShowDialog = false;
   ValueNotifier<bool> _isShowDialog = ValueNotifier<bool>(false);
 
   final FocusNode _focusBarcodeField = FocusNode();
   final TextEditingController _textEditing = TextEditingController();
   final FocusNode _keyboardListenerFocusNode = FocusNode();
-  final _reportFormKey = GlobalKey<FormState>();
-  ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
-  ValueNotifier<int> _countListType = ValueNotifier<int>(0);
 
+  ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
+  ValueNotifier<File?> _imageRepack = ValueNotifier<File?>(null);
+  List<File?> _imageNoReason = [];
+
+  int _countListType = 0;
   @override
   void initState() {
     CustomButtonListener.initialize();
+
     _initialValueListDropdown();
     _onScannListener();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startEventTable();
+      // updateCountList();
+      context.read<ScanFindItemsPageBloc>().stream.listen((state) {
+        if (state is ScanPageGetLoadedState) {
+          _countListType = state.model.length;
+        }
+      });
     });
     super.initState();
   }
@@ -67,14 +77,9 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFFF5ECD5),
-        title: Text("สแกนพร้อมปล่อยของ"),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop({"reloadData": true});
-          },
-        ),
+        title: Text("สแกนหาของ"),
       ),
+      backgroundColor: Color(0xFFFFFAEC),
       body: SafeArea(
         child: KeyboardListener(
           focusNode: _keyboardListenerFocusNode,
@@ -90,7 +95,7 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                 children: [
                   Center(
                     child: Text(
-                      "งานของวันที่ ${datePicked}",
+                      "งานของวันที่ $datePicked",
                       style: TextStyle(fontSize: 25),
                     ),
                   ),
@@ -101,18 +106,15 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                       DropdownMenu<String>(
                         initialSelection: list.first,
                         onSelected: (String? value) {
-                          dropdownLabel = value!;
-                          _handleDropdownSelection(value);
+                          setState(() {
+                            dropdownLabel = value!;
+                            _handleDropdownSelection(value); // Moved logic to a separate function
+                          });
                         },
                         dropdownMenuEntries: menuEntries,
                       ),
                       SizedBox(width: 10),
-                      ValueListenableBuilder<int>(
-                        valueListenable: _countListType,
-                        builder: (context, value, child) {
-                          return Text("จำนวน: $value", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold));
-                        },
-                      ),
+                      Text("จำนวน: $_countListType", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   SizedBox(height: 20),
@@ -130,8 +132,10 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                             controller: _textEditing,
                             onSubmitted: (String value) {
                               _textEditing.text = value;
-                              _onScan(parentContext: context, hawb: value.trim());
+                              _onScan(context, hawb: value.trim());
                             },
+
+                            // keyboardType: TextInputType.none,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
@@ -144,22 +148,27 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                   BlocListener<ScanFindItemsPageBloc, ScanPageBlocState>(
                     listener: (context, state) {
                       if (state is ScanPageGetLoadedState) {
-                        _countListType.value = state.model.length;
-                      }else{
-                        _countListType.value = 0;
+                        setState(() {
+                          _countListType = state.model.length;
+                        });
+                      } else if (state is ScanPageGetErrorState) {
+                        setState(() {
+                          _countListType = 0;
+                        });
                       }
                     },
-                    child: BlocBuilder<ScanFindItemsPageBloc, ScanPageBlocState>(
-                      builder: (context, state) {
-                        if (state is ScanPageGetLoadingState) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-                        if (state is ScanPageGetLoadedState) {
-                          return _tableListData(state.model);
-                        }
-                        return const Center(child: Text("ไม่มีข้อมูล"));
-                      },
-                    ),
+                    child: SizedBox(),
+                  ),
+                  BlocBuilder<ScanFindItemsPageBloc, ScanPageBlocState>(
+                    builder: (context, state) {
+                      if (state is ScanPageGetLoadingState) {
+                        return CircularProgressIndicator();
+                      } else if (state is ScanPageGetLoadedState) {
+                        return _tableListData(state.model);
+                      } else {
+                        return Center(child: Text("ไม่มีข้อมูล"));
+                      }
+                    },
                   ),
                   SizedBox(height: 80),
                 ],
@@ -175,39 +184,31 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
   void _handleDropdownSelection(String value) {
     switch (value) {
       case "ทั้งหมด":
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked),
-            );
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
         break;
       case "สแกนแล้ว":
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "03"),
-            );
+        dropdownValue = "03";
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "03"));
         break;
       case "ยังไม่ได้สแกน":
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "01"),
-            );
+        dropdownValue = "01";
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "01"));
         break;
       case "ของพร้อมปล่อย":
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "04"),
-            );
+        dropdownValue = "04";
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "04"));
         break;
       case "ปล่อยของ":
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "05"),
-            );
+        dropdownValue = "05";
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "05"));
         break;
       case "พบปัญหา":
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "08"),
-            );
+        dropdownValue = "08";
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "08"));
         break;
       case "อื่นๆ":
-        context.read<ScanFindItemsPageBloc>().add(
-              ScanPageGetDataEvent(date: datePicked, type: "00"),
-            );
+        dropdownValue = "00";
+        context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked, type: "00"));
         break;
       default:
     }
@@ -279,7 +280,7 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
       return Colors.green[200];
     } else if (lastStatus == "เจอของ") {
       return Colors.blue[200];
-    } else if (lastStatus == "พบปัญหา") {
+    } else if (lastStatus == "พบปัญหา [DMC (กล่องบุบ)]") {
       return Colors.red[200];
     }
     return Colors.black;
@@ -333,12 +334,12 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        _onScan(parentContext: ctx, hawb: _controller.text);
+                        _onScan(ctx, hawb: _controller.text.trim());
                         Navigator.pop(context);
                       }
                       _controller.text = "";
                     },
-                    child: Text('Submit'),
+                    child: Text('Submit', style: TextStyle(color: Colors.black)),
                   ),
                   SizedBox(height: 20),
                 ],
@@ -352,7 +353,8 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
   }
 
   void _startEventTable() {
-    datePicked = (ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>)["datePick"];
+    Map<String, dynamic> date = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    datePicked = date["datePick"];
     context.read<ScanFindItemsPageBloc>().add(ScanPageGetDataEvent(date: datePicked));
   }
 
@@ -363,88 +365,94 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
     );
   }
 
-  Future<void> _onScan({required BuildContext parentContext, required String hawb}) async {
-    var dataGetScan = await DataService().getPendingReleaseListener(hawb);
+  Future<void> _onScan(BuildContext parentContext, {required String hawb}) async {
+    var dataGetScan = await DataService().getScanListener(hawb);
     var data = dataGetScan["body"];
     try {
-      ScanAndReleaseModel result = ScanAndReleaseModel.fromJson(data);
+      ScanListenerModel result = ScanListenerModel.fromJson(data);
 
       if (dataGetScan["code"] == 200) {
-        if (data["appCode"] == "01" && data["statusCode"] == "04" ||
-            data["statusCode"] == "07" ||
-            data["statusCode"] == "11") {
-          // Dialog 1
-          DialogScan().showScanAndReleaseDialog(
+        if (data["appCode"] == "01" && data["statusCode"] == "03") {
+          // Dialog 6
+          DialogScan().showScanDialog(
             isShowDialog: _isShowDialog,
-            model: result,
             parentContext: parentContext,
+            model: result,
             datePicked: datePicked,
             formKeyDialogConfirm: _reportFormKey,
             imageDialogConfirm: _imageReport,
-            module: "2",
+            statusCode: 200,
+            module: "1",
             nameReportBtn: "แจ้งปัญหา",
-            remarkFailed: "สแกนของพร้อมปล่อยสำเร็จ",
-            isGreen: true,
-            typeDialogScan: TypeDialogScanItems.dialog1,
+            typeDialogScan: TypeDialogScanItems.dialog6,
           );
         }
       } else if (dataGetScan["code"] == 400) {
-        if (data["appCode"] == "03") {
-          // Dialog 4
-          DialogScan().showScanNoHawbDialog(
-            title: "ไม่พบ HAWB ในระบบ",
-            isShowDialog: _isShowDialog,
-            context: context,
-            datePicked: datePicked,
-          );
-        } else if (data["appCode"] == "02" && data["statusCode"] == "10") {
-          // Dialog 5
+        if (data["appCode"] == "02" && data["statusCode"] == "08" && data["subStatusCode"] != "03") {
+          // Dialog 1
           ScanResultModel result = ScanResultModel.fromJson(data);
-
           DialogScan().showNoDMCDialog(
             isShowDialog: _isShowDialog,
             parentContext: parentContext,
             model: result,
             datePicked: datePicked,
-            module: "2",
+            module: "1",
             remarkFailed: 'เป็นงาน "${result.reason}"' + "\nต้องการยืนยันการตรวจสอบ",
           );
-        } else if (data["appCode"] == "02" &&
-            (data["statusCode"] == "04" || data["statusCode"] == "07" || data["statusCode"] == "11")) {
+        } else if (data["appCode"] == "03") {
           // Dialog 2
-          DialogScan().showScanAndReleaseDialog(
-            isShowDialog: _isShowDialog,
-            model: result,
-            parentContext: parentContext,
-            datePicked: datePicked,
-            formKeyDialogConfirm: _reportFormKey,
-            imageDialogConfirm: _imageReport,
-            module: "2",
-            nameReportBtn: "แจ้งปัญหา",
-            remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว",
-            typeDialogScan: TypeDialogScanItems.dialog2,
-          );
+          DialogScan().showScanNoHawbDialog(
+              title: "ไม่พบ HAWB ในระบบ", isShowDialog: _isShowDialog, context: context, datePicked: datePicked);
         } else if (data["appCode"] == "02" &&
-            (data["statusCode"] == "01" ||
-                data["statusCode"] == "02" ||
+            (data["statusCode"] == "04" ||
                 data["statusCode"] == "05" ||
-                data["statusCode"] == "08")) {
+                data["statusCode"] == "10" ||
+                data["statusCode"] == "11")) {
           // Dialog 3
-          // DialogScan().showScanAndReleaseDialog(
+          // DialogScan().showScanDialog(
           //   isShowDialog: _isShowDialog,
-          //   model: result,
           //   parentContext: parentContext,
+          //   model: result,
           //   datePicked: datePicked,
           //   formKeyDialogConfirm: _reportFormKey,
           //   imageDialogConfirm: _imageReport,
-          //   module: "2",
+          //   statusCode: 400,
+          //   module: "1",
           //   remarkFailed: "สถานะไม่ถูกต้อง",
+          //   typeDialogScan: TypeDialogScanItems.dialog3,
           // );
           DialogScan().showScanNoHawbDialog(
-            title: "สถานะไม่ถูกต้อง",
+              title: "สถานะไม่ถูกต้อง", isShowDialog: _isShowDialog, context: context, datePicked: datePicked);
+        } else if (data["appCode"] == "02" && data["statusCode"] == "08" && data["subStatusCode"] == "03") {
+          // Dialog 4
+          DialogScan().showScanDialog(
             isShowDialog: _isShowDialog,
-            context: context,
+            parentContext: parentContext,
+            model: result,
             datePicked: datePicked,
+            formKeyDialogConfirm: _reportFormKey,
+            imageDialogConfirm: _imageRepack,
+            statusCode: 400,
+            module: "1",
+            typeDialogScan: TypeDialogScanItems.dialog4,
+            nameReportBtn: "ยืนยัน\nRepack",
+            remarkFailed: "เป็นงาน DMC คุณต้องการยืนยันการ\nRepack(หากยืนยันบังคับถ่ายรูป)",
+          );
+        } else if (data["appCode"] == "02" &&
+            (data["statusCode"] == "03" || data["statusCode"] == "06" || data["statusCode"] == "09")) {
+          // Dialog 5
+          DialogScan().showScanDialog(
+            isShowDialog: _isShowDialog,
+            parentContext: parentContext,
+            model: result,
+            datePicked: datePicked,
+            formKeyDialogConfirm: _reportFormKey,
+            imageDialogConfirm: _imageReport,
+            statusCode: 400,
+            module: "1",
+            remarkFailed: "HAWB นี้ถูกสแกนไปแล้ว",
+            nameReportBtn: "แจ้งปัญหา",
+            typeDialogScan: TypeDialogScanItems.dialog5,
           );
         }
       }

@@ -3,8 +3,10 @@
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kymscanner/common.dart';
 import 'package:kymscanner/constant.dart';
 import 'package:kymscanner/data/api/api.dart';
+import 'package:kymscanner/data/models/search_model.dart';
 import 'package:kymscanner/main.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:kymscanner/data/models/home_model.dart';
@@ -30,6 +32,10 @@ class _HomePageState extends State<HomePage> with RouteAware {
   bool _didInitReleaseDialog = false;
   bool _didRefreshReleaseDialog = false;
   bool _subscribed = false;
+  ValueNotifier<bool> showSearchField = ValueNotifier<bool>(false);
+  TextEditingController searchController = TextEditingController();
+  ValueNotifier<bool> isSingleChild = ValueNotifier<bool>(false);
+  ValueNotifier<bool> isShowDialog = ValueNotifier<bool>(false);
 
   @override
   void didChangeDependencies() {
@@ -50,133 +56,15 @@ class _HomePageState extends State<HomePage> with RouteAware {
 
   @override
   Widget build(BuildContext contextRoot) {
+    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
       backgroundColor: Color(0xFFFFFAEC),
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Stack(
           children: [
-            SizedBox(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        height: MediaQuery.of(contextRoot).size.height * 0.1,
-                        alignment: Alignment.center,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    _selectDateFromDialog(contextRoot);
-                                  },
-                                  child: Text(
-                                    'Select date',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.greenAccent,
-                                  ),
-                                ),
-                                SizedBox(width: 20),
-                                ValueListenableBuilder<DateTime>(
-                                  valueListenable: selectedDate,
-                                  builder: (context, value, child) {
-                                    return Text(
-                                      "${value.toLocal()}".split(' ')[0],
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.account_circle),
-                              onPressed: () async {
-                                confirmLogout(contextRoot);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      BlocBuilder<HomeBloc, HomeState>(
-                        builder: (context, state) {
-                          if (state is HomeLoadingState) {
-                            return CircularProgressIndicator();
-                          } else if (state is HomeErrorState) {
-                            return Center(child: Text("เกิดข้อผิดพลาดบางอย่าง"));
-                          } else if (state is HomeLoadedState) {
-                            HomeModel model = state.model;
-                            return Column(
-                              children: [
-                                Container(
-                                  height: MediaQuery.of(contextRoot).size.height * 0.06,
-                                  alignment: Alignment.center,
-                                  child: Text("Total: ${model.totalPickup.toString()}", style: TextStyle(fontSize: 20)),
-                                ),
-                                _colorItems(model.countGreen, model.countRed, model.countOther),
-                                Container(
-                                  height: MediaQuery.of(contextRoot).size.height * 0.06,
-                                  alignment: Alignment.center,
-                                  child: DottedLine(
-                                    lineThickness: 2,
-                                    dashLength: 3,
-                                  ),
-                                ),
-                                Container(
-                                  height: MediaQuery.of(contextRoot).size.height * 0.06,
-                                  alignment: Alignment.center,
-                                  child: Text("Pick Up", style: TextStyle(fontSize: 20)),
-                                ),
-                                _releaseItemss(model.countPickupByUps, model.countPickupBySkl, model.countPickupByL),
-                                Container(
-                                  height: MediaQuery.of(contextRoot).size.height * 0.06,
-                                  alignment: Alignment.center,
-                                  child: DottedLine(
-                                    lineThickness: 2,
-                                    dashLength: 3,
-                                  ),
-                                ),
-                                _countStatusText("เจอของ", model.scannedPickup),
-                                _countStatusText("ของพร้อมปล่อย", model.pendingReleasePickup),
-                                _countStatusText("ปล่อยของ", model.releasePickup),
-                                _countStatusText("พบปัญหา", model.problemPickup),
-                                _countStatusText("อื่นๆ", model.otherPickup),
-                              ],
-                            );
-                          }
-                          return Center(child: Text("เกิดข้อผิดพลาดบางอย่าง"));
-                        },
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(bottom: 30),
-                        child: Column(
-                          children: [
-                            _scanFindItemsButton(contextRoot, selectedDate.value),
-                            SizedBox(height: 20),
-                            _scanAndRelease(contextRoot, selectedDate.value),
-                            SizedBox(height: 20),
-                            _releaseItemsButton(contextRoot, selectedDate.value),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            _body(contextRoot),
             Positioned(
               bottom: 8,
               right: 10,
@@ -195,6 +83,28 @@ class _HomePageState extends State<HomePage> with RouteAware {
             ),
           ],
         ),
+      ),
+      floatingActionButton: ValueListenableBuilder<bool>(
+        valueListenable: showSearchField,
+        builder: (context, show, _) {
+          return show
+              ? Stack(
+                  children: [
+                    Positioned(
+                      right: 0,
+                      bottom: keyboardInset > 0 ? keyboardInset : 20,
+                      child: _textFormFieldSearch(),
+                    ),
+                  ],
+                )
+              : FloatingActionButton(
+                  onPressed: () {
+                    showSearchField.value = true;
+                  },
+                  child: Icon(Icons.search),
+                  backgroundColor: Colors.greenAccent,
+                );
+        },
       ),
     );
   }
@@ -587,6 +497,178 @@ class _HomePageState extends State<HomePage> with RouteAware {
     );
   }
 
+  Widget _textFormFieldSearch() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.92,
+      height: 50,
+      alignment: Alignment.bottomCenter,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        autofocus: true,
+        controller: searchController,
+        decoration: InputDecoration(
+          hintText: 'ค้นหา...',
+          filled: true,
+          fillColor: Colors.transparent,
+          suffixIcon: IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () {
+              searchController.clear();
+              showSearchField.value = false;
+            },
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        ),
+        onFieldSubmitted: (value) {
+          // handle search logic here
+          searchController.value = TextEditingValue.empty;
+          showSearchField.value = false;
+          _onScan(context, hawb: value.trim());
+        },
+        style: TextStyle(fontSize: 16),
+      ),
+    );
+  }
+
+  Widget _body(BuildContext contextRoot) {
+    return SizedBox(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                height: MediaQuery.of(contextRoot).size.height * 0.1,
+                alignment: Alignment.center,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            _selectDateFromDialog(contextRoot);
+                          },
+                          child: Text(
+                            'Select date',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.greenAccent,
+                          ),
+                        ),
+                        SizedBox(width: 20),
+                        ValueListenableBuilder<DateTime>(
+                          valueListenable: selectedDate,
+                          builder: (context, value, child) {
+                            return Text(
+                              "${value.toLocal()}".split(' ')[0],
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.account_circle),
+                      onPressed: () async {
+                        confirmLogout(contextRoot);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              BlocBuilder<HomeBloc, HomeState>(
+                builder: (context, state) {
+                  if (state is HomeLoadingState) {
+                    return CircularProgressIndicator();
+                  } else if (state is HomeErrorState) {
+                    return Center(child: Text("เกิดข้อผิดพลาดบางอย่าง"));
+                  } else if (state is HomeLoadedState) {
+                    HomeModel model = state.model;
+                    return Column(
+                      children: [
+                        Container(
+                          height: MediaQuery.of(contextRoot).size.height * 0.06,
+                          alignment: Alignment.center,
+                          child: Text("Total: ${model.totalPickup.toString()}", style: TextStyle(fontSize: 20)),
+                        ),
+                        _colorItems(model.countGreen, model.countRed, model.countOther),
+                        Container(
+                          height: MediaQuery.of(contextRoot).size.height * 0.06,
+                          alignment: Alignment.center,
+                          child: DottedLine(
+                            lineThickness: 2,
+                            dashLength: 3,
+                          ),
+                        ),
+                        Container(
+                          height: MediaQuery.of(contextRoot).size.height * 0.06,
+                          alignment: Alignment.center,
+                          child: Text("Pick Up", style: TextStyle(fontSize: 20)),
+                        ),
+                        _releaseItemss(model.countPickupByUps, model.countPickupBySkl, model.countPickupByL),
+                        Container(
+                          height: MediaQuery.of(contextRoot).size.height * 0.06,
+                          alignment: Alignment.center,
+                          child: DottedLine(
+                            lineThickness: 2,
+                            dashLength: 3,
+                          ),
+                        ),
+                        _countStatusText("เจอของ", model.scannedPickup),
+                        _countStatusText("ของพร้อมปล่อย", model.pendingReleasePickup),
+                        _countStatusText("ปล่อยของ", model.releasePickup),
+                        _countStatusText("พบปัญหา", model.problemPickup),
+                        _countStatusText("อื่นๆ", model.otherPickup),
+                      ],
+                    );
+                  }
+                  return Center(child: Text("เกิดข้อผิดพลาดบางอย่าง"));
+                },
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: 30),
+                child: Column(
+                  children: [
+                    _scanFindItemsButton(contextRoot, selectedDate.value),
+                    SizedBox(height: 20),
+                    _scanAndRelease(contextRoot, selectedDate.value),
+                    SizedBox(height: 20),
+                    _releaseItemsButton(contextRoot, selectedDate.value),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<dynamic> confirmLogout(BuildContext context) {
     return showDialog(
       context: context,
@@ -709,6 +791,21 @@ class _HomePageState extends State<HomePage> with RouteAware {
   void reloadDataFunction(bool? reloadData) {
     if (reloadData != null && reloadData == true) {
       _refreshReleaseDialog();
+    }
+  }
+
+  Future<void> _onScan(BuildContext parentContext, {required String hawb}) async {
+    var dataGetScan = await DataService().getScanListener(hawb);
+    var data = dataGetScan["body"];
+    try {
+      SearchItemsModel result = SearchItemsModel.fromJson(data);
+
+      DialogScan().showSearchItemDialog(
+        parentContext: parentContext,
+        model: result,
+      );
+    } catch (e) {
+      Exception(e);
     }
   }
 }

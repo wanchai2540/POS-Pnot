@@ -1,6 +1,6 @@
 class ReleaseRoundModel {
   String uuid;
-  int itemNo;
+  String itemNo;
   String productType;
   String hawb;
   String type;
@@ -34,7 +34,7 @@ class ReleaseRoundModel {
   factory ReleaseRoundModel.fromJson(Map<String, dynamic> json) {
     return ReleaseRoundModel(
       uuid: json["uuid"] ?? "",
-      itemNo: json["itemNo"] ?? 0,
+      itemNo: json["itemNo"] ?? "",
       productType: json["productType"] ?? "",
       hawb: json["hawb"] ?? "",
       type: json["type"] ?? "",

@@ -11,6 +11,7 @@ import 'package:kymscanner/data/models/release_model.dart';
 import 'package:kymscanner/data/models/scanAndRelease_model.dart';
 import 'package:kymscanner/data/models/scan_listener_model.dart';
 import 'package:kymscanner/data/models/scan_result_model.dart';
+import 'package:kymscanner/data/models/search_model.dart';
 import 'package:kymscanner/presentation/release_items/bloc/release_items_bloc.dart';
 import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
 import 'package:watermark_unique/image_format.dart';
@@ -588,6 +589,58 @@ class DialogScan {
                     ),
                   ],
                 ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> showSearchItemDialog({required BuildContext parentContext, required SearchItemsModel model}) {
+    return showDialog(
+      context: parentContext,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                Text("HAWB: ${model.hawb}"),
+                if (model.productType == "G" || model.productType == "R")
+                  customBadgeSpecial(model.productType)
+                else
+                  customTypeBadge(model.productType),
+                Text("Pick Up: ${model.pickUpBy}"),
+                Text("สถานะล่าสุด: ${model.lastStatus}"),
+                ColoredBox(
+                  color: model.isSuspended ? Colors.yellow : Colors.transparent,
+                  child: Text("Item No: ${model.itemNo}"),
+                ),
+                Text("Consignee: ${model.consigneeName}"),
+                Text("CTNS: ${model.ctns}"),
+                SizedBox(height: 30),
+                SizedBox(height: 10),
+              ],
+            ),
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Row(
+                  children: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        textStyle: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      child: const Text('สแกนต่อ'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                )
               ],
             ),
           ],

@@ -3,6 +3,7 @@
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kymscanner/button_listener.dart';
 import 'package:kymscanner/common.dart';
 import 'package:kymscanner/constant.dart';
 import 'package:kymscanner/data/api/api.dart';
@@ -55,6 +56,12 @@ class _HomePageState extends State<HomePage> with RouteAware {
   }
 
   @override
+  void dispose() {
+    CustomButtonListener.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext contextRoot) {
     final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
 
@@ -98,11 +105,12 @@ class _HomePageState extends State<HomePage> with RouteAware {
                   ],
                 )
               : FloatingActionButton(
-                        onPressed: () {
-                          showSearchField.value = true;
-                        },
-                        child: Icon(Icons.search),
-                        backgroundColor: Colors.greenAccent,
+                  onPressed: () {
+                    showSearchField.value = true;
+                    _onScannListener();
+                  },
+                  child: Icon(Icons.search),
+                  backgroundColor: Colors.greenAccent,
                 );
         },
       ),
@@ -792,6 +800,14 @@ class _HomePageState extends State<HomePage> with RouteAware {
     if (reloadData != null && reloadData == true) {
       _refreshReleaseDialog();
     }
+  }
+
+  void _onScannListener() {
+    CustomButtonListener.onButtonPressed = (event) {
+      if (event != null) {
+        searchController.value = TextEditingValue.empty;
+      }
+    };
   }
 
   Future<void> _onScan(BuildContext parentContext, {required String hawb}) async {

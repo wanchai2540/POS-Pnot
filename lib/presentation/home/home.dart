@@ -824,12 +824,8 @@ class _HomePageState extends State<HomePage> with RouteAware {
       }
     } else {
       try {
-        SearchItemsModel result = SearchItemsModel.fromJson(data);
         if (context.mounted) {
-          DialogScan().showSearchItemDialog(
-            parentContext: parentContext,
-            model: result,
-          );
+          Navigator.of(parentContext).pushNamed("/search", arguments: {"hawb": hawb});
         }
       } catch (e) {
         Exception(e);

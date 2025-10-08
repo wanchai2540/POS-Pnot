@@ -1281,57 +1281,6 @@ class DialogScan {
     );
   }
 
-  Widget customBadgeSpecial(String productType) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text("Type:  "),
-        Container(
-          width: 25,
-          height: 25,
-          decoration: BoxDecoration(
-            color: productType == "G" ? Colors.green : Colors.red,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              productType,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget customTypeBadge(String productType) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text("Type:  "),
-        Container(
-          width: 30,
-          height: 25,
-          decoration: BoxDecoration(color: Colors.yellow),
-          child: Center(
-            child: Text(
-              productType,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBarUtil(BuildContext context, String title) {
     return ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1356,6 +1305,57 @@ Widget zoomImage({required Widget child}) {
       maxScale: 4.0,
       // boundaryMargin: const EdgeInsets.all(0),
       child: child);
+}
+
+Widget customBadgeSpecial(String productType) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Text("Type:  "),
+      Container(
+        width: 25,
+        height: 25,
+        decoration: BoxDecoration(
+          color: productType == "G" ? Colors.green : Colors.red,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Text(
+            productType,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      )
+    ],
+  );
+}
+
+Widget customTypeBadge(String productType) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Text("Type:  "),
+      Container(
+        width: 30,
+        height: 25,
+        decoration: BoxDecoration(color: Colors.yellow),
+        child: Center(
+          child: Text(
+            productType,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      )
+    ],
+  );
 }
 
 Future<File?> takePhoto({required String hawb, String reason = "", required String module}) async {

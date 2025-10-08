@@ -5,6 +5,7 @@ import 'package:kymscanner/presentation/detail_items_scan/bloc/detail_item_scan_
 import 'package:kymscanner/presentation/home/bloc/home_bloc.dart';
 import 'package:kymscanner/presentation/release_items/bloc/release_items_bloc.dart';
 import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_page_bloc.dart';
+import 'package:kymscanner/presentation/search_items/bloc/search_items_bloc.dart';
 import 'package:kymscanner/route.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
           String date = "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}";
           return HomeBloc()..add(HomeLoadingEvent(date: date));
         }),
+        BlocProvider<SearchItemsBloc>(create: (BuildContext context) => SearchItemsBloc()),
         BlocProvider<ScanFindItemsPageBloc>(create: (BuildContext context) => ScanFindItemsPageBloc()),
         BlocProvider<DetailItemScanBloc>(create: (BuildContext context) => DetailItemScanBloc()),
         BlocProvider<ReleaseItemsBloc>(create: (BuildContext context) => ReleaseItemsBloc()),

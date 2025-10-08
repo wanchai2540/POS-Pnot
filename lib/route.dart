@@ -5,6 +5,7 @@ import 'package:kymscanner/presentation/login.dart';
 import 'package:kymscanner/presentation/release_items/releaseItems.dart';
 import 'package:kymscanner/presentation/scan_and_release/scanAndRelease.dart';
 import 'package:kymscanner/presentation/scan_find_items/scanFindItems.dart';
+import 'package:kymscanner/presentation/search_items/search_items.dart';
 import 'package:kymscanner/presentation/splash.dart';
 
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
@@ -28,6 +29,14 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
         settings: settings,
         pageBuilder: (context, animation, secondaryAnimation) {
           return HomePage();
+        },
+      );
+    case '/search':
+      return PageRouteBuilder(
+        settings: settings,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          Map args = settings.arguments as Map;
+          return SearchItems(hawb: args["hawb"]);
         },
       );
     case '/scanFindItems':

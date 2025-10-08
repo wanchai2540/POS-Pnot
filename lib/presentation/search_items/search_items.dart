@@ -8,14 +8,15 @@ import 'package:kymscanner/presentation/search_items/bloc/search_items_bloc.dart
 
 class SearchItems extends StatefulWidget {
   final String hawb;
-  const SearchItems({super.key, required this.hawb});
+  final String uuid;
+  const SearchItems({super.key, required this.hawb, required this.uuid});
 
   @override
   State<SearchItems> createState() => _SearchItemsState();
 }
 
 class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin {
-  late SearchItemsModel? searchItemsModel;
+  // late SearchItemsModel? searchItemsModel;
   List<DetailItemScanModel> detailData = [];
   List<PhotoItemScanModel> imageData = [];
   late final TabController _tabController;
@@ -24,7 +25,7 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
   void initState() {
     super.initState();
     _tabController = TabController(initialIndex: 0, length: 2, vsync: this);
-    context.read<SearchItemsBloc>().add(SearchItemsLoadingEvent(hawb: widget.hawb));
+    context.read<SearchItemsBloc>().add(SearchItemsLoadingEvent(hawb: widget.hawb, uuid: widget.uuid));
   }
 
   @override
@@ -53,9 +54,8 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
           } else if (state is SearchItemsErrorState) {
             return Center(child: Text("ไม่พบข้อมูล"));
           } else if (state is SearchItemsLoadedState) {
-            searchItemsModel = state.resultSearch;
             return SingleChildScrollView(
-              child: sectionSearch(),
+              child: sectionDetailSearch(state.resultSearch, state.resultDetail),
             );
           } else {
             return Column(
@@ -71,38 +71,49 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
     );
   }
 
-  Widget sectionSearch() {
+  Widget sectionDetailSearch(SearchItemsModel searchItemsModel, Map<String, dynamic>? detailItems) {
     return Column(
       children: [
         SizedBox(height: 10),
-        Text("HAWB: ${searchItemsModel!.hawb}"),
-        if (searchItemsModel!.productType == "G" || searchItemsModel!.productType == "R")
-          customBadgeSpecial(searchItemsModel!.productType)
+        Text("HAWB: ${searchItemsModel.hawb}"),
+        if (searchItemsModel.productType == "G" || searchItemsModel.productType == "R")
+          customBadgeSpecial(searchItemsModel.productType)
         else
-          customTypeBadge(searchItemsModel!.productType),
-        Text("Pick Up: ${searchItemsModel!.pickUpBy}"),
-        Text("สถานะล่าสุด: ${searchItemsModel!.lastStatus}"),
+          customTypeBadge(searchItemsModel.productType),
+        Text("Pick Up: ${searchItemsModel.pickUpBy}"),
+        Text("สถานะล่าสุด: ${searchItemsModel.lastStatus}"),
         ColoredBox(
-          color: searchItemsModel!.isSuspended ? Colors.yellow : Colors.transparent,
-          child: Text("Item No: ${searchItemsModel!.itemNo}"),
+          color: searchItemsModel.isSuspended ? Colors.yellow : Colors.transparent,
+          child: Text("Item No: ${searchItemsModel.itemNo}"),
         ),
         Text(
-          "Consignee: ${searchItemsModel!.consigneeName}",
+          "Consignee: ${searchItemsModel.consigneeName}",
           textAlign: TextAlign.center,
           softWrap: true,
           overflow: TextOverflow.visible,
         ),
-        Text("CTNS: ${searchItemsModel!.ctns.toString()}"),
-        Text("วันที่: ${searchItemsModel!.date.toString()}"),
-        SizedBox(height: 30),
-        sectionDetail(),
+        Text("CTNS: ${searchItemsModel.ctns.toString()}"),
+        Text("วันที่: ${searchItemsModel.date.toString()}"),
+        SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          child: Divider(thickness: 1, color: Colors.grey),
+        ),
+        SizedBox(height: 10),
+        detailItems != null ? sectionTab(detailItems) : Text("ไม่ข้อมูลสถานะ"),
       ],
     );
   }
 
-  Widget sectionDetail() {
+  Widget sectionTab(Map<String, dynamic>? detailItems) {
+    if (detailItems != null && detailItems["routes"] != null) {
+      detailData = (detailItems["routes"] as List).map((item) => DetailItemScanModel.fromJson(item)).toList();
+    }
+    if (detailItems != null && detailItems["images"] != null) {
+      imageData = (detailItems["images"] as List).map((item) => PhotoItemScanModel.fromJson(item)).toList();
+    }
     return SizedBox(
-      height: 400, // Set a fixed height for TabBarView
+      height: 450,
       child: Column(
         children: [
           TabBar(
@@ -116,46 +127,432 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
             child: TabBarView(
               controller: _tabController,
               children: [
-                // Detail Tab
-                ListView.builder(
-                  itemCount: 3,
-                  itemBuilder: (context, index) {
-                    // final detail = searchItemsModel!.detailItems[index];
-                    return ListTile(
-                      title: Text(
-                          // detail.title
-                          // ??
-                          ''),
-                      subtitle: Text(
-                          // detail.description
-                          // ??
-                          ''),
-                    );
-                  },
-                ),
-                // Photo Tab
-                ListView.builder(
-                  itemCount: 3,
-                  itemBuilder: (context, index) {
-                    // final photo = searchItemsModel!.photoItems[index];
-                    return ListTile(
-                      leading:
-                          // photo.imageUrl != null
-                          //   ? Image.network(photo.imageUrl!)
-                          //   : const
-                          Icon(Icons.image),
-                      title: Text(
-                          // photo.caption
-                          // ??
-                          ''),
-                    );
-                  },
-                ),
+                _tableDetailData(detailData),
+                _tablePhotoData(imageData),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _tableDetailData(List<DetailItemScanModel> model) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Table(
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          columnWidths: const <int, TableColumnWidth>{
+            0: FlexColumnWidth(),
+            1: FixedColumnWidth(180),
+            2: FixedColumnWidth(60),
+          },
+          border: TableBorder.all(color: Colors.black, style: BorderStyle.solid, width: 1),
+          children: [
+            TableRow(
+              decoration: BoxDecoration(color: Colors.white),
+              children: [
+                TableCell(
+                  verticalAlignment: TableCellVerticalAlignment.middle,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    child: Center(
+                      child: Text(
+                        "Status",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+                TableCell(
+                  verticalAlignment: TableCellVerticalAlignment.middle,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    child: Center(
+                      child: Text(
+                        "Created At",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(),
+              ],
+            ),
+            for (var data in model)
+              TableRow(
+                decoration: BoxDecoration(color: Colors.white),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(data.status),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        data.createdAt,
+                        style: TextStyle(
+                          color: Colors.green[200],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (data.albums.length > 0 || data.remark != "")
+                        IconButton(
+                          onPressed: () {
+                            _showCustomDialog(
+                              context: context,
+                              hawb: widget.hawb,
+                              status: data.status,
+                              remark: data.remark,
+                              albums: data.albums,
+                            );
+                          },
+                          icon: Icon(Icons.warning, color: Colors.orange),
+                        )
+                      else
+                        SizedBox(height: 48)
+                    ],
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _tablePhotoData(List<PhotoItemScanModel> model) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Table(
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          columnWidths: const <int, TableColumnWidth>{
+            0: FlexColumnWidth(),
+            1: FixedColumnWidth(180),
+            2: FixedColumnWidth(60),
+          },
+          border: TableBorder.all(color: Colors.black, style: BorderStyle.solid, width: 1),
+          children: [
+            TableRow(
+              decoration: BoxDecoration(color: Colors.white),
+              children: [
+                TableCell(
+                  verticalAlignment: TableCellVerticalAlignment.middle,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    child: Center(
+                      child: Text(
+                        "Location",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+                TableCell(
+                  verticalAlignment: TableCellVerticalAlignment.middle,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    child: Center(
+                      child: Text(
+                        "Created At",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(),
+              ],
+            ),
+            for (var data in model)
+              TableRow(
+                decoration: BoxDecoration(color: Colors.white),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(data.location),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        data.createdAt,
+                        style: TextStyle(
+                          color: Colors.green[200],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Builder(builder: (context) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (data.albums.length > 0)
+                          IconButton(
+                            onPressed: () {
+                              _showPhotoDialog(context: context, albums: data.albums);
+                            },
+                            icon: Icon(Icons.warning, color: Colors.orange),
+                          )
+                        else
+                          SizedBox(height: 48)
+                      ],
+                    );
+                  }),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCustomDialog({
+    required BuildContext context,
+    required String hawb,
+    required String status,
+    required String remark,
+    required List albums,
+  }) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.warning, color: Colors.orange),
+              SizedBox(width: 8),
+              Text('รายละเอียด', style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(color: Colors.black, fontSize: 18),
+                    children: [
+                      TextSpan(
+                        text: 'HAWB: ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                        text: hawb,
+                        style: TextStyle(fontWeight: FontWeight.normal),
+                      ),
+                    ],
+                  ),
+                ),
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(color: Colors.black, fontSize: 18),
+                    children: [
+                      TextSpan(
+                        text: 'สถานะ: ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                        text: status,
+                        style: TextStyle(fontWeight: FontWeight.normal),
+                      ),
+                    ],
+                  ),
+                ),
+                remark.isNotEmpty
+                    ? RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black, fontSize: 18),
+                          children: [
+                            TextSpan(
+                              text: 'หมายเหตุ: ',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            TextSpan(
+                              text: remark,
+                              style: TextStyle(fontWeight: FontWeight.normal),
+                            ),
+                          ],
+                        ),
+                      )
+                    : SizedBox(),
+                albums.isNotEmpty
+                    ? Column(
+                        children: [
+                          Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'รูปภาพ:',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              )),
+                          SizedBox(height: 16),
+                          Column(
+                            children: [
+                              SizedBox(
+                                width: double.maxFinite,
+                                height: 300,
+                                child: GridView.builder(
+                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    crossAxisSpacing: 4.0,
+                                    mainAxisSpacing: 4.0,
+                                  ),
+                                  itemCount: albums.length,
+                                  itemBuilder: (context, index) {
+                                    return GestureDetector(
+                                      onTap: () => showImagePreview(context, albums[index]["imageUrl"]),
+                                      child: Image.network(
+                                        loadingBuilder: (context, child, loadingProgress) {
+                                          if (loadingProgress == null) {
+                                            return child;
+                                          } else {
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress.expectedTotalBytes != null
+                                                    ? loadingProgress.cumulativeBytesLoaded /
+                                                        (loadingProgress.expectedTotalBytes ?? 1)
+                                                    : null,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        albums[index]["imageUrl"],
+                                        height: 200,
+                                        width: 200,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+                    : SizedBox(),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('ปิด'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showPhotoDialog({
+    required BuildContext context,
+    required List<dynamic> albums,
+  }) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: SizedBox(),
+          content: SizedBox(
+            width: double.maxFinite,
+            height: 300.0,
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 4.0,
+                mainAxisSpacing: 4.0,
+              ),
+              itemCount: albums.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () => showImagePreview(context, albums[index]["imageUrl"]),
+                  child: Image.network(
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      } else {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                                : null,
+                          ),
+                        );
+                      }
+                    },
+                    albums[index]["imageUrl"],
+                    height: 200,
+                    width: 200,
+                    fit: BoxFit.contain,
+                  ),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('ปิด'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showImagePreview(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: zoomImage(
+              child: Image.network(
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                            : null,
+                      ),
+                    );
+                  }
+                },
+                imageUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

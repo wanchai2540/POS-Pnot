@@ -813,23 +813,13 @@ class _HomePageState extends State<HomePage> with RouteAware {
   Future<void> _onScan(BuildContext parentContext, {required String hawb}) async {
     var dataGetScan = await DataService().getSearchItems(hawb);
     var data = dataGetScan["data"];
-    if (dataGetScan["status"] != "success") {
+
+    try {
       if (context.mounted) {
-        DialogScan().showScanNoHawbDialog(
-          title: "ไม่เจอข้อมูล",
-          isShowDialog: isShowDialog,
-          context: parentContext,
-          datePicked: "",
-        );
+        Navigator.of(parentContext).pushNamed("/search", arguments: {"hawb": hawb, "uuid": data["uuid"]});
       }
-    } else {
-      try {
-        if (context.mounted) {
-          Navigator.of(parentContext).pushNamed("/search", arguments: {"hawb": hawb});
-        }
-      } catch (e) {
-        Exception(e);
-      }
+    } catch (e) {
+      Exception(e);
     }
   }
 }

@@ -36,7 +36,7 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
         settings: settings,
         pageBuilder: (context, animation, secondaryAnimation) {
           Map args = settings.arguments as Map;
-          return SearchItems(hawb: args["hawb"]);
+          return SearchItems(hawb: args["hawb"], uuid: args["uuid"]);
         },
       );
     case '/scanFindItems':

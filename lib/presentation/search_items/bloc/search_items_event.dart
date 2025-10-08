@@ -4,5 +4,6 @@ sealed class SearchItemsEvent {}
 
 class SearchItemsLoadingEvent extends SearchItemsEvent {
   String hawb;
-  SearchItemsLoadingEvent({required this.hawb});
+  String uuid;
+  SearchItemsLoadingEvent({required this.hawb, required this.uuid});
 }

@@ -13,7 +13,7 @@ class SearchItemsBloc extends Bloc<SearchItemsEvent, SearchItemsState> {
       var dataSearch = await DataService().getSearchItems(event.hawb);
       if (dataSearch["status"] == "success") {
         SearchItemsModel resultSearch = SearchItemsModel.fromJson(dataSearch["data"]);
-        var dataDetail = await DataService().getDetailItem(event.hawb);
+        var dataDetail = await DataService().getDetailItem(event.uuid);
         Map<String, dynamic>? resultDetail;
         if (dataDetail["status"] == "success") {
           resultDetail = dataDetail["data"];

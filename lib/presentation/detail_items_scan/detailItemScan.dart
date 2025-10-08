@@ -527,4 +527,5 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
       },
     );
   }
+
 }

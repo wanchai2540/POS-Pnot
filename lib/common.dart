@@ -1352,9 +1352,9 @@ Widget zoomImage({required Widget child}) {
   return InteractiveViewer(
       panEnabled: true,
       scaleEnabled: true,
-      minScale: 0.8,
+      minScale: 1,
       maxScale: 4.0,
-      boundaryMargin: const EdgeInsets.all(20),
+      // boundaryMargin: const EdgeInsets.all(0),
       child: child);
 }
 

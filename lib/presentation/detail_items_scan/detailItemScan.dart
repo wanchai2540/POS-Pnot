@@ -459,25 +459,25 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () => showImagePreview(context, albums[index]["imageUrl"]),
-                  child: Image.network(
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) {
-                        return child;
-                      } else {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                                : null,
-                          ),
-                        );
-                      }
-                    },
-                    albums[index]["imageUrl"],
-                    height: 200,
-                    width: 200,
-                    fit: BoxFit.contain,
-                  ),
+                    child: Image.network(
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        } else {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                                  : null,
+                            ),
+                          );
+                        }
+                      },
+                      albums[index]["imageUrl"],
+                      height: 200,
+                      width: 200,
+                      fit: BoxFit.contain,
+                    ),
                 );
               },
             ),

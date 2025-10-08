@@ -1,66 +1,70 @@
 class SearchItemsModel {
-  final String uuid;
-  final String itemNo;
-  final String productType;
-  final String hawb;
-  final String lastStatus;
-  final String type;
-  final String pickUpBy;
+  final String appCode;
   final String statusCode;
   final String subStatusCode;
-  final String isProblem;
-  final String ctns;
+  final String uuid;
+  final String hawb;
+  final String date;
+  final String productType;
+  final String pickUpBy;
+  final String lastStatus;
+  final String itemNo;
   final String consigneeName;
+  final int ctns;
+  final String reason;
   final bool isSuspended;
 
   SearchItemsModel({
-    required this.uuid,
-    required this.itemNo,
-    required this.productType,
-    required this.hawb,
-    required this.lastStatus,
-    required this.type,
-    required this.pickUpBy,
+    required this.appCode,
     required this.statusCode,
     required this.subStatusCode,
-    required this.isProblem,
-    required this.ctns,
+    required this.uuid,
+    required this.hawb,
+    required this.date,
+    required this.productType,
+    required this.pickUpBy,
+    required this.lastStatus,
+    required this.itemNo,
     required this.consigneeName,
+    required this.ctns,
+    required this.reason,
     required this.isSuspended,
   });
 
   factory SearchItemsModel.fromJson(Map<String, dynamic> json) {
     return SearchItemsModel(
-      uuid: json["uuid"] ?? '',
-      itemNo: json["itemNo"].toString(),
-      productType: json["productType"] ?? '',
-      hawb: json["hawb"] ?? '',
-      lastStatus: json["lastStatus"] ?? '',
-      type: json["type"] ?? '',
-      pickUpBy: json["pickUpBy"] ?? '',
+      appCode: json["appCode"] ?? '',
       statusCode: json["statusCode"] ?? '',
       subStatusCode: json["subStatusCode"] ?? '',
-      isProblem: json["isProblem"] ?? '',
-      ctns: json["ctns"].toString(),
+      uuid: json["uuid"] ?? '',
+      hawb: json["hawb"] ?? '',
+      date: json["date"] ?? '',
+      productType: json["productType"] ?? '',
+      pickUpBy: json["pickUpBy"] ?? '',
+      lastStatus: json["lastStatus"] ?? '',
+      itemNo: json["itemNo"] ?? '',
       consigneeName: json["consigneeName"] ?? '',
+      ctns: json["ctns"] ?? 0,
+      reason: json["reason"] ?? '',
       isSuspended: json["isSuspended"] ?? false,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      "uuid": uuid,
-      "itemNo": itemNo,
-      "productType": productType,
-      "hawb": hawb,
-      "lastStatus": lastStatus,
-      "type": type,
-      "pickUpBy": pickUpBy,
+      "appCode": appCode,
       "statusCode": statusCode,
       "subStatusCode": subStatusCode,
-      "isProblem": isProblem,
-      "ctns": ctns,
+      "uuid": uuid,
+      "hawb": hawb,
+      "date": date,
+      "productType": productType,
+      "pickUpBy": pickUpBy,
+      "lastStatus": lastStatus,
+      "itemNo": itemNo,
       "consigneeName": consigneeName,
+      "ctns": ctns,
+      "reason": reason,
       "isSuspended": isSuspended,
     };
   }

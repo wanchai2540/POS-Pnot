@@ -617,10 +617,14 @@ class DialogScan {
                   color: model.isSuspended ? Colors.yellow : Colors.transparent,
                   child: Text("Item No: ${model.itemNo}"),
                 ),
-                Text("Consignee: ${model.consigneeName}"),
-                Text("CTNS: ${model.ctns}"),
-                SizedBox(height: 30),
-                SizedBox(height: 10),
+                Text(
+                  "Consignee: ${model.consigneeName}",
+                  textAlign: TextAlign.center,
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
+                ),
+                Text("CTNS: ${model.ctns.toString()}"),
+                Text("วันที่: ${model.date.toString()}"),
               ],
             ),
           ),
@@ -634,7 +638,7 @@ class DialogScan {
                       style: TextButton.styleFrom(
                         textStyle: Theme.of(context).textTheme.labelLarge,
                       ),
-                      child: const Text('สแกนต่อ'),
+                      child: const Text('ปิด'),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -818,10 +822,10 @@ class DialogScan {
         return AlertDialog(
           content: GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: Image.file(
-              imageUrl,
-              fit: BoxFit.cover,
-            ),
+                child: Image.file(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                ),
           ),
         );
       },

@@ -67,7 +67,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
             _body(contextRoot),
             Positioned(
               bottom: 8,
-              right: 10,
+              left: 15,
               child: FutureBuilder<String>(
                 future: _getAppVersion(),
                 builder: (context, snapshot) {
@@ -98,11 +98,11 @@ class _HomePageState extends State<HomePage> with RouteAware {
                   ],
                 )
               : FloatingActionButton(
-                  onPressed: () {
-                    showSearchField.value = true;
-                  },
-                  child: Icon(Icons.search),
-                  backgroundColor: Colors.greenAccent,
+                        onPressed: () {
+                          showSearchField.value = true;
+                        },
+                        child: Icon(Icons.search),
+                        backgroundColor: Colors.greenAccent,
                 );
         },
       ),
@@ -795,17 +795,29 @@ class _HomePageState extends State<HomePage> with RouteAware {
   }
 
   Future<void> _onScan(BuildContext parentContext, {required String hawb}) async {
-    var dataGetScan = await DataService().getScanListener(hawb);
-    var data = dataGetScan["body"];
-    try {
-      SearchItemsModel result = SearchItemsModel.fromJson(data);
-
-      DialogScan().showSearchItemDialog(
-        parentContext: parentContext,
-        model: result,
-      );
-    } catch (e) {
-      Exception(e);
+    var dataGetScan = await DataService().getSearchItems(hawb);
+    var data = dataGetScan["data"];
+    if (dataGetScan["status"] != "success") {
+      if (context.mounted) {
+        DialogScan().showScanNoHawbDialog(
+          title: "ไม่เจอข้อมูล",
+          isShowDialog: isShowDialog,
+          context: parentContext,
+          datePicked: "",
+        );
+      }
+    } else {
+      try {
+        SearchItemsModel result = SearchItemsModel.fromJson(data);
+        if (context.mounted) {
+          DialogScan().showSearchItemDialog(
+            parentContext: parentContext,
+            model: result,
+          );
+        }
+      } catch (e) {
+        Exception(e);
+      }
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kymscanner/common.dart';
 import 'package:kymscanner/data/models/detailItemScan_model.dart';
 import 'package:kymscanner/data/models/photoItemScan_model.dart';
 import 'package:kymscanner/presentation/detail_items_scan/bloc/detail_item_scan_bloc.dart';
@@ -459,25 +460,25 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () => showImagePreview(context, albums[index]["imageUrl"]),
-                    child: Image.network(
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) {
-                          return child;
-                        } else {
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                                  : null,
-                            ),
-                          );
-                        }
-                      },
-                      albums[index]["imageUrl"],
-                      height: 200,
-                      width: 200,
-                      fit: BoxFit.contain,
-                    ),
+                  child: Image.network(
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      } else {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                                : null,
+                          ),
+                        );
+                      }
+                    },
+                    albums[index]["imageUrl"],
+                    height: 200,
+                    width: 200,
+                    fit: BoxFit.contain,
+                  ),
                 );
               },
             ),
@@ -502,22 +503,24 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
         return AlertDialog(
           content: GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: Image.network(
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) {
-                  return child;
-                } else {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                          : null,
-                    ),
-                  );
-                }
-              },
-              imageUrl,
-              fit: BoxFit.cover,
+            child: zoomImage(
+              child: Image.network(
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                            : null,
+                      ),
+                    );
+                  }
+                },
+                imageUrl,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         );

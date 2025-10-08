@@ -701,11 +701,13 @@ class DialogScan {
                                 if (index < capturedImage.length) {
                                   return GestureDetector(
                                     onTap: () => showImagePreview(context, capturedImage[index]!),
-                                    child: Image.file(
-                                      capturedImage[index]!,
-                                      height: 200,
-                                      width: 200,
-                                      fit: BoxFit.contain,
+                                    child: zoomImage(
+                                      child: Image.file(
+                                        capturedImage[index]!,
+                                        height: 200,
+                                        width: 200,
+                                        fit: BoxFit.contain,
+                                      ),
                                     ),
                                   );
                                 } else {
@@ -815,23 +817,6 @@ class DialogScan {
     );
   }
 
-  void showImagePreview(BuildContext context, File imageUrl) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: GestureDetector(
-            onTap: () => Navigator.pop(context),
-                child: Image.file(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                ),
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> showConfirmFindItemDialog({
     required ValueNotifier<bool> isShowDialog,
     required BuildContext parentContext,
@@ -935,11 +920,13 @@ class DialogScan {
                                   if (index < capturedImage.length) {
                                     return GestureDetector(
                                       onTap: () => showImagePreview(context, capturedImage[index]!),
-                                      child: Image.file(
-                                        capturedImage[index]!,
-                                        height: 200,
-                                        width: 200,
-                                        fit: BoxFit.contain,
+                                      child: zoomImage(
+                                        child: Image.file(
+                                          capturedImage[index]!,
+                                          height: 200,
+                                          width: 200,
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
                                     );
                                   } else {
@@ -1163,11 +1150,13 @@ class DialogScan {
                                 if (index < capturedImage.length) {
                                   return GestureDetector(
                                     onTap: () => showImagePreview(context, capturedImage[index]!),
-                                    child: Image.file(
-                                      capturedImage[index]!,
-                                      height: 200,
-                                      width: 200,
-                                      fit: BoxFit.contain,
+                                    child: zoomImage(
+                                      child: Image.file(
+                                        capturedImage[index]!,
+                                        height: 200,
+                                        width: 200,
+                                        fit: BoxFit.contain,
+                                      ),
                                     ),
                                   );
                                 } else {
@@ -1273,6 +1262,25 @@ class DialogScan {
     );
   }
 
+  void showImagePreview(BuildContext context, File imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: zoomImage(
+              child: Image.file(
+                imageUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget customBadgeSpecial(String productType) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -1338,6 +1346,16 @@ class DialogScan {
       return data.value == valueTarget;
     }).label;
   }
+}
+
+Widget zoomImage({required Widget child}) {
+  return InteractiveViewer(
+      panEnabled: true,
+      scaleEnabled: true,
+      minScale: 0.8,
+      maxScale: 4.0,
+      boundaryMargin: const EdgeInsets.all(20),
+      child: child);
 }
 
 Future<File?> takePhoto({required String hawb, String reason = "", required String module}) async {

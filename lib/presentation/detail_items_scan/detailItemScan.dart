@@ -19,6 +19,11 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
   List<PhotoItemScanModel> imageData = [];
   late final TabController _tabController;
 
+  // List for images share
+  final List<String> imagePaths = [];
+  ValueNotifier<List<String>> selectedImages = ValueNotifier<List<String>>([]);
+  ValueNotifier<bool> isSeletecting = ValueNotifier<bool>(false);
+
   @override
   void initState() {
     super.initState();
@@ -114,190 +119,200 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
   }
 
   Widget _tableDetailData(List<DetailItemScanModel> model) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10),
-      child: Table(
-        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        columnWidths: const <int, TableColumnWidth>{
-          0: FlexColumnWidth(),
-          1: FixedColumnWidth(180),
-          2: FixedColumnWidth(60),
-        },
-        border: TableBorder.all(color: Colors.black, style: BorderStyle.solid, width: 1),
-        children: [
-          TableRow(
-            decoration: BoxDecoration(color: Colors.white),
-            children: [
-              TableCell(
-                verticalAlignment: TableCellVerticalAlignment.middle,
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.05,
-                  child: Center(
-                    child: Text(
-                      "Status",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ),
-              TableCell(
-                verticalAlignment: TableCellVerticalAlignment.middle,
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.05,
-                  child: Center(
-                    child: Text(
-                      "Created At",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(),
-            ],
-          ),
-          for (var data in model)
+    if (model.isEmpty) {
+      return Center(child: Text("ไม่พบข้อมูล"));
+    }
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Table(
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          columnWidths: const <int, TableColumnWidth>{
+            0: FlexColumnWidth(),
+            1: FixedColumnWidth(180),
+            2: FixedColumnWidth(60),
+          },
+          border: TableBorder.all(color: Colors.black, style: BorderStyle.solid, width: 1),
+          children: [
             TableRow(
               decoration: BoxDecoration(color: Colors.white),
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(data.status),
-                    ],
-                  ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      data.createdAt,
-                      style: TextStyle(
-                        color: Colors.green[200],
-                        fontWeight: FontWeight.bold,
+                TableCell(
+                  verticalAlignment: TableCellVerticalAlignment.middle,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    child: Center(
+                      child: Text(
+                        "Status",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (data.albums.length > 0 || data.remark != "")
-                      IconButton(
-                        onPressed: () {
-                          _showCustomDialog(
-                            context: context,
-                            hawb: widget.hawb,
-                            status: data.status,
-                            remark: data.remark,
-                            albums: data.albums,
-                          );
-                        },
-                        icon: Icon(Icons.warning, color: Colors.orange),
-                      )
-                    else
-                      SizedBox(height: 48)
-                  ],
+                TableCell(
+                  verticalAlignment: TableCellVerticalAlignment.middle,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    child: Center(
+                      child: Text(
+                        "Created At",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
                 ),
+                SizedBox(),
               ],
             ),
-        ],
-      ),
-    );
-  }
-
-  Widget _tablePhotoData(List<PhotoItemScanModel> model) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10),
-      child: Table(
-        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        columnWidths: const <int, TableColumnWidth>{
-          0: FlexColumnWidth(),
-          1: FixedColumnWidth(180),
-          2: FixedColumnWidth(60),
-        },
-        border: TableBorder.all(color: Colors.black, style: BorderStyle.solid, width: 1),
-        children: [
-          TableRow(
-            decoration: BoxDecoration(color: Colors.white),
-            children: [
-              TableCell(
-                verticalAlignment: TableCellVerticalAlignment.middle,
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.05,
-                  child: Center(
-                    child: Text(
-                      "Location",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            for (var data in model)
+              TableRow(
+                decoration: BoxDecoration(color: Colors.white),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(data.status),
+                      ],
                     ),
                   ),
-                ),
-              ),
-              TableCell(
-                verticalAlignment: TableCellVerticalAlignment.middle,
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.05,
-                  child: Center(
-                    child: Text(
-                      "Created At",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(),
-            ],
-          ),
-          for (var data in model)
-            TableRow(
-              decoration: BoxDecoration(color: Colors.white),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
+                  Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(data.location),
+                      Text(
+                        data.createdAt,
+                        style: TextStyle(
+                          color: Colors.green[200],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      data.createdAt,
-                      style: TextStyle(
-                        color: Colors.green[200],
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                Builder(builder: (context) {
-                  return Column(
+                  Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (data.albums.length > 0)
+                      if (data.albums.length > 0 || data.remark != "")
                         IconButton(
                           onPressed: () {
-                            _showPhotoDialog(context: context, albums: data.albums);
+                            _showDetailDialog(
+                              context: context,
+                              hawb: widget.hawb,
+                              status: data.status,
+                              remark: data.remark,
+                              albums: data.albums,
+                            );
                           },
                           icon: Icon(Icons.warning, color: Colors.orange),
                         )
                       else
                         SizedBox(height: 48)
                     ],
-                  );
-                }),
-              ],
-            ),
-        ],
+                  ),
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }
 
-  void _showCustomDialog({
+  Widget _tablePhotoData(List<PhotoItemScanModel> model) {
+    if (model.isEmpty) {
+      return Center(child: Text("ไม่พบข้อมูล"));
+    }
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Table(
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          columnWidths: const <int, TableColumnWidth>{
+            0: FlexColumnWidth(),
+            1: FixedColumnWidth(180),
+            2: FixedColumnWidth(60),
+          },
+          border: TableBorder.all(color: Colors.black, style: BorderStyle.solid, width: 1),
+          children: [
+            TableRow(
+              decoration: BoxDecoration(color: Colors.white),
+              children: [
+                TableCell(
+                  verticalAlignment: TableCellVerticalAlignment.middle,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    child: Center(
+                      child: Text(
+                        "Location",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+                TableCell(
+                  verticalAlignment: TableCellVerticalAlignment.middle,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    child: Center(
+                      child: Text(
+                        "Created At",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(),
+              ],
+            ),
+            for (var data in model)
+              TableRow(
+                decoration: BoxDecoration(color: Colors.white),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(data.location),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        data.createdAt,
+                        style: TextStyle(
+                          color: Colors.green[200],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Builder(builder: (context) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (data.albums.length > 0)
+                          IconButton(
+                            onPressed: () {
+                              _showPhotoDialog(context: context, albums: data.albums);
+                            },
+                            icon: Icon(Icons.warning, color: Colors.orange),
+                          )
+                        else
+                          SizedBox(height: 48)
+                      ],
+                    );
+                  }),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDetailDialog({
     required BuildContext context,
     required String hawb,
     required String status,
@@ -391,28 +406,23 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
                                   ),
                                   itemCount: albums.length,
                                   itemBuilder: (context, index) {
-                                    return GestureDetector(
-                                      onTap: () => showImagePreview(context, albums[index]["imageUrl"]),
-                                      child: Image.network(
-                                        loadingBuilder: (context, child, loadingProgress) {
-                                          if (loadingProgress == null) {
-                                            return child;
-                                          } else {
-                                            return Center(
-                                              child: CircularProgressIndicator(
-                                                value: loadingProgress.expectedTotalBytes != null
-                                                    ? loadingProgress.cumulativeBytesLoaded /
-                                                        (loadingProgress.expectedTotalBytes ?? 1)
-                                                    : null,
-                                              ),
-                                            );
-                                          }
-                                        },
-                                        albums[index]["imageUrl"],
-                                        height: 200,
-                                        width: 200,
-                                        fit: BoxFit.contain,
-                                      ),
+                                    return ValueListenableBuilder(
+                                      valueListenable: isSeletecting,
+                                      builder: (context, isSeletecting, _) {
+                                        if (isSeletecting) {
+                                          return ImageUtils().overlaySelectImage(
+                                            albums[index]["imageUrl"],
+                                            ImageUtils().imageContent(albums[index]["imageUrl"]),
+                                            selectedImages,
+                                          );
+                                        } else {
+                                          return GestureDetector(
+                                            onTap: () =>
+                                                ImageUtils().showImagePreviewByURL(context, albums[index]["imageUrl"]),
+                                            child: ImageUtils().imageContent(albums[index]["imageUrl"]),
+                                          );
+                                        }
+                                      },
                                     );
                                   },
                                 ),
@@ -426,8 +436,52 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
             ),
           ),
           actions: [
+            albums.isNotEmpty
+                ? ValueListenableBuilder<bool>(
+                    valueListenable: isSeletecting,
+                    builder: (context, selecting, _) {
+                      if (selecting) {
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                isSeletecting.value = false;
+                                selectedImages.value = [];
+                              },
+                              child: const Text('ยกเลิก'),
+                            ),
+                            ValueListenableBuilder<List<String>>(
+                              valueListenable: selectedImages,
+                              builder: (context, selected, _) {
+                                return TextButton(
+                                  onPressed: selected.isEmpty
+                                      ? null
+                                      : () async {
+                                          await ImageUtils().shareSelectedImages(context, selectedImages.value);
+                                        },
+                                  child: const Text('แชร์รูปภาพ'),
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      } else {
+                        return TextButton(
+                          onPressed: () {
+                            isSeletecting.value = true;
+                            selectedImages.value = [];
+                          },
+                          child: const Text('เลือกภาพ'),
+                        );
+                      }
+                    },
+                  )
+                : SizedBox(),
             TextButton(
               onPressed: () {
+                isSeletecting.value = false;
+                selectedImages.value = [];
                 Navigator.of(context).pop();
               },
               child: Text('ปิด'),
@@ -458,74 +512,80 @@ class _DetailScanItemPageState extends State<DetailScanItemPage> with TickerProv
               ),
               itemCount: albums.length,
               itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () => showImagePreview(context, albums[index]["imageUrl"]),
-                  child: Image.network(
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) {
-                        return child;
-                      } else {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                                : null,
-                          ),
-                        );
-                      }
-                    },
-                    albums[index]["imageUrl"],
-                    height: 200,
-                    width: 200,
-                    fit: BoxFit.contain,
-                  ),
+                return ValueListenableBuilder(
+                  valueListenable: isSeletecting,
+                  builder: (context, isSeletecting, _) {
+                    if (isSeletecting) {
+                      return ImageUtils().overlaySelectImage(
+                        albums[index]["imageUrl"],
+                        ImageUtils().imageContent(albums[index]["imageUrl"]),
+                        selectedImages,
+                      );
+                    } else {
+                      return GestureDetector(
+                        onTap: () => ImageUtils().showImagePreviewByURL(context, albums[index]["imageUrl"]),
+                        child: ImageUtils().imageContent(albums[index]["imageUrl"]),
+                      );
+                    }
+                  },
                 );
               },
             ),
           ),
           actions: [
+            albums.isNotEmpty
+                ? ValueListenableBuilder<bool>(
+                    valueListenable: isSeletecting,
+                    builder: (context, selecting, _) {
+                      if (selecting) {
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                isSeletecting.value = false;
+                                selectedImages.value = [];
+                              },
+                              child: const Text('ยกเลิก'),
+                            ),
+                            ValueListenableBuilder<List<String>>(
+                              valueListenable: selectedImages,
+                              builder: (context, selected, _) {
+                                return TextButton(
+                                  onPressed: selected.isEmpty
+                                      ? null
+                                      : () async {
+                                          await ImageUtils().shareSelectedImages(context, selectedImages.value);
+                                        },
+                                  child: const Text('แชร์รูปภาพ'),
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      } else {
+                        return TextButton(
+                          onPressed: () {
+                            isSeletecting.value = true;
+                            selectedImages.value = [];
+                          },
+                          child: const Text('เลือกภาพ'),
+                        );
+                      }
+                    },
+                  )
+                : SizedBox(),
             TextButton(
               onPressed: () {
+                isSeletecting.value = false;
+                selectedImages.value = [];
                 Navigator.of(context).pop();
               },
-              child: Text('ปิด'),
+              child: const Text('ปิด'),
             ),
           ],
         );
       },
     );
   }
-
-  void showImagePreview(BuildContext context, String imageUrl) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: zoomImage(
-              child: Image.network(
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) {
-                    return child;
-                  } else {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                            : null,
-                      ),
-                    );
-                  }
-                },
-                imageUrl,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
 }

@@ -21,16 +21,16 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
   List<PhotoItemScanModel> imageData = [];
   late final TabController _tabController;
 
+  // List for images share
+  final List<String> imagePaths = [];
+  ValueNotifier<List<String>> selectedImages = ValueNotifier<List<String>>([]);
+  ValueNotifier<bool> isSeletecting = ValueNotifier<bool>(false);
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(initialIndex: 0, length: 2, vsync: this);
     context.read<SearchItemsBloc>().add(SearchItemsLoadingEvent(hawb: widget.hawb, uuid: widget.uuid));
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
   }
 
   @override
@@ -138,6 +138,9 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
   }
 
   Widget _tableDetailData(List<DetailItemScanModel> model) {
+    if (model.isEmpty) {
+      return Center(child: Text("ไม่พบข้อมูล"));
+    }
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10),
@@ -211,7 +214,7 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
                       if (data.albums.length > 0 || data.remark != "")
                         IconButton(
                           onPressed: () {
-                            _showCustomDialog(
+                            _showDetailDialog(
                               context: context,
                               hawb: widget.hawb,
                               status: data.status,
@@ -234,6 +237,9 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
   }
 
   Widget _tablePhotoData(List<PhotoItemScanModel> model) {
+    if (model.isEmpty) {
+      return Center(child: Text("ไม่พบข้อมูล"));
+    }
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10),
@@ -325,7 +331,7 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
     );
   }
 
-  void _showCustomDialog({
+  void _showDetailDialog({
     required BuildContext context,
     required String hawb,
     required String status,
@@ -419,28 +425,23 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
                                   ),
                                   itemCount: albums.length,
                                   itemBuilder: (context, index) {
-                                    return GestureDetector(
-                                      onTap: () => showImagePreview(context, albums[index]["imageUrl"]),
-                                      child: Image.network(
-                                        loadingBuilder: (context, child, loadingProgress) {
-                                          if (loadingProgress == null) {
-                                            return child;
-                                          } else {
-                                            return Center(
-                                              child: CircularProgressIndicator(
-                                                value: loadingProgress.expectedTotalBytes != null
-                                                    ? loadingProgress.cumulativeBytesLoaded /
-                                                        (loadingProgress.expectedTotalBytes ?? 1)
-                                                    : null,
-                                              ),
-                                            );
-                                          }
-                                        },
-                                        albums[index]["imageUrl"],
-                                        height: 200,
-                                        width: 200,
-                                        fit: BoxFit.contain,
-                                      ),
+                                    return ValueListenableBuilder(
+                                      valueListenable: isSeletecting,
+                                      builder: (context, isSeletecting, _) {
+                                        if (isSeletecting) {
+                                          return ImageUtils().overlaySelectImage(
+                                            albums[index]["imageUrl"],
+                                            ImageUtils().imageContent(albums[index]["imageUrl"]),
+                                            selectedImages,
+                                          );
+                                        } else {
+                                          return GestureDetector(
+                                            onTap: () =>
+                                                ImageUtils().showImagePreviewByURL(context, albums[index]["imageUrl"]),
+                                            child: ImageUtils().imageContent(albums[index]["imageUrl"]),
+                                          );
+                                        }
+                                      },
                                     );
                                   },
                                 ),
@@ -454,8 +455,52 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
             ),
           ),
           actions: [
+            albums.isNotEmpty
+                ? ValueListenableBuilder<bool>(
+                    valueListenable: isSeletecting,
+                    builder: (context, selecting, _) {
+                      if (selecting) {
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                isSeletecting.value = false;
+                                selectedImages.value = [];
+                              },
+                              child: const Text('ยกเลิก'),
+                            ),
+                            ValueListenableBuilder<List<String>>(
+                              valueListenable: selectedImages,
+                              builder: (context, selected, _) {
+                                return TextButton(
+                                  onPressed: selected.isEmpty
+                                      ? null
+                                      : () async {
+                                          await ImageUtils().shareSelectedImages(context, selectedImages.value);
+                                        },
+                                  child: const Text('แชร์รูปภาพ'),
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      } else {
+                        return TextButton(
+                          onPressed: () {
+                            isSeletecting.value = true;
+                            selectedImages.value = [];
+                          },
+                          child: const Text('เลือกภาพ'),
+                        );
+                      }
+                    },
+                  )
+                : SizedBox(),
             TextButton(
               onPressed: () {
+                isSeletecting.value = false;
+                selectedImages.value = [];
                 Navigator.of(context).pop();
               },
               child: Text('ปิด'),
@@ -486,71 +531,78 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
               ),
               itemCount: albums.length,
               itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () => showImagePreview(context, albums[index]["imageUrl"]),
-                  child: Image.network(
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) {
-                        return child;
-                      } else {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                                : null,
-                          ),
-                        );
-                      }
-                    },
-                    albums[index]["imageUrl"],
-                    height: 200,
-                    width: 200,
-                    fit: BoxFit.contain,
-                  ),
+                return ValueListenableBuilder(
+                  valueListenable: isSeletecting,
+                  builder: (context, isSeletecting, _) {
+                    if (isSeletecting) {
+                      return ImageUtils().overlaySelectImage(
+                        albums[index]["imageUrl"],
+                        ImageUtils().imageContent(albums[index]["imageUrl"]),
+                        selectedImages,
+                      );
+                    } else {
+                      return GestureDetector(
+                        onTap: () => ImageUtils().showImagePreviewByURL(context, albums[index]["imageUrl"]),
+                        child: ImageUtils().imageContent(albums[index]["imageUrl"]),
+                      );
+                    }
+                  },
                 );
               },
             ),
           ),
           actions: [
+            albums.isNotEmpty
+                ? ValueListenableBuilder<bool>(
+                    valueListenable: isSeletecting,
+                    builder: (context, selecting, _) {
+                      if (selecting) {
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                isSeletecting.value = false;
+                                selectedImages.value = [];
+                              },
+                              child: const Text('ยกเลิก'),
+                            ),
+                            ValueListenableBuilder<List<String>>(
+                              valueListenable: selectedImages,
+                              builder: (context, selected, _) {
+                                return TextButton(
+                                  onPressed: selected.isEmpty
+                                      ? null
+                                      : () async {
+                                          await ImageUtils().shareSelectedImages(context, selectedImages.value);
+                                        },
+                                  child: const Text('แชร์รูปภาพ'),
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      } else {
+                        return TextButton(
+                          onPressed: () {
+                            isSeletecting.value = true;
+                            selectedImages.value = [];
+                          },
+                          child: const Text('เลือกภาพ'),
+                        );
+                      }
+                    },
+                  )
+                : SizedBox(),
             TextButton(
               onPressed: () {
+                isSeletecting.value = false;
+                selectedImages.value = [];
                 Navigator.of(context).pop();
               },
               child: Text('ปิด'),
             ),
           ],
-        );
-      },
-    );
-  }
-
-  void showImagePreview(BuildContext context, String imageUrl) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: zoomImage(
-              child: Image.network(
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) {
-                    return child;
-                  } else {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                            : null,
-                      ),
-                    );
-                  }
-                },
-                imageUrl,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
         );
       },
     );

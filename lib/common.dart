@@ -17,6 +17,9 @@ import 'package:kymscanner/presentation/scan_find_items/bloc/scan_find_items_pag
 import 'package:watermark_unique/image_format.dart';
 import 'package:watermark_unique/watermark_unique.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 class DialogScan {
   Future<void> showScanNoHawbDialog({
@@ -700,8 +703,8 @@ class DialogScan {
                               itemBuilder: (context, index) {
                                 if (index < capturedImage.length) {
                                   return GestureDetector(
-                                    onTap: () => showImagePreview(context, capturedImage[index]!),
-                                    child: zoomImage(
+                                    onTap: () => ImageUtils().showImagePreviewByFile(context, capturedImage[index]!),
+                                    child: ImageUtils().zoomImage(
                                       child: Image.file(
                                         capturedImage[index]!,
                                         height: 200,
@@ -919,8 +922,8 @@ class DialogScan {
                                 itemBuilder: (context, index) {
                                   if (index < capturedImage.length) {
                                     return GestureDetector(
-                                      onTap: () => showImagePreview(context, capturedImage[index]!),
-                                      child: zoomImage(
+                                      onTap: () => ImageUtils().showImagePreviewByFile(context, capturedImage[index]!),
+                                      child: ImageUtils().zoomImage(
                                         child: Image.file(
                                           capturedImage[index]!,
                                           height: 200,
@@ -1149,8 +1152,8 @@ class DialogScan {
                               itemBuilder: (context, index) {
                                 if (index < capturedImage.length) {
                                   return GestureDetector(
-                                    onTap: () => showImagePreview(context, capturedImage[index]!),
-                                    child: zoomImage(
+                                    onTap: () => ImageUtils().showImagePreviewByFile(context, capturedImage[index]!),
+                                    child: ImageUtils().zoomImage(
                                       child: Image.file(
                                         capturedImage[index]!,
                                         height: 200,
@@ -1262,34 +1265,6 @@ class DialogScan {
     );
   }
 
-  void showImagePreview(BuildContext context, File imageUrl) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: zoomImage(
-              child: Image.file(
-                imageUrl,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBarUtil(BuildContext context, String title) {
-    return ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(title),
-        duration: Duration(seconds: 3),
-      ),
-    );
-  }
-
   String _getLabelNameFromReasonList(List<DropdownMenuEntry<String>> reasonList, String valueTarget) {
     return reasonList.firstWhere((data) {
       return data.value == valueTarget;
@@ -1297,14 +1272,13 @@ class DialogScan {
   }
 }
 
-Widget zoomImage({required Widget child}) {
-  return InteractiveViewer(
-      panEnabled: true,
-      scaleEnabled: true,
-      minScale: 1,
-      maxScale: 4.0,
-      // boundaryMargin: const EdgeInsets.all(0),
-      child: child);
+ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBarUtil(BuildContext context, String title) {
+  return ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(title),
+      duration: Duration(seconds: 3),
+    ),
+  );
 }
 
 Widget customBadgeSpecial(String productType) {
@@ -1587,3 +1561,178 @@ Future<void> showSessionExpiredDialog(BuildContext context, {ValueNotifier<bool>
     },
   );
 }
+
+class ImageUtils {
+  Future<void> shareSelectedImages(BuildContext context, List<String> selectedImages) async {
+    if (selectedImages.isEmpty) return;
+
+    if (context.mounted == false) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      List<XFile> xFiles = [];
+
+      for (String imageUrl in selectedImages) {
+        final response = await http.get(Uri.parse(imageUrl));
+        if (response.statusCode == 200) {
+          final tempDir = await getTemporaryDirectory();
+          final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          final file = File('${tempDir.path}/$fileName');
+          await file.writeAsBytes(response.bodyBytes);
+          xFiles.add(XFile(file.path));
+        }
+      }
+
+      if (xFiles.isNotEmpty) {
+        await Share.shareXFiles(
+          xFiles,
+          text: 'แชร์รูปภาพไปยัง LINE',
+        );
+      }
+    } catch (e) {
+      debugPrint('แชร์ไม่สำเร็จ: $e');
+      if (!context.mounted) return;
+      snackBarUtil(context, 'แชร์ไม่สำเร็จ');
+    } finally {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+  }
+
+  ValueNotifier<List<String>> toggleSelect(String path, ValueNotifier<List<String>> selectedImages) {
+    final current = List<String>.from(selectedImages.value);
+    if (current.contains(path)) {
+      current.remove(path);
+    } else {
+      current.add(path);
+    }
+    selectedImages.value = current;
+    return selectedImages;
+  }
+
+  void showImagePreviewByFile(BuildContext parentContext, File imageUrl) {
+    showDialog(
+      context: parentContext,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: zoomImage(
+              child: Image.file(
+                imageUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showImagePreviewByURL(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: ImageUtils().zoomImage(
+              child: Image.network(
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                            : null,
+                      ),
+                    );
+                  }
+                },
+                imageUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget zoomImage({required Widget child}) {
+    return InteractiveViewer(
+        panEnabled: true,
+        scaleEnabled: true,
+        minScale: 1,
+        maxScale: 4.0,
+        // boundaryMargin: const EdgeInsets.all(0),
+        child: child);
+  }
+
+  Widget imageContent(String imageUrl) {
+    return Padding(
+      padding: EdgeInsets.all(0),
+      child: Image.network(
+        imageUrl,
+        width: 350,
+        height: 350,
+        fit: BoxFit.contain,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          } else {
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                    : null,
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Widget overlaySelectImage(String urlImage, Widget imageWidget, ValueNotifier<List<String>> selectedImages) {
+    return ValueListenableBuilder<List<String>>(
+      valueListenable: selectedImages,
+      builder: (context, selected, _) {
+        bool isSelected = selected.contains(urlImage);
+        return GestureDetector(
+          onTap: () {
+            ImageUtils().toggleSelect(urlImage, selectedImages);
+          },
+          child: Stack(children: [
+            imageWidget,
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.green : Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                padding: EdgeInsets.all(2),
+                child: Icon(
+                  isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ),
+          ]),
+        );
+      },
+    );
+  }
+}
+
+class TableDetailByHAWB {}

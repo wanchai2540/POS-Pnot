@@ -24,7 +24,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with RouteAware {
   ValueNotifier<DateTime> selectedDate = ValueNotifier<DateTime>(DateTime.now());
-  DateTime? selectedDateAfter = null;
+  DateTime? selectedDateAfter;
 
   final TextEditingController _controllerRemark = TextEditingController();
   ValueNotifier<List<Map<String, dynamic>>> periodReleaseDialog = ValueNotifier<List<Map<String, dynamic>>>([]);
@@ -35,8 +35,6 @@ class _HomePageState extends State<HomePage> with RouteAware {
   bool _subscribed = false;
   ValueNotifier<bool> showSearchField = ValueNotifier<bool>(false);
   TextEditingController searchController = TextEditingController();
-  ValueNotifier<bool> isSingleChild = ValueNotifier<bool>(false);
-  ValueNotifier<bool> isShowDialog = ValueNotifier<bool>(false);
 
   @override
   void didChangeDependencies() {
@@ -542,7 +540,6 @@ class _HomePageState extends State<HomePage> with RouteAware {
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
         onFieldSubmitted: (value) {
-          // handle search logic here
           searchController.value = TextEditingValue.empty;
           showSearchField.value = false;
           _onScan(context, hawb: value.trim());

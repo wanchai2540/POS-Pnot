@@ -519,7 +519,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
           ),
         ],
       ),
-      child: TextFormField(
+      child: TextField(
         autofocus: true,
         controller: searchController,
         decoration: InputDecoration(
@@ -539,7 +539,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
           ),
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
-        onFieldSubmitted: (value) {
+        onSubmitted: (value) {
           searchController.value = TextEditingValue.empty;
           showSearchField.value = false;
           _onScan(context, hawb: value.trim());

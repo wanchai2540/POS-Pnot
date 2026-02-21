@@ -24,4 +24,7 @@ final class ReleasePageScanErrorState extends ReleaseItemsState {
   ReleasePageScanErrorState({required this.model});
 }
 
-final class ReleasePageGetErrorState extends ReleaseItemsState {}
+final class ReleasePageGetErrorState extends ReleaseItemsState {
+  final String textError;
+  ReleasePageGetErrorState(this.textError);
+}

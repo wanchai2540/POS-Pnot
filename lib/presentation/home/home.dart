@@ -123,7 +123,8 @@ class _HomePageState extends State<HomePage> with RouteAware {
           _handleGetDataReleaseRound();
           _controllerRemark.text = "";
           await _dialogRemarkOfReleaseItem(context).then((value) async {
-            if (value! == true) {
+            if (value == null) return;
+            if (value == true) {
               if (context.mounted) {
                 Navigator.pushNamed(context, "/releaseItems", arguments: {
                   "datePick": "${dateNow.year}-${dateNow.month}-${dateNow.day}",
@@ -377,7 +378,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
     );
   }
 
-  Widget _releaseItemss(int ups, int skl, int l) {
+  Widget _releaseItems(int ups, int skl, int l) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -635,7 +636,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
                           alignment: Alignment.center,
                           child: Text("Pick Up", style: TextStyle(fontSize: 20)),
                         ),
-                        _releaseItemss(model.countPickupByUps, model.countPickupBySkl, model.countPickupByL),
+                        _releaseItems(model.countPickupByUps, model.countPickupBySkl, model.countPickupByL),
                         Container(
                           height: MediaQuery.of(contextRoot).size.height * 0.06,
                           alignment: Alignment.center,
@@ -757,7 +758,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
     if (!_didRefreshReleaseDialog) {
       _didRefreshReleaseDialog = true;
       _refreshDataFromDate(selectedDate.value);
-      periodReleaseDialog.value = await _initalReleaseRound(selectedDate.value);
+      // periodReleaseDialog.value = await _initalReleaseRound(selectedDate.value);
       Future.delayed(Duration(milliseconds: 100), () {
         _didRefreshReleaseDialog = false;
       });

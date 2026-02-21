@@ -145,7 +145,7 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                     listener: (context, state) {
                       if (state is ScanPageGetLoadedState) {
                         _countListType.value = state.model.length;
-                      }else{
+                      } else {
                         _countListType.value = 0;
                       }
                     },
@@ -153,9 +153,10 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                       builder: (context, state) {
                         if (state is ScanPageGetLoadingState) {
                           return const Center(child: CircularProgressIndicator());
-                        }
-                        if (state is ScanPageGetLoadedState) {
+                        } else if (state is ScanPageGetLoadedState) {
                           return _tableListData(state.model);
+                        } else if (state is ScanPageGetErrorState) {
+                          return Center(child: Text(state.textError));
                         }
                         return const Center(child: Text("ไม่มีข้อมูล"));
                       },

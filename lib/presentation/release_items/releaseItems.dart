@@ -148,6 +148,8 @@ class _ReleaseItemsPageState extends State<ReleaseItemsPage> {
                           return const Center(child: CircularProgressIndicator());
                         } else if (state is ReleasePageGetLoadedState && state.model.isNotEmpty) {
                           return _tableListData(state.model);
+                        } else if (state is ReleasePageGetErrorState) {
+                          return Center(child: Text(state.textError));
                         }
                         return const Center(child: Text("ไม่มีข้อมูล"));
                       },

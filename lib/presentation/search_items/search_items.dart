@@ -52,7 +52,7 @@ class _SearchItemsState extends State<SearchItems> with TickerProviderStateMixin
           } else if (state is SearchItemsLoadingState) {
             return Center(child: CircularProgressIndicator());
           } else if (state is SearchItemsErrorState) {
-            return Center(child: Text("ไม่พบข้อมูล"));
+            return Center(child: Text(state.textError));
           } else if (state is SearchItemsLoadedState) {
             return SingleChildScrollView(
               child: sectionDetailSearch(state.resultSearch, state.resultDetail),

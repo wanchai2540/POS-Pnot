@@ -12,4 +12,7 @@ final class SearchItemsLoadedState extends SearchItemsState {
   SearchItemsLoadedState({required this.resultSearch, required this.resultDetail});
 }
 
-final class SearchItemsErrorState extends SearchItemsState {}
+final class SearchItemsErrorState extends SearchItemsState {
+  final String textError;
+  SearchItemsErrorState(this.textError);
+}

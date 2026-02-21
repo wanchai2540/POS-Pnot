@@ -155,9 +155,10 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                       builder: (context, state) {
                         if (state is ScanPageGetLoadingState) {
                           return const Center(child: CircularProgressIndicator());
-                        }
-                        if (state is ScanPageGetLoadedState) {
+                        } else if (state is ScanPageGetLoadedState) {
                           return _tableListData(state.model);
+                        } else if (state is ScanPageGetErrorState) {
+                          return Center(child: Text(state.textError));
                         }
                         return const Center(child: Text("ไม่มีข้อมูล"));
                       },

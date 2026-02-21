@@ -24,4 +24,7 @@ final class ScanPageScanErrorState extends ScanPageBlocState {
   ScanPageScanErrorState({required this.model});
 }
 
-final class ScanPageGetErrorState extends ScanPageBlocState {}
+final class ScanPageGetErrorState extends ScanPageBlocState {
+  String textError;
+  ScanPageGetErrorState(this.textError);
+}

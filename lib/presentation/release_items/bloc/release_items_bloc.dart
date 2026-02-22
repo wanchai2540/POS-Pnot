@@ -15,7 +15,7 @@ class ReleaseItemsBloc extends Bloc<ReleaseItemsEvent, ReleaseItemsState> {
       try {
         final data = await DataService()
             .getTableReleaseByRound(event.date, event.releaseRoundUUID)
-            .timeout(const Duration(seconds: 8));
+            .timeout(const Duration(seconds: 5));
 
         if (data["status"] != "success") {
           emit(ReleasePageGetErrorState("ไม่มีข้อมูล"));

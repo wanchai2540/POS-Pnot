@@ -14,7 +14,7 @@ class SearchItemsBloc extends Bloc<SearchItemsEvent, SearchItemsState> {
 
       try {
         // Fetch search items with timeout
-        final dataSearch = await DataService().getSearchItems(event.hawb).timeout(const Duration(seconds: 8));
+        final dataSearch = await DataService().getSearchItems(event.hawb).timeout(const Duration(seconds: 5));
 
         // Validate search response
         if (dataSearch["status"] != "success") {
@@ -26,7 +26,7 @@ class SearchItemsBloc extends Bloc<SearchItemsEvent, SearchItemsState> {
         final resultSearch = SearchItemsModel.fromJson(dataSearch["data"]);
 
         // Fetch detail items with timeout
-        final dataDetail = await DataService().getDetailItem(event.uuid).timeout(const Duration(seconds: 8));
+        final dataDetail = await DataService().getDetailItem(event.uuid).timeout(const Duration(seconds: 5));
 
         // Parse detail results if available
         Map<String, dynamic>? resultDetail;

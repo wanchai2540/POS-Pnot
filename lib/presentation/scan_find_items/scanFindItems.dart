@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_unnecessary_containers, use_build_context_synchronously
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
@@ -42,8 +43,10 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
 
   ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
   ValueNotifier<File?> _imageRepack = ValueNotifier<File?>(null);
-
   ValueNotifier<int> _countListType = ValueNotifier<int>(0);
+
+  bool _isSubmittingScan = false;
+  
   @override
   void initState() {
     CustomButtonListener.initialize();
@@ -130,9 +133,14 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                           child: TextField(
                             focusNode: _focusBarcodeField,
                             controller: _textEditing,
-                            onSubmitted: (String value) {
-                              _textEditing.text = value;
-                              _onScan(context, hawb: value.trim());
+                            onSubmitted: (String value) async {
+                              // _textEditing.text = value;
+                              // _onScan(context, hawb: value.trim());
+                              await _submitScanIfIdle(
+                                context,
+                                rawHawb: value,
+                                withDelay: true,
+                              );
                             },
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -320,10 +328,10 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
                         Color(0xFFF5ECD5),
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        _onScan(ctx, hawb: _controller.text.trim());
-                        Navigator.pop(context);
+                        await _submitScanIfIdle(ctx, rawHawb: _controller.text, isFromScan: false);
+                        // await _onScan(ctx, hawb: _controller.text.trim(), isFromScan: false);
                       }
                       _controller.text = "";
                     },
@@ -352,11 +360,54 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
     );
   }
 
-  Future<void> _onScan(BuildContext parentContext, {required String hawb}) async {
-    var dataGetScan = await DataService().getScanListener(hawb);
-    var data = dataGetScan["body"];
+  Future<void> _submitScanIfIdle(
+    BuildContext parentContext, {
+    required String rawHawb,
+    bool withDelay = false,
+    bool isFromScan = true,
+  }) async {
+    if (_isSubmittingScan) return;
+
+    final hawb = rawHawb.trim();
+    if (hawb.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("กรุณาสแกนใหม่อีกครั้ง"),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    _isSubmittingScan = true;
     try {
+      if (withDelay) {
+        await Future.delayed(Duration(milliseconds: 500));
+      }
+      _textEditing.text = hawb;
+
+      await _onScan(parentContext, hawb: hawb, isFromScan: isFromScan);
+    } finally {
+      _isSubmittingScan = false;
+    }
+  }
+
+  Future<void> _onScan(BuildContext parentContext, {required String hawb, bool isFromScan = true}) async {
+    if (!isFromScan) Navigator.pop(context);
+    showDialog<bool>(
+      context: parentContext,
+      builder: (BuildContext context) {
+        return Center(child: CircularProgressIndicator());
+      },
+    );
+
+    try {
+      var dataGetScan = await DataService().getScanListener(hawb).timeout(Duration(seconds: 5));
+      var data = dataGetScan["body"];
       ScanListenerModel result = ScanListenerModel.fromJson(data);
+
+      // Pop Dialog Loading
+      Navigator.pop(context);
 
       if (dataGetScan["code"] == 200) {
         if (data["appCode"] == "01" && data["statusCode"] == "03") {
@@ -443,7 +494,16 @@ class _ScanFindItemsPageState extends State<ScanFindItemsPage> {
           );
         }
       }
+    } on TimeoutException {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("หมดเวลาการร้องขอ กรุณาสแกนใหม่อีกครั้ง"),
+          duration: Duration(seconds: 3),
+        ),
+      );
     } catch (e) {
+      Navigator.pop(context);
       Exception(e);
     }
   }

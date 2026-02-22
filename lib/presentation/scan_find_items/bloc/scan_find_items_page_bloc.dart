@@ -15,7 +15,7 @@ class ScanFindItemsPageBloc extends Bloc<ScanPageBlocEvent, ScanPageBlocState> {
 
       try {
         // Fetch scan find items with timeout
-        final data = await DataService().getScanFindItems(event.date, event.type).timeout(const Duration(seconds: 8));
+        final data = await DataService().getScanFindItems(event.date, event.type).timeout(const Duration(seconds: 5));
 
         // Validate response
         if (data["status"] != "success") {

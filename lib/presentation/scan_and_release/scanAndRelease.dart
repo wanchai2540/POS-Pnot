@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_unnecessary_containers
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
@@ -42,6 +43,8 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
   final _reportFormKey = GlobalKey<FormState>();
   ValueNotifier<File?> _imageReport = ValueNotifier<File?>(null);
   ValueNotifier<int> _countListType = ValueNotifier<int>(0);
+
+  bool _isSubmittingScan = false;
 
   @override
   void initState() {
@@ -128,9 +131,14 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                           child: TextField(
                             focusNode: _focusBarcodeField,
                             controller: _textEditing,
-                            onSubmitted: (String value) {
-                              _textEditing.text = value;
-                              _onScan(parentContext: context, hawb: value.trim());
+                            onSubmitted: (String value) async {
+                              // _textEditing.text = value;
+                              // _onScan(parentContext: context, hawb: value.trim());
+                              await _submitScanIfIdle(
+                                context,
+                                rawHawb: value,
+                                withDelay: true,
+                              );
                             },
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -332,10 +340,11 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
                         Color(0xFFF5ECD5),
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        _onScan(parentContext: ctx, hawb: _controller.text);
-                        Navigator.pop(context);
+                        // _onScan(parentContext: ctx, hawb: _controller.text);
+                        // Navigator.pop(context);
+                        await _submitScanIfIdle(ctx, rawHawb: _controller.text, isFromScan: false);
                       }
                       _controller.text = "";
                     },
@@ -364,11 +373,54 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
     );
   }
 
-  Future<void> _onScan({required BuildContext parentContext, required String hawb}) async {
-    var dataGetScan = await DataService().getPendingReleaseListener(hawb);
-    var data = dataGetScan["body"];
+  Future<void> _submitScanIfIdle(
+    BuildContext parentContext, {
+    required String rawHawb,
+    bool withDelay = false,
+    bool isFromScan = true,
+  }) async {
+    if (_isSubmittingScan) return;
+
+    final hawb = rawHawb.trim();
+    if (hawb.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("กรุณาสแกนใหม่อีกครั้ง"),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    _isSubmittingScan = true;
     try {
+      if (withDelay) {
+        await Future.delayed(Duration(milliseconds: 500));
+      }
+      _textEditing.text = hawb;
+
+      await _onScan(parentContext: parentContext, hawb: hawb, isFromScan: isFromScan);
+    } finally {
+      _isSubmittingScan = false;
+    }
+  }
+
+  Future<void> _onScan({required BuildContext parentContext, required String hawb, bool isFromScan = true}) async {
+    if (!isFromScan) Navigator.pop(context);
+    showDialog<bool>(
+      context: parentContext,
+      builder: (BuildContext context) {
+        return Center(child: CircularProgressIndicator());
+      },
+    );
+
+    try {
+      var dataGetScan = await DataService().getPendingReleaseListener(hawb).timeout(Duration(seconds: 5));
+      var data = dataGetScan["body"];
       ScanAndReleaseModel result = ScanAndReleaseModel.fromJson(data);
+
+      // Pop Dialog Loading
+      Navigator.pop(context);
 
       if (dataGetScan["code"] == 200) {
         if (data["appCode"] == "01" && data["statusCode"] == "04" ||
@@ -449,7 +501,16 @@ class _ScanAndReleasePageState extends State<ScanAndReleasePage> {
           );
         }
       }
+    } on TimeoutException {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("หมดเวลาการร้องขอ กรุณาสแกนใหม่อีกครั้ง"),
+          duration: Duration(seconds: 3),
+        ),
+      );
     } catch (e) {
+      Navigator.pop(context);
       Exception(e);
     }
   }

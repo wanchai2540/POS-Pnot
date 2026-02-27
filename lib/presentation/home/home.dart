@@ -29,12 +29,22 @@ class _HomePageState extends State<HomePage> with RouteAware {
   final TextEditingController _controllerRemark = TextEditingController();
   ValueNotifier<List<Map<String, dynamic>>> periodReleaseDialog = ValueNotifier<List<Map<String, dynamic>>>([]);
   List<Map<String, dynamic>> periodReleaseDialogOriginal = [];
-  late SharedPreferences prefs;
+  SharedPreferences? sharePref;
   bool _didInitReleaseDialog = false;
   bool _didRefreshReleaseDialog = false;
   bool _subscribed = false;
   ValueNotifier<bool> showSearchField = ValueNotifier<bool>(false);
   TextEditingController searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePreferences();
+  }
+
+  Future<void> _initializePreferences() async {
+    sharePref ??= await SharedPreferences.getInstance();
+  }
 
   @override
   void didChangeDependencies() {
@@ -276,17 +286,18 @@ class _HomePageState extends State<HomePage> with RouteAware {
   }
 
   Future<void> _handleAndSaveUserSelection(bool isCustom, String selectedValue) async {
+    if (sharePref == null) await _initializePreferences();
     if (isCustom) {
       // TextFormField
-      await prefs.setString(releaseRoundName, selectedValue);
-      await prefs.setString(releaseRoundUUID, Uuid().v4());
+      await sharePref?.setString(releaseRoundName, selectedValue);
+      await sharePref?.setString(releaseRoundUUID, Uuid().v4());
     } else {
       // DropDown
       String selectedName = periodReleaseDialog.value.firstWhere(
         (item) => item['value'] == selectedValue,
       )['text'];
-      await prefs.setString(releaseRoundName, selectedName);
-      await prefs.setString(releaseRoundUUID, selectedValue);
+      await sharePref?.setString(releaseRoundName, selectedName);
+      await sharePref?.setString(releaseRoundUUID, selectedValue);
     }
   }
 
@@ -703,9 +714,10 @@ class _HomePageState extends State<HomePage> with RouteAware {
               ),
               child: const Text('ออกจากระบบ'),
               onPressed: () async {
-                prefs.remove("username");
-                prefs.remove("password");
-                prefs.remove("accessToken");
+                if (sharePref == null) await _initializePreferences();
+                sharePref?.remove("username");
+                sharePref?.remove("password");
+                sharePref?.remove("accessToken");
                 Navigator.of(context).pop();
                 Navigator.pushReplacementNamed(context, "/login");
               },
@@ -767,9 +779,9 @@ class _HomePageState extends State<HomePage> with RouteAware {
 
   Future<List<Map<String, dynamic>>> _initalReleaseRound(DateTime dateNow) async {
     List<Map<String, dynamic>> resultReleaseRound = await _getPeriodReleaseForDialog(dateNow) ?? [];
-    prefs = await SharedPreferences.getInstance();
-    prefs.remove(releaseRoundName);
-    prefs.remove(releaseRoundUUID);
+    if (sharePref == null) await _initializePreferences();
+    sharePref?.remove(releaseRoundName);
+    sharePref?.remove(releaseRoundUUID);
     return resultReleaseRound;
   }
 
